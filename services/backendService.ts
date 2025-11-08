@@ -9,7 +9,7 @@ export class BuildingService {
     filters?: Record<string, any>
   }): Promise<Building[]> {
     try {
-      const response = await apiClient.getBuildings(params)
+      const response = await apiClient.getBuildings(params) as { data?: Building[] }
       return response.data || []
     } catch (error) {
       console.error('Error fetching buildings:', error)
@@ -19,7 +19,7 @@ export class BuildingService {
 
   static async getBuildingById(id: string): Promise<Building | null> {
     try {
-      const response = await apiClient.getBuildingById(id)
+      const response = await apiClient.getBuildingById(id) as { data?: Building }
       return response.data || null
     } catch (error) {
       console.error('Error fetching building:', error)
@@ -29,7 +29,7 @@ export class BuildingService {
 
   static async getFeaturedBuildings(limit: number = 4): Promise<Building[]> {
     try {
-      const response = await apiClient.getBuildings({ limit, featured: true })
+      const response = await apiClient.getBuildings({ limit, filters: { featured: true } }) as { data?: Building[] }
       return response.data || []
     } catch (error) {
       console.error('Error fetching featured buildings:', error)
@@ -48,7 +48,7 @@ export class RoomService {
     }
   ): Promise<Room[]> {
     try {
-      const response = await apiClient.getRoomsByBuildingId(buildingId, params)
+      const response = await apiClient.getRoomsByBuildingId(buildingId, params) as { data?: Room[] }
       return response.data || []
     } catch (error) {
       console.error('Error fetching rooms:', error)
@@ -58,7 +58,7 @@ export class RoomService {
 
   static async getRoomById(id: string): Promise<Room | null> {
     try {
-      const response = await apiClient.getRoomById(id)
+      const response = await apiClient.getRoomById(id) as { data?: Room }
       return response.data || null
     } catch (error) {
       console.error('Error fetching room:', error)
@@ -70,7 +70,7 @@ export class RoomService {
     try {
       const response = await apiClient.getRoomsByBuildingId(buildingId, {
         filters: { available: true }
-      })
+      }) as { data?: Room[] }
       return response.data || []
     } catch (error) {
       console.error('Error fetching available rooms:', error)
@@ -104,7 +104,7 @@ export class BookingService {
 
   static async getUserBookings(token: string) {
     try {
-      const response = await apiClient.getUserBookings(token)
+      const response = await apiClient.getUserBookings(token) as { data?: any[] }
       return response.data || []
     } catch (error) {
       console.error('Error fetching user bookings:', error)
@@ -114,7 +114,7 @@ export class BookingService {
 
   static async getBookingById(id: string, token: string) {
     try {
-      const response = await apiClient.getBookingById(id, token)
+      const response = await apiClient.getBookingById(id, token) as { data?: any }
       return response.data || null
     } catch (error) {
       console.error('Error fetching booking:', error)
@@ -143,7 +143,7 @@ export class ReviewService {
 
   static async getRoomReviews(roomId: string) {
     try {
-      const response = await apiClient.getRoomReviews(roomId)
+      const response = await apiClient.getRoomReviews(roomId) as { data?: any[] }
       return response.data || []
     } catch (error) {
       console.error('Error fetching room reviews:', error)

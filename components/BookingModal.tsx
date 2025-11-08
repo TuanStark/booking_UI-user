@@ -54,10 +54,10 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     agreeToPrivacy: false
   })
 
-  const [errors, setErrors] = useState<Partial<BookingFormData>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validateStep = (step: number): boolean => {
-    const newErrors: Partial<BookingFormData> = {}
+    const newErrors: Record<string, string> = {}
 
     if (step === 1) {
       if (!formData.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên'
@@ -69,7 +69,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     if (step === 2) {
       if (!formData.moveInDate) newErrors.moveInDate = 'Vui lòng chọn ngày nhận phòng'
       if (!formData.moveOutDate) newErrors.moveOutDate = 'Vui lòng chọn ngày trả phòng'
-      if (formData.duration < 1) newErrors.duration = 'Thời gian thuê phải ít nhất 1 tháng'
+      if (formData.duration && formData.duration < 1) newErrors.duration = 'Thời gian thuê phải ít nhất 1 tháng'
     }
 
     if (step === 3) {

@@ -50,7 +50,7 @@ export default function SignUpPage() {
         password: formData.password,
         studentId: formData.studentId,
         phone: formData.phone,
-      })
+      }) as { success: boolean; message?: string }
 
       if (response.success) {
         setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
