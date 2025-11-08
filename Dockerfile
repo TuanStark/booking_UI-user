@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci && npm cache clean --force
 COPY . .
+# Create public directory if it doesn't exist
+RUN mkdir -p public
 RUN npm run build
 
 # Production stage
@@ -15,6 +17,7 @@ RUN addgroup -g 1001 -S nodejs && \
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
+RUN mkdir -p public
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
