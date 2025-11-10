@@ -88,7 +88,7 @@ class ApiClient {
   }
 
   async getBuildingById(id: string) {
-    return this.request(`/api/buildings/${id}`)
+    return this.request(`/buildings/${id}`)
   }
 
   async getRoomsByBuildingId(buildingId: string, params?: {
@@ -106,12 +106,12 @@ class ApiClient {
     }
     
     const queryString = searchParams.toString()
-    return this.request(`/api/buildings/${buildingId}/rooms${queryString ? `?${queryString}` : ''}`)
+    return this.request(`/buildings/${buildingId}/rooms${queryString ? `?${queryString}` : ''}`)
   }
 
   // Rooms endpoints
   async getRoomById(id: string) {
-    return this.request(`/api/rooms/${id}`)
+    return this.request(`/rooms/${id}`)
   }
 
   // Bookings endpoints
@@ -125,7 +125,7 @@ class ApiClient {
     emergencyContact: string
     emergencyPhone: string
   }, token: string) {
-    return this.request('/api/bookings', {
+    return this.request('/bookings', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -135,7 +135,7 @@ class ApiClient {
   }
 
   async getUserBookings(token: string) {
-    return this.request('/api/bookings/my-bookings', {
+    return this.request('/bookings/my-bookings', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -143,7 +143,7 @@ class ApiClient {
   }
 
   async getBookingById(id: string, token: string) {
-    return this.request(`/api/bookings/${id}`, {
+    return this.request(`/bookings/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -151,7 +151,7 @@ class ApiClient {
   }
 
   async updateBookingStatus(id: string, status: string, token: string) {
-    return this.request(`/api/bookings/${id}/status`, {
+    return this.request(`/bookings/${id}/status`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -166,7 +166,7 @@ class ApiClient {
     rating: number
     comment: string
   }, token: string) {
-    return this.request('/api/reviews', {
+    return this.request('/reviews', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -176,12 +176,12 @@ class ApiClient {
   }
 
   async getRoomReviews(roomId: string) {
-    return this.request(`/api/rooms/${roomId}/reviews`)
+    return this.request(`/rooms/${roomId}/reviews`)
   }
 
   // Notifications endpoints
   async getNotifications(token: string) {
-    return this.request('/api/notifications', {
+    return this.request('/notifications', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -189,7 +189,7 @@ class ApiClient {
   }
 
   async markNotificationAsRead(id: string, token: string) {
-    return this.request(`/api/notifications/${id}/read`, {
+    return this.request(`/notifications/${id}/read`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -202,7 +202,7 @@ class ApiClient {
     const formData = new FormData()
     formData.append('image', file)
 
-    return this.request('/api/upload/image', {
+    return this.request('/upload/image', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
