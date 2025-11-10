@@ -84,7 +84,7 @@ class ApiClient {
     }
     
     const queryString = searchParams.toString()
-    return this.request(`/api/buildings${queryString ? `?${queryString}` : ''}`)
+    return this.request(`/buildings${queryString ? `?${queryString}` : ''}`)
   }
 
   async getBuildingById(id: string) {

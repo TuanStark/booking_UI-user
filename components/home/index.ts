@@ -1,0 +1,5 @@
+export { default as HeroSection } from './HeroSection'
+export { default as FeaturedDormsSection } from './FeaturedDormsSection'
+export { default as FeaturesSection } from './FeaturesSection'
+export { default as AmenitiesSection } from './AmenitiesSection'
+export { default as CTASection } from './CTASection'

@@ -23,7 +23,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma 2>/dev/null || true
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma/schema.prisma
 USER nextjs
 EXPOSE 3000
 ENV NODE_ENV=production
