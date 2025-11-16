@@ -34,7 +34,8 @@ import RoomCard from '@/components/RoomCard'
 import FilterBar from '@/components/FilterBar'
 import { LoadingState, EmptyState } from '@/components/ui/UtilityComponents'
 import { cn } from '@/lib/utils'
-import { BuildingService, RoomService } from '@/services/backendService'
+import { BuildingService } from '@/services/buildingService'
+import { RoomService } from '@/services/backendService'
 import { Building, Room, FilterState, SearchParams } from '@/types'
 
 export default function BuildingDetailPage() {

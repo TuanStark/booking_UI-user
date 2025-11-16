@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar'
 import DormMap from '@/components/DormMap'
 import Footer from '@/components/Footer'
 import { cn } from '@/lib/utils'
-import { BuildingService } from '@/services/backendService'
+import { BuildingService } from '@/services/buildingService'
 import { Building } from '@/types'
 
 export default function BuildingsPage() {

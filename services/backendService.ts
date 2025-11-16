@@ -1,42 +1,5 @@
 import { apiClient } from './apiClient'
-import { Building, Room } from '@/types'
-
-export class BuildingService {
-  static async getAllBuildings(params?: {
-    page?: number
-    limit?: number
-    search?: string
-    filters?: Record<string, any>
-  }): Promise<Building[]> {
-    try {
-      const response = await apiClient.getBuildings(params) as { data?: Building[] }
-      return response.data || []
-    } catch (error) {
-      console.error('Error fetching buildings:', error)
-      return []
-    }
-  }
-
-  static async getBuildingById(id: string): Promise<Building | null> {
-    try {
-      const response = await apiClient.getBuildingById(id) as { data?: Building }
-      return response.data || null
-    } catch (error) {
-      console.error('Error fetching building:', error)
-      return null
-    }
-  }
-
-  static async getFeaturedBuildings(limit: number = 4): Promise<Building[]> {
-    try {
-      const response = await apiClient.getBuildings({ limit, filters: { featured: true } }) as { data?: Building[] }
-      return response.data || []
-    } catch (error) {
-      console.error('Error fetching featured buildings:', error)
-      return []
-    }
-  }
-}
+import { Room } from '@/types'
 
 export class RoomService {
   static async getRoomsByBuildingId(

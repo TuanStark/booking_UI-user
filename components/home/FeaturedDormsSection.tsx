@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Building2, ArrowRight } from 'lucide-react'
 import BuildingCard from '@/components/BuildingCard'
-import { BuildingService } from '@/services/backendService'
+import { BuildingService } from '@/services/buildingService'
 import { Building } from '@/types'
 
 interface FeaturedDormsSectionProps {

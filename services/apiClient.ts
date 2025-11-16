@@ -78,7 +78,14 @@ class ApiClient {
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          searchParams.append(key, String(value))
+          if (key === 'filters' && typeof value === 'object') {
+            // Handle filters object - serialize each filter key-value pair
+            Object.entries(value).forEach(([filterKey, filterValue]) => {
+              searchParams.append(`filters[${filterKey}]`, String(filterValue))
+            })
+          } else {
+            searchParams.append(key, String(value))
+          }
         }
       })
     }
