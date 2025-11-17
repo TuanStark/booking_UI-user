@@ -39,9 +39,14 @@ export interface RegisterResponse {
   }
 }
 
+
+export interface RoleResponse {
+  id: string
+  name: string
+}
 export interface UserResponse {
   id: string
   email: string
   name: string
-  role: string
+  role: RoleResponse
 }

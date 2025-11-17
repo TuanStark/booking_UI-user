@@ -1,7 +1,7 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { ReactNode } from 'react'
+import { useUser } from '@/contexts/UserContext'
 
 interface AuthGuardProps {
   children: ReactNode
@@ -10,30 +10,26 @@ interface AuthGuardProps {
   requireAuth?: boolean
 }
 
-export default function AuthGuard({ 
-  children, 
-  fallback = null, 
-  roles = [], 
-  requireAuth = true 
+export default function AuthGuard({
+  children,
+  fallback = null,
+  roles = [],
+  requireAuth = true,
 }: AuthGuardProps) {
-  const { data: session, status } = useSession()
+  const { user, isAuthenticated, isLoading } = useUser()
 
-  // Still loading
-  if (status === 'loading') {
-    return (
-      <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-10 w-full"></div>
-    )
+  if (isLoading) {
+    return <div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-10 w-full" />
   }
 
-  // Not authenticated and auth is required
-  if (requireAuth && !session) {
+  if (requireAuth && !isAuthenticated) {
     return <>{fallback}</>
   }
 
-  // Check roles if specified
-  if (roles.length > 0 && session) {
-    const userRole = session.user?.role
-    if (!userRole || !roles.includes(userRole)) {
+  if (roles.length > 0 && isAuthenticated) {
+    const normalizedRoles = roles.map((role) => role.toLowerCase())
+    const userRole = user?.role?.name?.toLowerCase()
+    if (!userRole || !normalizedRoles.includes(userRole)) {
       return <>{fallback}</>
     }
   }
@@ -41,7 +37,6 @@ export default function AuthGuard({
   return <>{children}</>
 }
 
-// Convenience components
 export function RequireAuth({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   return (
     <AuthGuard requireAuth={true} fallback={fallback}>

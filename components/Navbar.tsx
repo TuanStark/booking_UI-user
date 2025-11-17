@@ -3,18 +3,19 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sun, Moon, Building2, User, LogOut, Settings } from 'lucide-react'
+import { signOut } from 'next-auth/react'
+import { Menu, X, Sun, Moon, Building2, User, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NAV_ITEMS } from '../constants'
 import AuthStatus from './AuthStatus'
+import { useUser } from '@/contexts/UserContext'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const pathname = usePathname()
-  const { data: session, status } = useSession()
+  const { user, isAuthenticated } = useUser()
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
@@ -22,6 +23,7 @@ export default function Navbar() {
   }
 
   const handleSignOut = async () => {
+    setIsUserMenuOpen(false)
     await signOut({ callbackUrl: '/' })
   }
 
@@ -63,7 +65,7 @@ export default function Navbar() {
 
           {/* Desktop Auth Buttons & Dark Mode */}
           <div className="hidden md:flex items-center space-x-4">
-            <button
+            {/* <button
               onClick={toggleDarkMode}
               className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
             >
@@ -72,14 +74,14 @@ export default function Navbar() {
               ) : (
                 <Moon className="h-5 w-5" />
               )}
-            </button>
+            </button> */}
             
             <AuthStatus />
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            <button
+            {/* <button
               onClick={toggleDarkMode}
               className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
             >
@@ -88,9 +90,15 @@ export default function Navbar() {
               ) : (
                 <Moon className="h-5 w-5" />
               )}
-            </button>
+            </button> */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                const nextState = !isMenuOpen
+                setIsMenuOpen(nextState)
+                if (!nextState) {
+                  setIsUserMenuOpen(false)
+                }
+              }}
               className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
             >
               {isMenuOpen ? (
@@ -116,58 +124,89 @@ export default function Navbar() {
                       ? 'text-blue-600 dark:text-blue-400'
                       : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                   )}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    setIsMenuOpen(false)
+                    setIsUserMenuOpen(false)
+                  }}
                 >
                   {item.name}
                 </Link>
               ))}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                {session ? (
+                {isAuthenticated ? (
                   <>
-                    <div className="px-3 py-2 mb-2">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {session.user?.name || 'User'}
-                        </span>
-                      </div>
-                    </div>
-                    <Link
-                      href="/profile"
-                      className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Hồ sơ
-                    </Link>
-                    <Link
-                      href="/bookings"
-                      className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Đặt phòng của tôi
-                    </Link>
                     <button
-                      onClick={handleSignOut}
-                      className="text-red-600 dark:text-red-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
+                      type="button"
+                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                      className="w-full px-3 py-2 mb-2 flex items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors duration-200"
                     >
-                      Đăng xuất
+                      <span className="flex items-center space-x-2">
+                        <span className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-white" />
+                        </span>
+                        <span>{user?.name || user?.email || 'User'}</span>
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 transition-transform duration-200',
+                          isUserMenuOpen ? 'rotate-180' : 'rotate-0'
+                        )}
+                      />
                     </button>
+                    {isUserMenuOpen && (
+                      <>
+                        <Link
+                          href="/profile"
+                          className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            setIsUserMenuOpen(false)
+                          }}
+                        >
+                          Hồ sơ
+                        </Link>
+                        <Link
+                          href="/bookings"
+                          className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
+                          onClick={() => {
+                            setIsMenuOpen(false)
+                            setIsUserMenuOpen(false)
+                          }}
+                        >
+                          Đặt phòng của tôi
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            setIsMenuOpen(false)
+                            setIsUserMenuOpen(false)
+                            await handleSignOut()
+                          }}
+                          className="text-red-600 dark:text-red-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
+                        >
+                          Đăng xuất
+                        </button>
+                      </>
+                    )}
                   </>
                 ) : (
                   <>
                     <Link
                       href="/auth/signin"
                       className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        setIsUserMenuOpen(false)
+                      }}
                     >
                       Đăng nhập
                     </Link>
                     <Link
                       href="/auth/signup"
                       className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg text-base font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 w-full mt-2 block text-center"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        setIsMenuOpen(false)
+                        setIsUserMenuOpen(false)
+                      }}
                     >
                       Đăng ký
                     </Link>

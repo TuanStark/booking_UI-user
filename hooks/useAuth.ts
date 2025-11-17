@@ -1,8 +1,8 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@/contexts/UserContext'
 
 interface UseAuthOptions {
   required?: boolean
@@ -10,43 +10,42 @@ interface UseAuthOptions {
   roles?: string[]
 }
 
+const normalizeRole = (role?: string) => role?.toLowerCase() ?? ''
+
 export function useAuth(options: UseAuthOptions = {}) {
-  const { data: session, status } = useSession()
+  const { user, isAuthenticated, isLoading, refreshUser } = useUser()
   const router = useRouter()
   const { required = false, redirectTo = '/auth/signin', roles = [] } = options
 
   useEffect(() => {
-    if (status === 'loading') return // Still loading
+    if (isLoading) return
 
-    // If authentication is required but user is not authenticated
-    if (required && !session) {
+    if (required && !isAuthenticated) {
       const callbackUrl = encodeURIComponent(window.location.href)
       router.push(`${redirectTo}?callbackUrl=${callbackUrl}`)
       return
     }
 
-    // If specific roles are required
-    if (required && session && roles.length > 0) {
-      const userRole = session.user?.role
-      if (!userRole || !roles.includes(userRole)) {
+    if (required && isAuthenticated && roles.length > 0) {
+      const normalizedRoles = roles.map((role) => role.toLowerCase())
+      const userRole = normalizeRole(user?.role)
+      if (!normalizedRoles.includes(userRole)) {
         router.push('/unauthorized')
-        return
       }
     }
-  }, [session, status, required, redirectTo, roles, router])
+  }, [isAuthenticated, isLoading, required, redirectTo, roles, router, user])
 
   return {
-    session,
-    user: session?.user,
-    isLoading: status === 'loading',
-    isAuthenticated: !!session,
-    hasRole: (role: string) => session?.user?.role === role,
-    isAdmin: session?.user?.role === 'admin',
-    isStudent: session?.user?.role === 'student',
+    user,
+    isLoading,
+    isAuthenticated,
+    refreshUser,
+    hasRole: (role: string) => normalizeRole(user?.role) === role.toLowerCase(),
+    isAdmin: normalizeRole(user?.role) === 'admin',
+    isStudent: normalizeRole(user?.role) === 'student',
   }
 }
 
-// Convenience hooks for common use cases
 export function useRequireAuth() {
   return useAuth({ required: true })
 }
