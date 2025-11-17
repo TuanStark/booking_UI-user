@@ -152,7 +152,7 @@ export default function BuildingRoomsPage() {
               {/* Building Image */}
               <div className="lg:w-1/3">
                 <img
-                  src={building.imageUrl}
+                  src={building.images || '/placeholder-building.jpg'}
                   alt={building.name}
                   className="w-full h-64 lg:h-80 object-cover rounded-2xl shadow-lg"
                 />

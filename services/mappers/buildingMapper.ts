@@ -45,7 +45,7 @@ export function mapApiBuildingToBuilding(apiBuilding: ApiBuilding): Building {
     id: apiBuilding.id,
     name: apiBuilding.name,
     address: apiBuilding.address,
-    imageUrl: apiBuilding.images || '',
+    images: apiBuilding.images || null,
     totalRooms: apiBuilding.roomsCount || 0,
     availableRooms: apiBuilding.roomsCount || 0, // Default to totalRooms if not available
     averagePrice: 0, // Should be calculated from rooms

@@ -16,7 +16,7 @@ export interface BackendApiResponse<T = any> {
       limitNumber?: number
       totalPages?: number
     }
-  }
+  } | T | T[] // Support both nested and flat structures
   statusCode?: number
   message?: string
 }

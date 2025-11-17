@@ -40,6 +40,8 @@ interface GetBuildingsParams {
   filters?: Record<string, any>
 }
 
+type BuildingsResponse = BackendApiResponse<ApiBuilding | ApiBuilding[]>
+
 /**
  * Validate building ID
  */
@@ -52,6 +54,12 @@ function validateBuildingId(buildingId: string): void {
 /**
  * Handle API errors and convert to appropriate error types
  */
+function resolveStatusCode(error: any): number | undefined {
+  return typeof error?.statusCode === 'number'
+    ? error.statusCode
+    : error?.response?.status
+}
+
 function handleApiError(error: any, context: string): never {
   if (error instanceof ValidationError || error instanceof NotFoundError) {
     throw error
@@ -61,18 +69,58 @@ function handleApiError(error: any, context: string): never {
     throw new NetworkError(`Failed to ${context}: ${error.message}`)
   }
 
-  if (error.statusCode >= 400 && error.statusCode < 500) {
-    if (error.statusCode === 404) {
+  const status = resolveStatusCode(error)
+
+  if (status && status >= 400 && status < 500) {
+    if (status === 404) {
       throw new NotFoundError('Building', context)
     }
     throw new ValidationError(`Invalid request: ${error.message}`)
   }
 
-  if (error.statusCode >= 500) {
-    throw new ServerError(`Server error while ${context}: ${error.message}`, error.statusCode)
+  if (status && status >= 500) {
+    throw new ServerError(`Server error while ${context}: ${error.message}`, status)
   }
 
   throw new ServerError(`Unexpected error while ${context}: ${error.message}`)
+}
+
+function normalizeBuildingsResponse(response: BuildingsResponse): ApiBuilding[] {
+  if (!response?.data) {
+    return []
+  }
+
+  const payload = response.data
+
+  if (Array.isArray(payload)) {
+    return payload as ApiBuilding[]
+  }
+
+  if (payload && typeof payload === 'object') {
+    const nestedData = (payload as { data?: ApiBuilding | ApiBuilding[] }).data
+    if (Array.isArray(nestedData)) {
+      return nestedData as ApiBuilding[]
+    }
+    if (nestedData && !Array.isArray(nestedData)) {
+      return [nestedData]
+    }
+
+    const maybeBuilding = payload as Partial<ApiBuilding>
+    if (typeof maybeBuilding.id === 'string' && typeof maybeBuilding.name === 'string') {
+      return [maybeBuilding as ApiBuilding]
+    }
+  }
+
+  return []
+}
+
+function validatePagination(params?: GetBuildingsParams): void {
+  if (params?.page !== undefined && params.page < 1) {
+    throw new ValidationError('Page number must be greater than 0')
+  }
+  if (params?.limit !== undefined && params.limit < 1) {
+    throw new ValidationError('Limit must be greater than 0')
+  }
 }
 
 export class BuildingService {
@@ -97,29 +145,15 @@ export class BuildingService {
    */
   static async getAllBuildings(params?: GetBuildingsParams): Promise<Building[]> {
     try {
-      // Validate pagination params if provided
-      if (params?.page !== undefined && params.page < 1) {
-        throw new ValidationError('Page number must be greater than 0')
-      }
-      if (params?.limit !== undefined && params.limit < 1) {
-        throw new ValidationError('Limit must be greater than 0')
-      }
+      validatePagination(params)
 
-      // Call API
-      const response = await apiClient.getBuildings(params) as BackendApiResponse<ApiBuilding>
-      
-      // Extract and validate response
-      const buildingsData = response.data?.data
-      
-      if (!buildingsData) {
+      const response = await apiClient.getBuildings(params) as BuildingsResponse
+      const buildingsData = normalizeBuildingsResponse(response)
+
+      if (!buildingsData.length) {
         return []
       }
 
-      if (!Array.isArray(buildingsData)) {
-        throw new ServerError('Invalid response format: expected array of buildings')
-      }
-
-      // Transform API data to domain models
       return mapApiBuildingsToBuildings(buildingsData)
     } catch (error: any) {
       handleApiError(error, 'fetching buildings')
@@ -146,25 +180,15 @@ export class BuildingService {
       // Input validation
       validateBuildingId(id)
 
-      // Call API
-      const response = await apiClient.getBuildingById(id) as BackendApiResponse<ApiBuilding>
-      
-      // Extract and validate response
-      const buildingData = response.data?.data
-      
+      const response = await apiClient.getBuildingById(id) as BuildingsResponse
+      const [buildingData] = normalizeBuildingsResponse(response)
+
       if (!buildingData) {
         throw new NotFoundError('Building', id)
       }
 
-      // Handle both array and object responses
-      const building = Array.isArray(buildingData) ? buildingData[0] : buildingData
-      
-      if (!building) {
-        throw new NotFoundError('Building', id)
-      }
-
       // Transform API data to domain model
-      return mapApiBuildingToBuilding(building as ApiBuilding)
+      return mapApiBuildingToBuilding(buildingData)
     } catch (error: any) {
       handleApiError(error, `fetching building ${id}`)
     }
@@ -186,26 +210,17 @@ export class BuildingService {
    */
   static async getFeaturedBuildings(limit: number = 4): Promise<Building[]> {
     try {
-      // Validate limit
       if (limit < 1) {
         throw new ValidationError('Limit must be greater than 0')
       }
 
-      // Call API
-      const response = await apiClient.getBuildings({ limit }) as BackendApiResponse<ApiBuilding>
-      
-      // Extract and validate response
-      const buildingsData = response.data?.data
-      
-      if (!buildingsData) {
+      const response = await apiClient.getBuildings({ limit }) as BuildingsResponse
+      const buildingsData = normalizeBuildingsResponse(response)
+
+      if (!buildingsData.length) {
         return []
       }
 
-      if (!Array.isArray(buildingsData)) {
-        throw new ServerError('Invalid response format: expected array of buildings')
-      }
-
-      // Transform API data to domain models
       return mapApiBuildingsToBuildings(buildingsData)
     } catch (error: any) {
       handleApiError(error, 'fetching featured buildings')
@@ -236,35 +251,42 @@ export class BuildingService {
       validateBuildingId(buildingId)
 
       // Use RoomService to get rooms (endpoint: GET /rooms/building/:buildingId)
-      // This endpoint returns rooms with building info in each room
       const rooms = await RoomService.getRoomsByBuildingId(buildingId)
-      
       // If no rooms found, return null
       if (rooms.length === 0) {
         return { building: null, rooms: [] }
       }
 
       // Extract building info from first room
-      // Each room has buildingName and buildingAddress from the API
       const firstRoom = rooms[0]
-      
-      // Build building object from room data
-      const building: Building = {
+      const buildingData = firstRoom.buildingInfo ?? {
         id: buildingId,
-        name: firstRoom.buildingName || '',
-        address: firstRoom.buildingAddress || '',
-        imageUrl: '', // Can be enhanced if building images are available in API
-        totalRooms: rooms.length,
-        availableRooms: rooms.filter(r => r.available).length,
-        averagePrice: rooms.length > 0
-          ? Math.round(rooms.reduce((sum, r) => sum + r.price, 0) / rooms.length)
-          : 0,
-        rating: 0, // Can be calculated from room ratings if available
-        totalReviews: 0, // Can be calculated from room reviews if available
-        description: '', // Can be enhanced if building description is in API response
-        amenities: [], // Can be extracted from rooms if needed
-        latitude: 0, // Can be enhanced if building location is in API response
-        longitude: 0, // Can be enhanced if building location is in API response
+        name: firstRoom.buildingName,
+        address: firstRoom.buildingAddress,
+      }
+      const availableRooms = rooms.filter(r => r.available)
+      const averagePrice = rooms.length
+        ? Math.round(rooms.reduce((sum, r) => sum + r.price, 0) / rooms.length)
+        : 0
+
+      const building: Building = {
+        id: buildingData?.id || buildingId,
+        name: buildingData?.name || firstRoom.buildingName || '',
+        address: buildingData?.address || firstRoom.buildingAddress || '',
+        images: buildingData?.images || null,
+        totalRooms: typeof buildingData?.roomsCount === 'number' ? buildingData.roomsCount : rooms.length,
+        availableRooms: availableRooms.length,
+        averagePrice,
+        rating: (buildingData as any)?.rating || 0,
+        totalReviews: (buildingData as any)?.totalReviews || 0,
+        description: buildingData?.description || '',
+        amenities: Array.isArray((buildingData as any)?.amenities) ? (buildingData as any).amenities : [],
+        latitude: typeof buildingData?.latitude === 'number'
+          ? buildingData.latitude
+          : Number(buildingData?.latitude ?? 0) || 0,
+        longitude: typeof buildingData?.longitude === 'number'
+          ? buildingData.longitude
+          : Number(buildingData?.longitude ?? buildingData?.longtitude ?? 0) || 0,
       }
 
       return { building, rooms }

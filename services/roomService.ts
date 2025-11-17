@@ -34,19 +34,65 @@ interface GetRoomsParams {
   filters?: Record<string, any>
 }
 
+type RoomsResponse = BackendApiResponse<ApiRoom | ApiRoom[]>
+
 /**
  * Extract building information from API response
  * Helper function following DRY principle
  */
 function extractBuildingInfo(rooms: ApiRoom[]): { name: string; address: string } {
-  if (!rooms || rooms.length === 0) {
+  if (!rooms?.length) {
     return { name: '', address: '' }
   }
 
-  const firstRoom = rooms[0]
+  const [firstRoom] = rooms
   return {
     name: firstRoom?.buildingName || firstRoom?.building?.name || '',
     address: firstRoom?.buildingAddress || firstRoom?.building?.address || '',
+  }
+}
+
+/**
+ * Normalize any backend rooms response shape to a plain array
+ */
+function normalizeRoomsResponse(response: RoomsResponse): ApiRoom[] {
+  if (!response?.data) {
+    return []
+  }
+
+  const payload = response.data
+
+  if (Array.isArray(payload)) {
+    return payload as ApiRoom[]
+  }
+
+  if (payload && typeof payload === 'object') {
+    const nestedData = (payload as { data?: ApiRoom | ApiRoom[] }).data
+    if (Array.isArray(nestedData)) {
+      return nestedData as ApiRoom[]
+    }
+    if (nestedData && !Array.isArray(nestedData)) {
+      return [nestedData]
+    }
+
+    const maybeRoom = payload as Partial<ApiRoom>
+    if (typeof maybeRoom.id === 'string' && typeof maybeRoom.buildingId === 'string') {
+      return [maybeRoom as ApiRoom]
+    }
+  }
+
+  return []
+}
+
+/**
+ * Ensure pagination params are positive integers
+ */
+function validatePagination(params?: GetRoomsParams): void {
+  if (params?.page !== undefined && params.page < 1) {
+    throw new ValidationError('Page number must be greater than 0')
+  }
+  if (params?.limit !== undefined && params.limit < 1) {
+    throw new ValidationError('Limit must be greater than 0')
   }
 }
 
@@ -120,36 +166,18 @@ export class RoomService {
     params?: GetRoomsParams
   ): Promise<Room[]> {
     try {
-      // Input validation
       validateBuildingId(buildingId)
+      validatePagination(params)
 
-      // Validate pagination params if provided
-      if (params?.page !== undefined && params.page < 1) {
-        throw new ValidationError('Page number must be greater than 0')
-      }
-      if (params?.limit !== undefined && params.limit < 1) {
-        throw new ValidationError('Limit must be greater than 0')
-      }
+      const response = await apiClient.getRoomsByBuildingId(buildingId, params) as RoomsResponse
+      const roomsData = normalizeRoomsResponse(response)
 
-      // Call API
-      const response = await apiClient.getRoomsByBuildingId(buildingId, params) as BackendApiResponse<ApiRoom>
-      
-      // Extract and validate response
-      const roomsData = response.data?.data
-      
-      if (!roomsData) {
-        // Empty result is valid, return empty array
+      if (!roomsData.length) {
         return []
       }
 
-      if (!Array.isArray(roomsData)) {
-        throw new ServerError('Invalid response format: expected array of rooms')
-      }
-
-      // Extract building info for mapping
       const buildingInfo = extractBuildingInfo(roomsData)
-      
-      // Transform API data to domain models
+
       return mapApiRoomsToRooms(roomsData, buildingInfo.name, buildingInfo.address)
     } catch (error: any) {
       handleApiError(error, `fetching rooms for building ${buildingId}`)
@@ -176,28 +204,16 @@ export class RoomService {
       // Input validation
       validateRoomId(id)
 
-      // Call API
-      const response = await apiClient.getRoomById(id) as BackendApiResponse<ApiRoom>
-      
-      // Extract and validate response
-      const roomData = response.data?.data
-      
-      if (!roomData) {
-        throw new NotFoundError('Room', id)
-      }
+      const response = await apiClient.getRoomById(id) as RoomsResponse
+      const [room] = normalizeRoomsResponse(response)
 
-      // Handle both array and object responses
-      const room = Array.isArray(roomData) ? roomData[0] : roomData
-      
       if (!room) {
         throw new NotFoundError('Room', id)
       }
 
-      // Extract building info
-      const buildingInfo = extractBuildingInfo([room as ApiRoom])
-      
-      // Transform API data to domain model
-      return mapApiRoomToRoom(room as ApiRoom, buildingInfo.name, buildingInfo.address)
+      const buildingInfo = extractBuildingInfo([room])
+
+      return mapApiRoomToRoom(room, buildingInfo.name, buildingInfo.address)
     } catch (error: any) {
       handleApiError(error, `fetching room ${id}`)
     }
@@ -223,29 +239,19 @@ export class RoomService {
       // Input validation
       validateBuildingId(buildingId)
 
-      // Call API with status filter
       const response = await apiClient.getRoomsByBuildingId(buildingId, {
         filters: { status: 'AVAILABLE' }
-      }) as BackendApiResponse<ApiRoom>
-      
-      // Extract and validate response
-      const roomsData = response.data?.data
-      
-      if (!roomsData) {
+      }) as RoomsResponse
+
+      const roomsData = normalizeRoomsResponse(response)
+
+      if (!roomsData.length) {
         return []
       }
 
-      if (!Array.isArray(roomsData)) {
-        throw new ServerError('Invalid response format: expected array of rooms')
-      }
+      const availableRooms = roomsData.filter(room => room.status === 'AVAILABLE')
+      const buildingInfo = extractBuildingInfo(availableRooms.length ? availableRooms : roomsData)
 
-      // Double-check: filter by status in case API doesn't filter properly
-      const availableRooms = roomsData.filter((room: ApiRoom) => room.status === 'AVAILABLE')
-      
-      // Extract building info
-      const buildingInfo = extractBuildingInfo(availableRooms)
-      
-      // Transform API data to domain models
       return mapApiRoomsToRooms(availableRooms, buildingInfo.name, buildingInfo.address)
     } catch (error: any) {
       handleApiError(error, `fetching available rooms for building ${buildingId}`)

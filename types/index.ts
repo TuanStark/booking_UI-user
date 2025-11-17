@@ -3,7 +3,7 @@ export interface Building {
   id: string
   name: string
   address: string
-  imageUrl: string
+  images: string | null
   totalRooms: number
   availableRooms: number
   averagePrice: number
@@ -15,6 +15,18 @@ export interface Building {
   longitude: number
   contact?: ContactInfo
   rules?: string[]
+}
+
+export interface BuildingReference {
+  id?: string
+  name?: string
+  address?: string
+  images?: string | null
+  description?: string | null
+  latitude?: number | string | null
+  longitude?: number | string | null
+  longtitude?: number | string | null
+  roomsCount?: number | null
 }
 
 export interface Room {
@@ -41,6 +53,7 @@ export interface Room {
   contact: ContactInfo
   rules: string[]
   nearbyFacilities: NearbyFacility[]
+  buildingInfo?: BuildingReference
 }
 
 export interface ContactInfo {

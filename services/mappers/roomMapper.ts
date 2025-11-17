@@ -3,7 +3,7 @@
  * Senior pattern: Extract mapping logic to separate file for reusability and testability
  */
 
-import { Room } from '@/types'
+import { Room, BuildingReference } from '@/types'
 
 // API Response type from backend for Room (matching Prisma schema)
 export interface ApiRoom {
@@ -23,12 +23,18 @@ export interface ApiRoom {
   updatedAt?: string
   images?: Array<{
     id: string
+    roomId: string
     imageUrl: string
     imagePublicId?: string | null
+    createdAt?: string
+    updatedAt?: string
   }>
   amenities?: Array<{
     id: string
+    roomId: string
     name: string
+    createdAt?: string
+    updatedAt?: string
   }>
   buildingName?: string
   buildingAddress?: string
@@ -36,7 +42,17 @@ export interface ApiRoom {
     id: string
     name: string
     address: string
-    images?: string
+    images?: string | null
+    city?: string | null
+    country?: string | null
+    description?: string | null
+    longitude?: string | null
+    longtitude?: string | null
+    latitude?: string | null
+    imagePublicId?: string | null
+    createdAt?: string
+    updatedAt?: string
+    roomsCount?: number | null
   }
   roomNumber?: string
   type?: string
@@ -86,6 +102,20 @@ export function mapApiRoomToRoom(
   // Map status to available boolean
   const isAvailable = apiRoom.status === 'AVAILABLE'
 
+  const buildingMetadata: BuildingReference | undefined = apiRoom.building
+    ? {
+        id: apiRoom.building.id,
+        name: apiRoom.building.name,
+        address: apiRoom.building.address,
+        images: apiRoom.building.images || null,
+        description: apiRoom.building.description || null,
+        latitude: apiRoom.building.latitude ?? null,
+        longitude: apiRoom.building.longitude ?? apiRoom.building.longtitude ?? null,
+        longtitude: apiRoom.building.longtitude ?? apiRoom.building.longitude ?? null,
+        roomsCount: apiRoom.building.roomsCount ?? null,
+      }
+    : undefined
+
   return {
     id: apiRoom.id || '',
     roomNumber: apiRoom.roomNumber || apiRoom.name || '',
@@ -110,6 +140,7 @@ export function mapApiRoomToRoom(
     contact: apiRoom.contact || { phone: '', email: '', manager: '' },
     rules: apiRoom.rules || [],
     nearbyFacilities: apiRoom.nearbyFacilities || [],
+    buildingInfo: buildingMetadata,
   }
 }
 

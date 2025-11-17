@@ -167,7 +167,7 @@ function BuildingCard({ building, onSelect, isSelected }: BuildingCardProps) {
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={building.imageUrl}
+          src={building.images || '/placeholder-building.jpg'}
           alt={building.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />

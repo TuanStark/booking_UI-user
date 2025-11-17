@@ -1,83 +1,32 @@
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface BuildingImageCarouselProps {
   images: string[]
   buildingName: string
 }
 
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80'
+
 export default function BuildingImageCarousel({ images, buildingName }: BuildingImageCarouselProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-
-  const nextImage = () => {
-    if (currentImageIndex < images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1)
-    }
-  }
-
-  const prevImage = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1)
-    }
-  }
+  const primaryImage = images?.[0] || FALLBACK_IMAGE
 
   return (
-    <div className="relative h-48 md:h-64 lg:h-80">
+    <div className="relative h-48 md:h-64 lg:h-80 overflow-hidden rounded-3xl">
       <Image
-        src={images[currentImageIndex]}
-        alt={`${buildingName} - Ảnh ${currentImageIndex + 1}`}
+        src={primaryImage}
+        alt={`${buildingName}`}
         fill
         className="object-cover"
         priority
       />
-      
-      {/* Navigation Arrows */}
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={prevImage}
-            disabled={currentImageIndex === 0}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed z-10"
-          >
-            <ChevronLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-          </button>
-          <button
-            onClick={nextImage}
-            disabled={currentImageIndex === images.length - 1}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed z-10"
-          >
-            <ChevronRight className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-          </button>
-        </>
-      )}
-
-      {/* Image Counter */}
-      {images.length > 1 && (
-        <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
-          {currentImageIndex + 1} / {images.length}
-        </div>
-      )}
-
-      {/* Image Dots */}
-      {images.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                index === currentImageIndex
-                  ? 'w-8 bg-white'
-                  : 'w-2 bg-white/50 hover:bg-white/75'
-              }`}
-              aria-label={`Xem ảnh ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent pointer-events-none" />
+      <div className="absolute bottom-4 left-4 text-white">
+        <p className="text-xs uppercase tracking-wide text-white/70">Hình ảnh thực tế</p>
+        <p className="text-lg font-semibold">{buildingName}</p>
+      </div>
     </div>
   )
 }
