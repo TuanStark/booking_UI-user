@@ -22,13 +22,12 @@ export interface BackendApiResponse<T = any> {
 }
 
 export interface LoginResponse {
-  user: {
-    id: string
-    email: string
-    name: string
-    role: string
+  data: {
+    accessToken: string 
+    refreshToken: string
   }
-  token: string
+  success: boolean
+  message: string
 }
 
 export interface RegisterResponse {
@@ -38,4 +37,11 @@ export interface RegisterResponse {
     name: string
     role: string
   }
+}
+
+export interface UserResponse {
+  id: string
+  email: string
+  name: string
+  role: string
 }

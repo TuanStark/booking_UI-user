@@ -31,7 +31,6 @@ export default function SignInPage() {
         password: formData.password,
         redirect: false,
       })
-
       if (result?.error) {
         setError('Email hoặc mật khẩu không đúng')
       } else {

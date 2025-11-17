@@ -1,7 +1,13 @@
-import { NextAuthOptions } from 'next-auth'
+import { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { apiClient } from '@/services/apiClient'
-import { ApiResponse, LoginResponse } from '@/types/api'
+import { ApiResponse, BackendApiResponse, LoginResponse } from '@/types/api'
+import { UserResponse } from '@/types/api'
+
+type AuthUser = User & {
+  role: string
+  token: string
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -11,7 +17,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {
+      async authorize(credentials): Promise<AuthUser | null> {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -21,18 +27,20 @@ export const authOptions: NextAuthOptions = {
             email: credentials.email,
             password: credentials.password,
           }) as ApiResponse<LoginResponse>
-
-          if (response.success && response.data) {
-            return {
-              id: response.data.user.id,
-              email: response.data.user.email,
-              name: response.data.user.name,
-              role: response.data.user.role,
-              token: response.data.token,
-            }
+          const accessToken = response.data?.data?.accessToken
+          const profileResponse = await apiClient.getProfile(accessToken ?? '') as ApiResponse<UserResponse>
+          const profile = profileResponse.data
+          if (!profile) {
+            return null
           }
-
-          return null
+          return {
+            id: profile.id,
+            name: profile.name ?? profile.email ?? '',
+            email: profile.email ?? '',
+            image: null,
+            role: profile.role ?? 'USER',
+            token: accessToken ?? '',
+          }
         } catch (error) {
           console.error('Login error:', error)
           return null
@@ -45,17 +53,24 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role
-        token.accessToken = user.token
+      console.log('jwt', token, user)
+        if (user) {
+          const authUser = user as AuthUser
+          token.role = authUser.role
+          token.accessToken = authUser.token
       }
       return token
     },
     async session({ session, token }) {
+      console.log('session', session)
+      console.log('token', token)
       if (token) {
-        session.user.id = token.sub!
-        session.user.role = token.role as string
-        session.accessToken = token.accessToken as string
+        const authUser = session.user as AuthUser
+        authUser.id = token.sub || ''
+        authUser.name = authUser.name || ''
+        authUser.email = authUser.email || ''
+        authUser.role = (token.role as string) || 'USER'
+        ;(session as any).accessToken = token.accessToken
       }
       return session
     },

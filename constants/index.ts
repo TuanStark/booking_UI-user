@@ -106,10 +106,10 @@ export const VALIDATION_RULES = {
 
 // API endpoints
 export const API_ENDPOINTS = {
-  BUILDINGS: '/api/buildings',
-  ROOMS: '/api/rooms',
-  BOOKINGS: '/api/bookings',
-  AUTH: '/api/auth',
+  BUILDINGS: '/buildings',
+  ROOMS: '/rooms',
+  BOOKINGS: '/bookings',
+  AUTH: '/auth',
   UPLOAD: '/api/upload'
 }
 

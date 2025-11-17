@@ -15,7 +15,7 @@
 import { NetworkError, ServerError, ValidationError } from '@/lib/errors'
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
 /**
  * Serialize query parameters, handling nested objects (filters)
@@ -126,7 +126,7 @@ class ApiClient {
    * Login user
    */
   async login(credentials: { email: string; password: string }) {
-    return this.request('/api/auth/login', {
+    return this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     })
@@ -142,7 +142,7 @@ class ApiClient {
     studentId: string
     phone: string
   }) {
-    return this.request('/api/auth/register', {
+    return this.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     })
@@ -152,7 +152,7 @@ class ApiClient {
    * Get user profile
    */
   async getProfile(token: string) {
-    return this.request('/api/auth/profile', {
+    return this.request('/auth/user/profile', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
