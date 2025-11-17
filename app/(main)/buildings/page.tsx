@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Map, Grid, Building2, Star, MapPin, DollarSign, Users, Eye } from 'lucide-react'
-import Navbar from '@/components/Navbar'
 import DormMap from '@/components/DormMap'
-import Footer from '@/components/Footer'
 import { cn } from '@/lib/utils'
 import { BuildingService } from '@/services/buildingService'
 import { Building } from '@/types'
@@ -46,107 +44,95 @@ export default function BuildingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      
-      <main className="pt-20">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Danh sách Tòa nhà
-                </h1>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">
-                  Khám phá các tòa nhà ký túc xá có sẵn
-                </p>
-              </div>
-              
-              {/* View Mode Toggle */}
-              <div className="mt-4 md:mt-0 flex items-center space-x-2">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={cn(
-                    'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200',
-                    viewMode === 'grid'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  )}
-                >
-                  <Grid className="h-4 w-4 mr-2" />
-                  Lưới
-                </button>
-                <button
-                  onClick={() => setViewMode('map')}
-                  className={cn(
-                    'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200',
-                    viewMode === 'map'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  )}
-                >
-                  <Map className="h-4 w-4 mr-2" />
-                  Bản đồ
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
+    <div className="space-y-8">
+      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-3xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Results Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-gray-600 dark:text-gray-400">
-                Tìm thấy <span className="font-semibold text-gray-900 dark:text-white">
-                  {buildings.length}
-                </span> tòa nhà
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Danh sách Tòa nhà
+              </h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Khám phá các tòa nhà ký túc xá có sẵn
               </p>
             </div>
+
+            <div className="mt-4 md:mt-0 flex items-center space-x-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200',
+                  viewMode === 'grid'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                )}
+              >
+                <Grid className="h-4 w-4 mr-2" />
+                Lưới
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={cn(
+                  'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200',
+                  viewMode === 'map'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                )}
+              >
+                <Map className="h-4 w-4 mr-2" />
+                Bản đồ
+              </button>
+            </div>
           </div>
-
-          {/* Content */}
-          {viewMode === 'grid' ? (
-            <div className="space-y-6">
-              {buildings.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {buildings.map((building) => (
-                    <div key={building.id} id={`building-${building.id}`}>
-                      <BuildingCard
-                        building={building}
-                        onSelect={handleBuildingSelect}
-                        isSelected={selectedBuildingId === building.id}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-20">
-                  <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Không tìm thấy tòa nhà
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Vui lòng thử lại sau
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="h-96 lg:h-[600px]">
-              <DormMap
-                dorms={buildings}
-                selectedDormId={selectedBuildingId}
-                onDormSelect={handleBuildingSelect}
-                className="h-full"
-              />
-            </div>
-          )}
         </div>
-      </main>
+      </div>
 
-      <Footer />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-gray-600 dark:text-gray-400">
+            Tìm thấy <span className="font-semibold text-gray-900 dark:text-white">
+              {buildings.length}
+            </span> tòa nhà
+          </p>
+        </div>
+
+        {viewMode === 'grid' ? (
+          <div className="space-y-6">
+            {buildings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {buildings.map((building) => (
+                  <div key={building.id} id={`building-${building.id}`}>
+                    <BuildingCard
+                      building={building}
+                      onSelect={handleBuildingSelect}
+                      isSelected={selectedBuildingId === building.id}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Không tìm thấy tòa nhà
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Vui lòng thử lại sau
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="h-96 lg:h-[600px] rounded-3xl overflow-hidden shadow-lg">
+            <DormMap
+              dorms={buildings}
+              selectedDormId={selectedBuildingId}
+              onDormSelect={handleBuildingSelect}
+              className="h-full"
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

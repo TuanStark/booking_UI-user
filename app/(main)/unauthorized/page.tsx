@@ -2,15 +2,11 @@
 
 import Link from 'next/link'
 import { Shield, ArrowLeft, Home } from 'lucide-react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 
 export default function UnauthorizedPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      
-      <div className="pt-20 pb-12">
+      <div className="pt-16 pb-12">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Icon */}
           <div className="mb-8">
@@ -86,8 +82,6 @@ export default function UnauthorizedPage() {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   )
 }

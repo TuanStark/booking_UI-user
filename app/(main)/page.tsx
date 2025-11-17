@@ -1,7 +1,5 @@
 'use client'
 
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import {
   HeroSection,
   FeaturedDormsSection,
@@ -12,14 +10,12 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
+    <div className="space-y-16">
       <HeroSection />
       <FeaturedDormsSection limit={4} />
       <FeaturesSection />
       <AmenitiesSection />
       <CTASection />
-      <Footer />
     </div>
   )
 }

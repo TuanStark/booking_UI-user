@@ -13,8 +13,6 @@ import {
   Grid,
   List
 } from 'lucide-react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import FilterBar from '@/components/FilterBar'
 import RoomCard from '@/components/RoomCard'
 import { LoadingState, EmptyState } from '@/components/ui/UtilityComponents'
@@ -108,30 +106,24 @@ export default function BuildingRoomsPage() {
 
   if (!building) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="pt-20 flex items-center justify-center min-h-screen">
-          <EmptyState
-            icon={<Building2 className="h-16 w-16 text-gray-400" />}
-            title="Không tìm thấy tòa nhà"
-            message="Tòa nhà bạn đang tìm kiếm không tồn tại"
-            action={
-              <Link href="/buildings" className="btn-primary">
-                Quay lại danh sách tòa nhà
-              </Link>
-            }
-          />
-        </div>
-        <Footer />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16 flex items-center justify-center">
+        <EmptyState
+          icon={<Building2 className="h-16 w-16 text-gray-400" />}
+          title="Không tìm thấy tòa nhà"
+          message="Tòa nhà bạn đang tìm kiếm không tồn tại"
+          action={
+            <Link href="/buildings" className="btn-primary">
+              Quay lại danh sách tòa nhà
+            </Link>
+          }
+        />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      
-      <main className="pt-20">
+      <div className="pt-16 space-y-10">
         {/* Breadcrumb */}
         <div className="bg-white dark:bg-gray-800 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -326,9 +318,7 @@ export default function BuildingRoomsPage() {
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   )
 }

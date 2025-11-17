@@ -28,7 +28,7 @@ export function useAuth(options: UseAuthOptions = {}) {
 
     if (required && isAuthenticated && roles.length > 0) {
       const normalizedRoles = roles.map((role) => role.toLowerCase())
-      const userRole = normalizeRole(user?.role)
+      const userRole = normalizeRole(user?.role?.name)
       if (!normalizedRoles.includes(userRole)) {
         router.push('/unauthorized')
       }
@@ -40,9 +40,9 @@ export function useAuth(options: UseAuthOptions = {}) {
     isLoading,
     isAuthenticated,
     refreshUser,
-    hasRole: (role: string) => normalizeRole(user?.role) === role.toLowerCase(),
-    isAdmin: normalizeRole(user?.role) === 'admin',
-    isStudent: normalizeRole(user?.role) === 'student',
+    hasRole: (role: string) => normalizeRole(user?.role?.name) === role.toLowerCase(),
+    isAdmin: normalizeRole(user?.role?.name) === 'admin',
+    isStudent: normalizeRole(user?.role?.name) === 'student',
   }
 }
 

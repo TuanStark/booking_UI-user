@@ -17,8 +17,6 @@ import {
   DollarSign,
   Sparkles
 } from 'lucide-react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import BuildingRoomsList from '@/components/buildings/BuildingRoomsList'
 import BuildingImageCarousel from '@/components/buildings/BuildingImageCarousel'
 import { BuildingService } from '@/services/buildingService'
@@ -205,9 +203,7 @@ export default async function BuildingDetailPage({ params }: BuildingDetailPageP
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      
-      <main className="">
+      <div className="space-y-16">
         <section className="relative isolate overflow-hidden bg-slate-900 text-white">
           <div
             className="absolute inset-0 opacity-60"
@@ -448,9 +444,7 @@ export default async function BuildingDetailPage({ params }: BuildingDetailPageP
             <BuildingRoomsList rooms={rooms} />
           </div>
         </section>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   )
 }

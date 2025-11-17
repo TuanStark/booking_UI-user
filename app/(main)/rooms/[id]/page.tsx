@@ -29,8 +29,6 @@ import {
   Phone,
   MessageCircle
 } from 'lucide-react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import BookingModal from '@/components/BookingModal'
 import { cn } from '@/lib/utils'
 import { MockDataService } from '@/services/mockDataService'
@@ -91,15 +89,11 @@ export default function RoomDetailPage() {
   // Show loading while checking authentication
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="pt-20 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Đang kiểm tra quyền truy cập...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Đang kiểm tra quyền truy cập...</p>
         </div>
-        <Footer />
       </div>
     )
   }
@@ -111,32 +105,26 @@ export default function RoomDetailPage() {
 
   if (!room || !building) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="pt-20 flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <Bed className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Không tìm thấy phòng
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Phòng bạn đang tìm kiếm không tồn tại
-            </p>
-            <Link href="/buildings" className="btn-primary">
-              Quay lại danh sách tòa nhà
-            </Link>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <Bed className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Không tìm thấy phòng
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Phòng bạn đang tìm kiếm không tồn tại
+          </p>
+          <Link href="/buildings" className="btn-primary">
+            Quay lại danh sách tòa nhà
+          </Link>
         </div>
-        <Footer />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      
-      <main className="pt-20">
+      <div className="pt-16 space-y-10">
         {/* Breadcrumb */}
         <div className="bg-white dark:bg-gray-800 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -534,7 +522,7 @@ export default function RoomDetailPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Booking Modal */}
       <BookingModal
@@ -544,8 +532,6 @@ export default function RoomDetailPage() {
         room={room}
         building={building}
       />
-
-      <Footer />
     </div>
   )
 }
