@@ -49,4 +49,8 @@ export interface UserResponse {
   email: string
   name: string
   role: RoleResponse
+  phone?: string | null
+  address?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
 }
