@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useRequireAuth } from '@/hooks/useAuth'
+import { useUser } from '@/contexts/UserContext'
 import Image from 'next/image'
 import { 
   ArrowLeft, 
@@ -12,11 +13,6 @@ import {
   Bed, 
   Bath, 
   Square, 
-  Wifi, 
-  Car, 
-  Utensils,
-  Shield,
-  Clock,
   Star,
   Calendar,
   DollarSign,
@@ -27,38 +23,72 @@ import {
   Heart,
   Share2,
   Phone,
-  MessageCircle
+  MessageCircle,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 import BookingModal from '@/components/BookingModal'
+import { RoomService } from '@/services/roomService'
+import { BookingService } from '@/services/bookingService'
 import { cn } from '@/lib/utils'
-import { MockDataService } from '@/services/mockDataService'
 import { Room, BookingFormData } from '@/types'
+
+interface BuildingInfo {
+  id: string
+  name: string
+  address: string
+  totalRooms: number
+  rating: number
+  images?: string | null
+  description?: string | null
+}
 
 export default function RoomDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const roomId = params.id as string
   
   // Require authentication for room booking
   const { isLoading: authLoading, isAuthenticated } = useRequireAuth()
+  const { accessToken } = useUser()
   
   const [room, setRoom] = useState<Room | null>(null)
-  const [building, setBuilding] = useState<any>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
+  const [bookingSuccess, setBookingSuccess] = useState(false)
+
+  // Derive building info from room data - ensures building is always available when room exists
+  const building: BuildingInfo | null = useMemo(() => {
+    if (!room) return null
+
+    const buildingInfo: BuildingInfo = {
+      id: room.buildingId,
+      name: room.buildingName || 'Tòa nhà',
+      address: room.buildingAddress || 'Chưa có địa chỉ',
+      totalRooms: room.buildingInfo?.roomsCount || 0,
+      rating: 0,
+      images: room.buildingInfo?.images || null,
+      description: room.buildingInfo?.description || null,
+    }
+
+    return buildingInfo
+  }, [room])
 
   useEffect(() => {
     const fetchRoomData = async () => {
+      if (!roomId) return
+      
       try {
         setIsLoading(true)
-        const roomData = MockDataService.getRoomById(roomId)
-        if (roomData) {
-          setRoom(roomData)
-          const buildingData = MockDataService.getBuildingById(roomData.buildingId)
-          setBuilding(buildingData)
-        }
-      } catch (error) {
-        console.error('Error fetching room data:', error)
+        setError(null)
+        const roomData = await RoomService.getRoomById(roomId)
+        setRoom(roomData)
+      } catch (err: any) {
+        console.error('Error fetching room data:', err)
+        setError(err?.message || 'Không thể tải thông tin phòng')
       } finally {
         setIsLoading(false)
       }
@@ -67,11 +97,38 @@ export default function RoomDetailPage() {
     fetchRoomData()
   }, [roomId])
 
-  const handleBookingSubmit = (bookingData: BookingFormData) => {
-    console.log('Booking submitted:', bookingData)
-    // Handle booking submission here
-    setIsBookingModalOpen(false)
-    // Show success message or redirect
+  const handleBookingSubmit = async (bookingData: BookingFormData) => {
+    if (!room || !accessToken) return
+
+    setIsSubmittingBooking(true)
+    try {
+      await BookingService.createBooking(
+        {
+          roomId: room.id,
+          moveInDate: bookingData.moveInDate,
+          moveOutDate: bookingData.moveOutDate,
+          duration: bookingData.duration,
+          paymentMethod: bookingData.paymentMethod,
+          specialRequests: bookingData.specialRequests || undefined,
+          emergencyContact: bookingData.emergencyContact,
+          emergencyPhone: bookingData.emergencyPhone,
+        },
+        accessToken
+      )
+
+      setBookingSuccess(true)
+      setIsBookingModalOpen(false)
+      
+      // Redirect to bookings page after 2 seconds
+      setTimeout(() => {
+        router.push('/bookings')
+      }, 2000)
+    } catch (err: any) {
+      console.error('Error creating booking:', err)
+      alert(err?.message || 'Không thể tạo đơn đặt phòng. Vui lòng thử lại.')
+    } finally {
+      setIsSubmittingBooking(false)
+    }
   }
 
   const nextImage = () => {
@@ -87,12 +144,14 @@ export default function RoomDetailPage() {
   }
 
   // Show loading while checking authentication
-  if (authLoading) {
+  if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16 flex items-center justify-center">
+      <div className="min-h-[50vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Đang kiểm tra quyền truy cập...</p>
+          <Loader2 className="h-10 w-10 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">
+            {authLoading ? 'Đang kiểm tra quyền truy cập...' : 'Đang tải thông tin phòng...'}
+          </p>
         </div>
       </div>
     )
@@ -103,18 +162,22 @@ export default function RoomDetailPage() {
     return null
   }
 
-  if (!room || !building) {
+  if (error || !room || !building) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16 flex items-center justify-center">
-        <div className="text-center">
-          <Bed className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Không tìm thấy phòng
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <AlertCircle className="h-14 w-14 text-red-400 mx-auto mb-4" />
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {error ? 'Lỗi tải dữ liệu' : 'Không tìm thấy phòng'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Phòng bạn đang tìm kiếm không tồn tại
+            {error || 'Phòng bạn đang tìm kiếm không tồn tại'}
           </p>
-          <Link href="/buildings" className="btn-primary">
+          <Link 
+            href="/buildings" 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
             Quay lại danh sách tòa nhà
           </Link>
         </div>
@@ -124,10 +187,10 @@ export default function RoomDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="pt-16 space-y-10">
+      <div className="space-y-6">
         {/* Breadcrumb */}
-        <div className="bg-white dark:bg-gray-800 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <nav className="flex items-center space-x-2 text-sm">
               <Link href="/buildings" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                 Tòa nhà
@@ -145,13 +208,13 @@ export default function RoomDetailPage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
               {/* Image Gallery */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-                <div className="relative h-96 lg:h-[500px]">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div className="relative h-80 lg:h-[450px]">
                   <Image
                     src={room.images[currentImageIndex]}
                     alt={`Phòng ${room.roomNumber} - Ảnh ${currentImageIndex + 1}`}
@@ -226,10 +289,10 @@ export default function RoomDetailPage() {
               </div>
 
               {/* Room Details */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-                <div className="flex items-start justify-between mb-6">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
+                <div className="flex items-start justify-between mb-5">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-2">
                       Phòng {room.roomNumber}
                     </h1>
                     <div className="flex items-center text-gray-600 dark:text-gray-400 mb-4">
@@ -266,12 +329,12 @@ export default function RoomDetailPage() {
               </div>
 
               {/* Room Specifications */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-5">
                   Thông số phòng
                 </h2>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mx-auto mb-3">
                       <Square className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -343,8 +406,8 @@ export default function RoomDetailPage() {
               </div>
 
               {/* Reviews Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-5">
                   Đánh giá từ sinh viên
                 </h2>
                 
@@ -413,9 +476,9 @@ export default function RoomDetailPage() {
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-6">
                 {/* Booking Card */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                  <div className="text-center mb-6">
-                    <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-5">
+                  <div className="text-center mb-5">
+                    <div className="text-2xl font-semibold text-green-600 dark:text-green-400 mb-2">
                       {room.price.toLocaleString()}đ/tháng
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -483,8 +546,8 @@ export default function RoomDetailPage() {
                 </div>
 
                 {/* Building Info */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-5">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">
                     Thông tin tòa nhà
                   </h3>
                   
@@ -532,6 +595,17 @@ export default function RoomDetailPage() {
         room={room}
         building={building}
       />
+
+      {/* Booking Success Toast */}
+      {bookingSuccess && (
+        <div className="fixed bottom-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-in slide-in-from-bottom">
+          <CheckCircle className="h-5 w-5" />
+          <div>
+            <p className="font-semibold">Đặt phòng thành công!</p>
+            <p className="text-sm opacity-90">Đang chuyển đến trang đơn đặt...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
