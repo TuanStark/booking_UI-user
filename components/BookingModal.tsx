@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   X, 
   Calendar, 
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Room, BookingFormData } from '@/types'
+import { useUser } from '@/contexts/UserContext'
 
 interface BookingModalProps {
   isOpen: boolean
@@ -28,6 +29,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ isOpen, onClose, onSubmit, room, building }: BookingModalProps) {
+  const { user } = useUser()
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<BookingFormData>({
     // Personal Info
@@ -55,6 +57,45 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Pre-fill user information when modal opens
+  useEffect(() => {
+    if (isOpen && user) {
+      setFormData(prev => ({
+        ...prev,
+        // Pre-fill user info only if fields are empty (preserve user edits during session)
+        fullName: prev.fullName || user.name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+        // Use user id as studentId if available
+        studentId: prev.studentId || user.id || '',
+      }))
+    }
+  }, [isOpen, user])
+
+  // Reset form and step when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setCurrentStep(1)
+      setErrors({})
+      // Reset all form fields to empty
+      setFormData({
+        fullName: '',
+        email: '',
+        phone: '',
+        studentId: '',
+        moveInDate: '',
+        moveOutDate: '',
+        duration: 12,
+        paymentMethod: 'bank_transfer',
+        specialRequests: '',
+        emergencyContact: '',
+        emergencyPhone: '',
+        agreeToTerms: false,
+        agreeToPrivacy: false,
+      })
+    }
+  }, [isOpen])
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {}
