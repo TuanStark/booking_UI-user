@@ -152,8 +152,6 @@ export async function generateMetadata({ params }: BuildingDetailPageProps): Pro
 export default async function BuildingDetailPage({ params }: BuildingDetailPageProps) {
   const { id } = await params
   const { building, rooms } = await BuildingService.getBuildingDetailWithRooms(id)
-  console.log('building', building);
-  console.log('rooms', rooms);
   if (!building) {
     notFound()
   }

@@ -110,7 +110,7 @@ export interface BookingFormData {
   duration: number
   
   // Payment
-  paymentMethod: 'bank_transfer' | 'credit_card' | 'momo'
+  paymentMethod: 'viet_qr' | 'vnpay'
   
   // Additional Info
   specialRequests: string

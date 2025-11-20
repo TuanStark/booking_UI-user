@@ -50,7 +50,7 @@ export default function RoomDetailPage() {
   
   // Require authentication for room booking
   const { isLoading: authLoading, isAuthenticated } = useRequireAuth()
-  const { accessToken } = useUser()
+  const { accessToken, user } = useUser()
   
   const [room, setRoom] = useState<Room | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -59,6 +59,8 @@ export default function RoomDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
   const [bookingSuccess, setBookingSuccess] = useState(false)
+  const [bookingResult, setBookingResult] = useState<any | null>(null)
+  const [bookingError, setBookingError] = useState<string | null>(null)
 
   // Derive building info from room data - ensures building is always available when room exists
   const building: BuildingInfo | null = useMemo(() => {
@@ -98,34 +100,56 @@ export default function RoomDetailPage() {
   }, [roomId])
 
   const handleBookingSubmit = async (bookingData: BookingFormData) => {
-    if (!room || !accessToken) return
+    if (!room || !accessToken || !user?.id) {
+      setBookingError('Bạn cần đăng nhập để đặt phòng.')
+      return
+    }
 
     setIsSubmittingBooking(true)
+    setBookingError(null)
     try {
-      await BookingService.createBooking(
+      const result = await BookingService.createBooking(
         {
           roomId: room.id,
+          roomPrice: room.price,
           moveInDate: bookingData.moveInDate,
           moveOutDate: bookingData.moveOutDate,
           duration: bookingData.duration,
           paymentMethod: bookingData.paymentMethod,
-          specialRequests: bookingData.specialRequests || undefined,
-          emergencyContact: bookingData.emergencyContact,
-          emergencyPhone: bookingData.emergencyPhone,
+          specialRequests: bookingData.specialRequests?.trim() || undefined,
+          emergencyContact: bookingData.emergencyContact?.trim() || undefined,
+          emergencyPhone: bookingData.emergencyPhone?.trim() || undefined,
         },
-        accessToken
+        accessToken,
+        user.id,
       )
 
+      console.log('Booking result:', result)
+      const bookingResultData = result?.data ?? result?.data?.data ?? result
+      setBookingResult(bookingResultData)
       setBookingSuccess(true)
       setIsBookingModalOpen(false)
       
-      // Redirect to bookings page after 2 seconds
-      setTimeout(() => {
-        router.push('/bookings')
-      }, 2000)
+      // Tự động chuyển hướng đến payment URL nếu có
+      const paymentUrl = 
+        bookingResultData?.payment?.paymentUrl || 
+        bookingResultData?.paymentUrl ||
+        bookingResultData?.payment?.vnpUrl
+      
+      if (paymentUrl) {
+        // Mở payment URL trong tab mới
+        window.open(paymentUrl, '_blank', 'noopener,noreferrer')
+      } else {
+        // Nếu không có payment URL, chuyển đến trang bookings sau 2 giây
+        setTimeout(() => {
+          router.push('/bookings')
+        }, 2000)
+      }
     } catch (err: any) {
       console.error('Error creating booking:', err)
-      alert(err?.message || 'Không thể tạo đơn đặt phòng. Vui lòng thử lại.')
+      const message = err?.message || 'Không thể tạo đơn đặt phòng. Vui lòng thử lại.'
+      setBookingError(message)
+      alert(message)
     } finally {
       setIsSubmittingBooking(false)
     }
@@ -206,6 +230,80 @@ export default function RoomDetailPage() {
               <span className="text-gray-900 dark:text-white font-medium">Phòng {room.roomNumber}</span>
             </nav>
           </div>
+        </div>
+
+        {/* Booking status notifications */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          {bookingError && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 dark:bg-red-900/30 dark:border-red-800 dark:text-red-200">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                <p>{bookingError}</p>
+              </div>
+            </div>
+          )}
+
+          {bookingResult?.payment && (
+            <div className="rounded-2xl border border-green-200 bg-white shadow-sm p-5 space-y-4 dark:bg-gray-800 dark:border-green-900/40">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-6 w-6 text-green-500" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Đặt phòng thành công! Hoàn tất thanh toán để xác nhận
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Mã đặt phòng: <span className="font-mono">{bookingResult.id}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Phương thức thanh toán</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
+                    {bookingResult.payment.method === 'VNPAY' ? 'VNPay' : 'VietQR'}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Số tiền</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">
+                    {(
+                      typeof bookingResult.payment.amount === 'number'
+                        ? bookingResult.payment.amount
+                        : room.price * (bookingResult.details?.[0]?.time || 1)
+                    ).toLocaleString('vi-VN')}
+                    đ
+                  </p>
+                </div>
+              </div>
+
+              {bookingResult.payment.paymentUrl && (
+                <a
+                  href={bookingResult.payment.paymentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-colors"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Mở trang thanh toán
+                </a>
+              )}
+
+              {bookingResult.payment.qrImageUrl && (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Quét mã VietQR:</p>
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 inline-flex">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={bookingResult.payment.qrImageUrl}
+                      alt="VietQR"
+                      className="w-48 h-48 object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">

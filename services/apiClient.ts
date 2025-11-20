@@ -215,20 +215,28 @@ class ApiClient {
   /**
    * Create a new booking
    */
-  async createBooking(bookingData: {
-    roomId: string
-    moveInDate: string
-    moveOutDate: string
-    duration: number
-    paymentMethod: string
-    specialRequests?: string
-    emergencyContact: string
-    emergencyPhone: string
-  }, token: string) {
+  async createBooking(
+    bookingData: {
+      startDate: string
+      endDate: string
+      typePayment: string
+      note?: string
+      details: {
+        roomId: string
+        price: number
+        note?: string
+        time: number
+      }[]
+    },
+    token: string,
+    userId: string,
+  ) {
     return this.request('/bookings', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        'x-user-id': userId,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(bookingData),
     })

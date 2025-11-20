@@ -15,13 +15,14 @@ import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib
 
 interface CreateBookingData {
   roomId: string
+  roomPrice: number
   moveInDate: string
   moveOutDate: string
   duration: number
   paymentMethod: string
   specialRequests?: string
-  emergencyContact: string
-  emergencyPhone: string
+  emergencyContact?: string
+  emergencyPhone?: string
 }
 
 /**
@@ -30,6 +31,9 @@ interface CreateBookingData {
 function validateBookingData(data: CreateBookingData): void {
   if (!data.roomId || typeof data.roomId !== 'string' || data.roomId.trim() === '') {
     throw new ValidationError('Room ID is required')
+  }
+  if (typeof data.roomPrice !== 'number' || data.roomPrice <= 0) {
+    throw new ValidationError('Room price is invalid')
   }
   if (!data.moveInDate) {
     throw new ValidationError('Move-in date is required')
@@ -43,9 +47,7 @@ function validateBookingData(data: CreateBookingData): void {
   if (!data.paymentMethod) {
     throw new ValidationError('Payment method is required')
   }
-  if (!data.emergencyContact || !data.emergencyPhone) {
-    throw new ValidationError('Emergency contact information is required')
-  }
+  // Emergency contact is optional - no validation needed
 }
 
 /**
@@ -94,12 +96,47 @@ export class BookingService {
    * @throws {NetworkError} - If network request fails
    * @throws {ServerError} - If server returns an error
    */
-  static async createBooking(bookingData: CreateBookingData, token: string) {
+  static async createBooking(
+    bookingData: CreateBookingData,
+    token: string,
+    userId: string,
+  ) {
     try {
       validateBookingData(bookingData)
       validateToken(token)
+      if (!userId) {
+        throw new ValidationError('User ID is required')
+      }
 
-      const response = await apiClient.createBooking(bookingData, token)
+      const normalizeDate = (value: string) => {
+        const date = new Date(value)
+        if (Number.isNaN(date.getTime())) {
+          throw new ValidationError('Invalid date format')
+        }
+        return date.toISOString()
+      }
+
+      const normalizedMethod =
+        bookingData.paymentMethod?.toUpperCase().replace(/[\s_-]/g, '') === 'VNPAY'
+          ? 'VNPAY'
+          : 'VIETQR'
+
+      const payload = {
+        startDate: normalizeDate(bookingData.moveInDate),
+        endDate: normalizeDate(bookingData.moveOutDate),
+        typePayment: normalizedMethod,
+        note: bookingData.specialRequests || undefined,
+        details: [
+          {
+            roomId: bookingData.roomId,
+            price: bookingData.roomPrice,
+            note: bookingData.specialRequests || undefined,
+            time: bookingData.duration,
+          },
+        ],
+      }
+
+      const response = await apiClient.createBooking(payload, token, userId)
       return response
     } catch (error: any) {
       handleApiError(error, 'creating booking')

@@ -5,13 +5,7 @@ import {
   X, 
   Calendar, 
   User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  DollarSign,
-  Clock,
   CheckCircle,
-  AlertCircle,
   CreditCard,
   Banknote,
   Smartphone
@@ -44,7 +38,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     duration: 12,
     
     // Payment
-    paymentMethod: 'bank_transfer',
+    paymentMethod: 'viet_qr',
     
     // Additional Info
     specialRequests: '',
@@ -87,7 +81,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
         moveInDate: '',
         moveOutDate: '',
         duration: 12,
-        paymentMethod: 'bank_transfer',
+        paymentMethod: 'viet_qr',
         specialRequests: '',
         emergencyContact: '',
         emergencyPhone: '',
@@ -114,11 +108,6 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     }
 
     if (step === 3) {
-      if (!formData.emergencyContact.trim()) newErrors.emergencyContact = 'Vui lòng nhập người liên hệ khẩn cấp'
-      if (!formData.emergencyPhone.trim()) newErrors.emergencyPhone = 'Vui lòng nhập số điện thoại liên hệ khẩn cấp'
-    }
-
-    if (step === 4) {
       if (!formData.agreeToTerms) newErrors.agreeToTerms = 'Vui lòng đồng ý với điều khoản'
       if (!formData.agreeToPrivacy) newErrors.agreeToPrivacy = 'Vui lòng đồng ý với chính sách bảo mật'
     }
@@ -138,6 +127,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
   }
 
   const handleSubmit = () => {
+    console.log('formData booking modal', formData)
     if (validateStep(currentStep)) {
       onSubmit(formData)
     }
@@ -183,8 +173,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
               {[
                 { step: 1, title: 'Thông tin cá nhân', icon: User },
                 { step: 2, title: 'Chi tiết đặt phòng', icon: Calendar },
-                { step: 3, title: 'Thông tin bổ sung', icon: AlertCircle },
-                { step: 4, title: 'Xác nhận & Thanh toán', icon: CheckCircle }
+                { step: 3, title: 'Xác nhận & Thanh toán', icon: CheckCircle }
               ].map(({ step, title, icon: Icon }, index) => (
                 <div key={step} className="flex items-center">
                   <div className={cn(
@@ -399,70 +388,8 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
               </div>
             )}
 
-            {/* Step 3: Additional Information */}
+            {/* Step 3: Confirmation & Payment */}
             {currentStep === 3 && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Thông tin bổ sung
-                </h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Người liên hệ khẩn cấp *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.emergencyContact}
-                      onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-                      className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.emergencyContact ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      )}
-                      placeholder="Họ tên người liên hệ khẩn cấp"
-                    />
-                    {errors.emergencyContact && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.emergencyContact}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Số điện thoại liên hệ khẩn cấp *
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.emergencyPhone}
-                      onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
-                      className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.emergencyPhone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                      )}
-                      placeholder="0123456789"
-                    />
-                    {errors.emergencyPhone && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.emergencyPhone}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Yêu cầu đặc biệt
-                    </label>
-                    <textarea
-                      value={formData.specialRequests}
-                      onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                      placeholder="Nhập các yêu cầu đặc biệt (nếu có)..."
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 4: Confirmation & Payment */}
-            {currentStep === 4 && (
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Xác nhận & Thanh toán
@@ -473,47 +400,33 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Phương thức thanh toán
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'bank_transfer' })}
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'viet_qr' })}
                       className={cn(
                         'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'bank_transfer'
+                        formData.paymentMethod === 'viet_qr'
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                       )}
                     >
                       <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">Chuyển khoản</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán qua ngân hàng</div>
+                      <div className="font-medium text-gray-900 dark:text-white">VietQR</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Quét mã QR ngân hàng</div>
                     </button>
 
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'credit_card' })}
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'vnpay' })}
                       className={cn(
                         'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'credit_card'
+                        formData.paymentMethod === 'vnpay'
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                       )}
                     >
                       <CreditCard className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">Thẻ tín dụng</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Visa, Mastercard</div>
-                    </button>
-
-                    <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'momo' })}
-                      className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'momo'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                      )}
-                    >
-                      <Smartphone className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">MoMo</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Ví điện tử</div>
+                      <div className="font-medium text-gray-900 dark:text-white">VNPay</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán qua VNPay</div>
                     </button>
                   </div>
                 </div>
@@ -533,6 +446,53 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <div className="flex justify-between font-semibold text-lg border-t border-gray-200 dark:border-gray-600 pt-3">
                       <span className="text-gray-900 dark:text-white">Tổng cộng:</span>
                       <span className="text-green-600 dark:text-green-400">{calculateTotal().toLocaleString()}đ</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Special Requests (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Yêu cầu đặc biệt (Tùy chọn)
+                  </label>
+                  <textarea
+                    value={formData.specialRequests}
+                    onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    placeholder="Nhập yêu cầu đặc biệt (ví dụ: tầng cao, hướng cửa sổ, v.v.)"
+                  />
+                </div>
+
+                {/* Emergency Contact (Optional) */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    Người liên hệ khẩn cấp (Tùy chọn)
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Họ tên người liên hệ
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.emergencyContact}
+                        onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                        placeholder="Nhập họ tên người liên hệ"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Số điện thoại
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.emergencyPhone}
+                        onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                        placeholder="0123456789"
+                      />
                     </div>
                   </div>
                 </div>
@@ -585,7 +545,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
             </button>
             
             <div className="flex space-x-3">
-              {currentStep < 4 ? (
+              {currentStep < 3 ? (
                 <button
                   onClick={handleNext}
                   className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200"
