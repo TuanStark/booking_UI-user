@@ -116,15 +116,10 @@ export class BookingService {
         return date.toISOString()
       }
 
-      const normalizedMethod =
-        bookingData.paymentMethod?.toUpperCase().replace(/[\s_-]/g, '') === 'VNPAY'
-          ? 'VNPAY'
-          : 'VIETQR'
-
       const payload = {
         startDate: normalizeDate(bookingData.moveInDate),
         endDate: normalizeDate(bookingData.moveOutDate),
-        typePayment: normalizedMethod,
+        typePayment: bookingData.paymentMethod,  // Send as 'VIETQR' or 'VNPAY'
         note: bookingData.specialRequests || undefined,
         details: [
           {
@@ -135,6 +130,8 @@ export class BookingService {
           },
         ],
       }
+
+      console.log('📤 Sending booking payload:', JSON.stringify(payload, null, 2))
 
       const response = await apiClient.createBooking(payload, token, userId)
       return response
@@ -158,7 +155,7 @@ export class BookingService {
 
       const response = await apiClient.getUserBookings(token) as BackendApiResponse<any>
       const bookingsData = response.data?.data
-      
+
       return Array.isArray(bookingsData) ? bookingsData : []
     } catch (error: any) {
       handleApiError(error, 'fetching user bookings')
@@ -185,7 +182,7 @@ export class BookingService {
 
       const response = await apiClient.getBookingById(id, token) as BackendApiResponse<any>
       const bookingData = response.data?.data
-      
+
       if (!bookingData) {
         throw new NotFoundError('Booking', id)
       }

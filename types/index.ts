@@ -103,20 +103,20 @@ export interface BookingFormData {
   email: string
   phone: string
   studentId: string
-  
+
   // Booking Details
   moveInDate: string
   moveOutDate: string
   duration: number
-  
+
   // Payment
-  paymentMethod: 'viet_qr' | 'vnpay'
-  
+  paymentMethod: 'VIETQR' | 'VNPAY'
+
   // Additional Info
   specialRequests: string
   emergencyContact: string
   emergencyPhone: string
-  
+
   // Terms
   agreeToTerms: boolean
   agreeToPrivacy: boolean

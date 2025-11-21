@@ -22,7 +22,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4
  */
 function serializeQueryParams(params: Record<string, any>): string {
   const searchParams = new URLSearchParams()
-  
+
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === null) {
       return
@@ -37,7 +37,7 @@ function serializeQueryParams(params: Record<string, any>): string {
       searchParams.append(key, String(value))
     }
   })
-  
+
   return searchParams.toString()
 }
 
@@ -67,7 +67,7 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
-    
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config)
-      
+
       // Handle non-OK responses
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({
@@ -343,6 +343,18 @@ class ApiClient {
         Authorization: `Bearer ${token}`,
       },
       body: formData,
+    })
+  }
+
+  // ==================== Payment Endpoints ====================
+
+  /**
+   * Verify VNPay payment callback
+   */
+  async verifyVNPayPayment(params: Record<string, string>) {
+    return this.request('/payments/vnpay/verify', {
+      method: 'POST',
+      body: JSON.stringify(params),
     })
   }
 }

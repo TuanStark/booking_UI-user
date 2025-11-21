@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  X, 
-  Calendar, 
-  User, 
+import {
+  X,
+  Calendar,
+  User,
   CheckCircle,
   CreditCard,
   Banknote,
@@ -31,20 +31,20 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     email: '',
     phone: '',
     studentId: '',
-    
+
     // Booking Details
     moveInDate: '',
     moveOutDate: '',
     duration: 12,
-    
+
     // Payment
-    paymentMethod: 'viet_qr',
-    
+    paymentMethod: 'VIETQR',
+
     // Additional Info
     specialRequests: '',
     emergencyContact: '',
     emergencyPhone: '',
-    
+
     // Terms
     agreeToTerms: false,
     agreeToPrivacy: false
@@ -81,7 +81,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
         moveInDate: '',
         moveOutDate: '',
         duration: 12,
-        paymentMethod: 'viet_qr',
+        paymentMethod: 'VIETQR',
         specialRequests: '',
         emergencyContact: '',
         emergencyPhone: '',
@@ -147,7 +147,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50" onClick={onClose}></div>
-        
+
         <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -213,7 +213,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Thông tin cá nhân
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -300,7 +300,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Chi tiết đặt phòng
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -394,7 +394,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Xác nhận & Thanh toán
                 </h3>
-                
+
                 {/* Payment Method */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -402,10 +402,10 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'viet_qr' })}
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'VIETQR' })}
                       className={cn(
                         'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'viet_qr'
+                        formData.paymentMethod === 'VIETQR'
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                       )}
@@ -416,10 +416,10 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     </button>
 
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'vnpay' })}
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'VNPAY' })}
                       className={cn(
                         'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'vnpay'
+                        formData.paymentMethod === 'VNPAY'
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                           : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                       )}
@@ -543,7 +543,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
             >
               {currentStep === 1 ? 'Hủy' : 'Quay lại'}
             </button>
-            
+
             <div className="flex space-x-3">
               {currentStep < 3 ? (
                 <button
