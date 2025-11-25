@@ -13,16 +13,27 @@ import { apiClient } from './apiClient'
 import { BackendApiResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
 
+const SUPPORTED_PAYMENT_METHODS = ['VIETQR', 'VNPAY'] as const
+type SupportedPaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number]
+
 interface CreateBookingData {
   roomId: string
   roomPrice: number
   moveInDate: string
   moveOutDate: string
   duration: number
-  paymentMethod: string
+  paymentMethod: SupportedPaymentMethod
   specialRequests?: string
   emergencyContact?: string
   emergencyPhone?: string
+}
+
+function normalizePaymentMethod(value: string): SupportedPaymentMethod {
+  const normalized = (value ?? '').toUpperCase()
+  if (!SUPPORTED_PAYMENT_METHODS.includes(normalized as SupportedPaymentMethod)) {
+    throw new ValidationError('Payment method must be either VIETQR or VNPAY')
+  }
+  return normalized as SupportedPaymentMethod
 }
 
 /**
@@ -44,9 +55,7 @@ function validateBookingData(data: CreateBookingData): void {
   if (data.duration < 1) {
     throw new ValidationError('Duration must be at least 1 month')
   }
-  if (!data.paymentMethod) {
-    throw new ValidationError('Payment method is required')
-  }
+  normalizePaymentMethod(data.paymentMethod)
   // Emergency contact is optional - no validation needed
 }
 
@@ -116,10 +125,12 @@ export class BookingService {
         return date.toISOString()
       }
 
+      const paymentMethod = normalizePaymentMethod(bookingData.paymentMethod)
+
       const payload = {
         startDate: normalizeDate(bookingData.moveInDate),
         endDate: normalizeDate(bookingData.moveOutDate),
-        typePayment: bookingData.paymentMethod,  // Send as 'VIETQR' or 'VNPAY'
+        paymentMethod: paymentMethod,
         note: bookingData.specialRequests || undefined,
         details: [
           {

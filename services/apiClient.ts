@@ -219,7 +219,7 @@ class ApiClient {
     bookingData: {
       startDate: string
       endDate: string
-      typePayment: string
+      paymentMethod: string
       note?: string
       details: {
         roomId: string

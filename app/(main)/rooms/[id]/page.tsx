@@ -26,6 +26,7 @@ import {
   MessageCircle,
   Loader2,
   AlertCircle,
+  CreditCard,
 } from 'lucide-react'
 import BookingModal from '@/components/BookingModal'
 import { RoomService } from '@/services/roomService'
@@ -125,7 +126,13 @@ export default function RoomDetailPage() {
       )
 
       console.log('Booking result:', result)
-      const bookingResultData = result?.data ?? result?.data?.data ?? result
+      const resultObject = result && typeof result === 'object'
+        ? (result as Record<string, any>)
+        : null
+      const bookingResultData =
+        resultObject?.data?.data ??
+        resultObject?.data ??
+        result
       setBookingResult(bookingResultData)
       setBookingSuccess(true)
       setIsBookingModalOpen(false)
