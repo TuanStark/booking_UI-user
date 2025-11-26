@@ -25,7 +25,7 @@ export default function HeroSection({
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        minHeight: '600px'
+        minHeight: '700px'
       }}
     >
       <div className={`absolute inset-0 ${overlayOpacity}`}></div>
