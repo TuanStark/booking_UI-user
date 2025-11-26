@@ -60,7 +60,7 @@ export default function FeaturedDormsSection({ limit = 6 }: FeaturedDormsSection
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 cursor-pointer">
           {dorms.slice(0, limit).map((dorm) => (
             <div
               key={dorm.id}

@@ -37,7 +37,7 @@ export default function ContactPage() {
         subject: '',
         message: ''
       })
-      
+
       // Reset success message after 5 seconds
       setTimeout(() => {
         setSubmitStatus('idle')
@@ -74,7 +74,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="pt-16 space-y-16">
+      <div className="space-y-16">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -6,6 +6,7 @@ export const NAV_ITEMS: NavItem[] = [
   { name: 'Tòa nhà', href: '/buildings' },
   { name: 'Giới thiệu', href: '/about' },
   { name: 'Liên hệ', href: '/contact' },
+  { name: 'Tin tức', href: '/news' },
 ]
 
 // Sort options
@@ -50,7 +51,7 @@ export const GENDER_OPTIONS: { value: Gender; label: string }[] = [
 // Building names
 export const BUILDING_NAMES = [
   'Tòa A - Maple Hall',
-  'Tòa B - Cedar Hall', 
+  'Tòa B - Cedar Hall',
   'Tòa C - Oak Residence',
   'Tòa D - Pine House',
   'Tòa E - Elm Building',
