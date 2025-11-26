@@ -7,7 +7,7 @@ interface HeroSectionProps {
   overlayOpacity?: string
 }
 
-export default function HeroSection({ 
+export default function HeroSection({
   backgroundImage = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80",
   overlayOpacity = "bg-gradient-to-br bg-black/80 via-gray-900/70 to-gray-800/80"
 }: HeroSectionProps) {
@@ -18,7 +18,7 @@ export default function HeroSection({
   ]
 
   return (
-    <section 
+    <section
       className="relative text-white overflow-hidden"
       style={{
         backgroundImage: `url('${backgroundImage}')`,
@@ -33,15 +33,15 @@ export default function HeroSection({
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
             Tìm Ký Túc Xá lý tưởng cho bạn
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+            {/* <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
               Dễ Dàng
-            </span>
+            </span> */}
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto animate-slide-up">
-            Khám phá hàng ngàn ký túc xá chất lượng cao với giá cả phải chăng, 
+            Khám phá hàng ngàn ký túc xá chất lượng cao với giá cả phải chăng,
             phù hợp cho sinh viên đại học
           </p>
-          
+
           {/* Search Bar */}
           <div className="max-w-4xl mx-auto mb-12">
             <SearchBar />
@@ -58,11 +58,11 @@ export default function HeroSection({
           </div>
         </div>
       </div>
-      
+
       {/* Decorative Elements */}
       <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-bounce-gentle"></div>
-      <div className="absolute bottom-20 right-10 w-16 h-16 bg-white/10 rounded-full animate-bounce-gentle" style={{animationDelay: '1s'}}></div>
-      <div className="absolute top-1/2 left-20 w-12 h-12 bg-white/10 rounded-full animate-bounce-gentle" style={{animationDelay: '2s'}}></div>
+      <div className="absolute bottom-20 right-10 w-16 h-16 bg-white/10 rounded-full animate-bounce-gentle" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-20 w-12 h-12 bg-white/10 rounded-full animate-bounce-gentle" style={{ animationDelay: '2s' }}></div>
     </section>
   )
 }

@@ -38,7 +38,7 @@ export default function SearchBar({ onSearch, onLocationChange, className }: Sea
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm ký túc xá, địa điểm..."
-            className="w-full pl-10 pr-4 py-4 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white text-lg placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+            className="text-gray-700 dark:text-gray-300 w-full pl-10 pr-4 py-4 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white text-lg placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
           />
         </div>
 
@@ -54,17 +54,17 @@ export default function SearchBar({ onSearch, onLocationChange, className }: Sea
               value={location}
               onChange={handleLocationChange}
               placeholder="Khu vực, thành phố..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+              className="text-gray-700 dark:text-gray-300 w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
             />
           </div>
 
           {/* Filter Button */}
           <button
             type="button"
-            className="flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            className="bg-white flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200"
           >
             <Filter className="h-5 w-5 text-gray-600 dark:text-gray-400 mr-2" />
-            <span className="text-gray-700 dark:text-gray-300 font-medium">Bộ lọc</span>
+            <span className=" text-gray-700 dark:text-gray-300 font-medium">Bộ lọc</span>
           </button>
 
           {/* Search Button */}
@@ -74,21 +74,6 @@ export default function SearchBar({ onSearch, onLocationChange, className }: Sea
           >
             Tìm kiếm
           </button>
-        </div>
-
-        {/* Quick Filters */}
-        <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">Tìm nhanh:</span>
-          {['Phòng đơn', 'Phòng đôi', 'Phòng nhóm', 'Gần trường', 'Giá rẻ'].map((filter) => (
-            <button
-              key={filter}
-              type="button"
-              onClick={() => setSearchQuery(filter)}
-              className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-            >
-              {filter}
-            </button>
-          ))}
         </div>
       </form>
     </div>
