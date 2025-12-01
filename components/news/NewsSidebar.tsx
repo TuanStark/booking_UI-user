@@ -6,7 +6,7 @@ import { Search } from 'lucide-react'
 
 export default function NewsSidebar() {
     const categories = [
-        { name: 'All', count: 12, active: true },
+        { name: 'Tất cả', count: 12, active: true },
         { name: 'Activity', count: 5, active: false },
         { name: 'Announcement', count: 3, active: false },
         { name: 'Blogs', count: 4, active: false },
@@ -48,7 +48,7 @@ export default function NewsSidebar() {
             {/* Categories */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
                 <div className="bg-blue-600 p-4">
-                    <h3 className="text-white font-bold text-lg">Categories</h3>
+                    <h3 className="text-white font-bold text-lg">Danh mục bài viết</h3>
                 </div>
                 <div className="divide-y divide-gray-100">
                     {categories.map((category) => (
@@ -66,7 +66,7 @@ export default function NewsSidebar() {
             {/* Recent Posts */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
                 <div className="bg-blue-600 p-4">
-                    <h3 className="text-white font-bold text-lg">Recent Posts</h3>
+                    <h3 className="text-white font-bold text-lg">Bài viết gần đây</h3>
                 </div>
                 <div className="p-4 space-y-4">
                     {recentPosts.map((post) => (
