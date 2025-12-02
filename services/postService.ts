@@ -1,4 +1,4 @@
-import { BackendApiResponse } from '@/types/api'
+import { BackendApiResponse, PaginatedResponse } from '@/types/api'
 import type { NewsSidebarData, CategoriesResponse, RecentPostsResponse, Post, CategoriesPost, FeaturedNewsData } from '@/types/post'
 
 // Wrapper fetch chung (giữ nguyên của bạn, rất tốt)
@@ -54,8 +54,40 @@ export async function getNewsSidebarData(): Promise<NewsSidebarData> {
 }
 
 
-export async function getAllPost(): Promise<FeaturedNewsData> {
-  return api<FeaturedNewsData>('/posts?page=1&limit=10&status=PUBLISHED&sortBy=title&sortOrder=desc', {
-    next: { revalidate: 600 },
-  })
+export async function getAllPosts({
+  page = 1,
+  limit = 10,
+  status = 'PUBLISHED',
+  sortBy = 'publishedAt',
+  sortOrder = 'desc',
+  categoryId = '',
+  search = ''
+}: {
+  page?: number
+  limit?: number
+  status?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  categoryId?: string
+  search?: string
+} = {}): Promise<PaginatedResponse<Post[]>> {
+  const response = await api<BackendApiResponse<Post[]>>(
+    `/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categoryId=${categoryId}&search=${search}`,
+    {
+      next: { revalidate: 600, tags: ['posts', `posts-page-${page}`] },
+    }
+  )
+
+  const { data, meta } = response.data
+
+  return {
+    items: data,
+    meta: {
+      ...meta,
+      page: meta.page || page,
+      limit: meta.limit || limit,
+      hasNextPage: page < meta.totalPages,
+      hasPrevPage: page > 1,
+    },
+  }
 }

@@ -8,7 +8,7 @@ export interface Post {
     status: string
     publishedAt: string
     authorId: string
-    categories: CategoriesPost[]
+    category: CategoriesPost
     categoryId: string
     createdAt: string
     updatedAt: string

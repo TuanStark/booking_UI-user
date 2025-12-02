@@ -1,13 +1,16 @@
-'use client'
-
+// src/components/news/NewsGrid.tsx
 import NewsCard from './NewsCard'
-import { NEWS_DATA } from './data'
+import type { Post } from '@/types/post'
 
-export default function NewsGrid() {
+interface NewsGridProps {
+    posts: Post[]
+}
+
+export default function NewsGrid({ posts }: NewsGridProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {NEWS_DATA.map((item) => (
-                <NewsCard key={item.id} {...item} />
+            {posts.map((post) => (
+                <NewsCard key={post.id} post={post} />
             ))}
         </div>
     )

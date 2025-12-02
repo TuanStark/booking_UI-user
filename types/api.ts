@@ -1,3 +1,4 @@
+// pagination
 export type PaginationMeta = {
   total: number
   page: number
@@ -7,9 +8,12 @@ export type PaginationMeta = {
 
 export type PaginatedResponse<T> = {
   items: T
-  meta: PaginationMeta
+  meta: PaginationMeta & {
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  }
 }
-// Backend API Response with nested data structure
+
 export interface BackendApiResponse<T = any> {
   data: {
     data: T
@@ -19,6 +23,8 @@ export interface BackendApiResponse<T = any> {
   message: string
 }
 
+
+// login
 export interface LoginResponse {
   data: {
     accessToken: string
