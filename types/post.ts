@@ -32,3 +32,12 @@ export type NewsSidebarData = {
 export type FeaturedNewsData = {
     featured: Post[]
 }
+
+// Nếu backend có endpoint trả riêng (tốt hơn)
+export type RecentPostsResponse = {
+    recentPosts: Post[]
+}
+
+export type CategoriesResponse = {
+    categories: CategoriesPost[]
+}

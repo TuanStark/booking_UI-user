@@ -1,8 +1,10 @@
-import type { NewsSidebarData, FeaturedNewsData } from '@/types/post'
+import { BackendApiResponse } from '@/types/api'
+import type { NewsSidebarData, CategoriesResponse, RecentPostsResponse, Post, CategoriesPost, FeaturedNewsData } from '@/types/post'
 
-// Wrapper nhỏ nếu cần thêm auth, logging, retry sau này
+// Wrapper fetch chung (giữ nguyên của bạn, rất tốt)
 async function api<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`
+
   const res = await fetch(url, {
     ...options,
     headers: {
@@ -12,22 +14,43 @@ async function api<T>(endpoint: string, options?: RequestInit): Promise<T> {
   })
 
   if (!res.ok) {
-    throw new Error(`API ${endpoint} failed: ${res.status}`)
+    throw new Error(`API ${endpoint} failed: ${res.status} ${res.statusText}`)
   }
   return res.json()
 }
 
-// Tất cả logic fetch tập trung ở đây → dễ test, dễ thay đổi
-export async function getPostCategories(): Promise<NewsSidebarData> {
-  return api<NewsSidebarData>('/post-categories', {
-    next: { revalidate: 600 },
+// 2 cách làm – bạn chọn 1 cái phù hợp
+
+// Cách 1: Backend có 1 endpoint tổng hợp (tốt nhất)
+export async function getNewsSidebar(): Promise<NewsSidebarData> {
+  return api<NewsSidebarData>('/news/sidebar', {
+    next: { revalidate: 600, tags: ['news-sidebar'] },
   })
 }
 
-export async function getPostRecent(): Promise<NewsSidebarData> {
-  return api<NewsSidebarData>('/posts?status=PUBLISHED&sortOrder=desc&limit=5', {
-    next: { revalidate: 600 },
+// Cách 2: Backend chưa có → bạn tự compose (vẫn chuẩn Senior)
+export async function getPostCategories(): Promise<CategoriesPost[]> {
+  const response = await api<BackendApiResponse<CategoriesPost[]>>('/post-categories', {
+    next: { revalidate: 3600, tags: ['categories'] }, // category ít thay đổi hơn
   })
+  return response.data.data;
+}
+
+export async function getRecentPosts(): Promise<Post[]> {
+  const response = await api<BackendApiResponse<Post[]>>('/posts?status=PUBLISHED&sortOrder=desc&limit=5', {
+    next: { revalidate: 600, tags: ['recent-posts'] },
+  })
+  return response.data.data;
+}
+
+// Helper: Gộp lại thành 1 object (dùng trong Server Component)
+export async function getNewsSidebarData(): Promise<NewsSidebarData> {
+  const [categories, recentPosts] = await Promise.all([
+    getPostCategories(),
+    getRecentPosts(),
+  ])
+
+  return { categories, recentPosts }
 }
 
 

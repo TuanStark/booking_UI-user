@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { User, LogOut, Settings, Building2, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { useUser } from '@/contexts/UserContext'
 
 interface AuthStatusProps {

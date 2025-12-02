@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api'
 import { MapPin, DollarSign, Users } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { Building } from '@/types'
 
 interface DormMapProps {
@@ -170,14 +170,14 @@ export default function DormMap({ dorms, selectedDormId, onDormSelect, className
               {(() => {
                 const dorm = markers.find(m => m.id === selectedMarker)?.dorm
                 if (!dorm) return null
-                
+
                 return (
                   <div className="space-y-3">
                     <div>
                       <h3 className="font-semibold text-gray-900 text-sm">{dorm.name}</h3>
                       <p className="text-xs text-gray-600 mt-1">{dorm.address}</p>
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center text-green-600">
                         <DollarSign className="h-3 w-3 mr-1" />
@@ -188,7 +188,7 @@ export default function DormMap({ dorms, selectedDormId, onDormSelect, className
                         <span>{dorm.availableRooms} phòng</span>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={() => onDormSelect?.(dorm.id)}
                       className="w-full bg-blue-500 text-white text-xs py-1 px-2 rounded hover:bg-blue-600 transition-colors duration-200"

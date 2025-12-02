@@ -1,16 +1,16 @@
 // src/app/(main)/news/sidebar/NewsSidebar.tsx
-import NewsSidebarClient from './NewsSidebarClient'
 import NewsSidebarSkeleton from '@/components/news/sidebar/NewsSidebarSkeleton'
-import { getPostCategories, getPostRecent } from '@/services/postService'
+import NewsSidebarClient from './NewsSidebarClient'
 import { Suspense } from 'react'
+import { getNewsSidebarData } from '@/services/postService'
 
 export default async function NewsSidebar() {
-  const data = await getPostCategories() // ← Chỉ 1 dòng, sạch sẽ
+  const data = await getNewsSidebarData() // ← Chỉ 1 dòng, rõ ràng, dễ test
 
   return <NewsSidebarClient initialData={data} />
 }
 
-// Nếu muốn streaming mượt hơn
+// Với Suspense (nếu muốn streaming mượt)
 export function NewsSidebarWithSuspense() {
   return (
     <Suspense fallback={<NewsSidebarSkeleton />}>
@@ -20,6 +20,6 @@ export function NewsSidebarWithSuspense() {
 }
 
 async function NewsSidebarContent() {
-  const data = await getPostCategories()
+  const data = await getNewsSidebarData()
   return <NewsSidebarClient initialData={data} />
 }

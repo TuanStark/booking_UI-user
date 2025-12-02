@@ -10,7 +10,7 @@ import {
   Banknote,
   Smartphone
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { Room, BookingFormData } from '@/types'
 import { useUser } from '@/contexts/UserContext'
 

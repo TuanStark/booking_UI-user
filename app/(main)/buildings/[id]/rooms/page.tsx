@@ -3,12 +3,12 @@
 import { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  ArrowLeft, 
-  Building2, 
-  MapPin, 
-  Users, 
-  DollarSign, 
+import {
+  ArrowLeft,
+  Building2,
+  MapPin,
+  Users,
+  DollarSign,
   Star,
   Grid,
   List
@@ -16,17 +16,17 @@ import {
 import FilterBar from '@/components/FilterBar'
 import RoomCard from '@/components/RoomCard'
 import { LoadingState, EmptyState } from '@/components/ui/UtilityComponents'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { MockDataService } from '@/services/mockDataService'
 import { Room, FilterState, SearchParams } from '@/types'
 
 export default function BuildingRoomsPage() {
   const params = useParams()
   const buildingId = params.id as string
-  
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>()
-  
+
   // Get building and rooms data
   const building = MockDataService.getBuildingById(buildingId)
   const rooms = MockDataService.getRoomsByBuildingId(buildingId)
@@ -236,7 +236,7 @@ export default function BuildingRoomsPage() {
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Bộ lọc phòng
                 </h2>
-                
+
                 <FilterBar
                   filters={filters}
                   onFiltersChange={setFilters}
@@ -260,7 +260,7 @@ export default function BuildingRoomsPage() {
                     </span> phòng
                   </p>
                 </div>
-                
+
                 {/* View Mode Toggle */}
                 <div className="flex items-center space-x-2">
                   <button
@@ -293,8 +293,8 @@ export default function BuildingRoomsPage() {
               {/* Rooms Content */}
               {filteredRooms.length > 0 ? (
                 <div className={cn(
-                  viewMode === 'grid' 
-                    ? 'grid grid-cols-1 md:grid-cols-2 gap-6' 
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
                     : 'space-y-4'
                 )}>
                   {filteredRooms.map((room) => (

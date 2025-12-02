@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 
 // Loading Spinner Component
 interface SpinnerProps {
@@ -44,9 +44,9 @@ interface ErrorStateProps {
   retryText?: string
 }
 
-export function ErrorState({ 
-  title = 'Đã xảy ra lỗi', 
-  message = 'Vui lòng thử lại sau', 
+export function ErrorState({
+  title = 'Đã xảy ra lỗi',
+  message = 'Vui lòng thử lại sau',
   onRetry,
   retryText = 'Thử lại'
 }: ErrorStateProps) {
@@ -79,9 +79,9 @@ interface EmptyStateProps {
   action?: ReactNode
 }
 
-export function EmptyState({ 
-  icon, 
-  title = 'Không có dữ liệu', 
+export function EmptyState({
+  icon,
+  title = 'Không có dữ liệu',
   message = 'Hiện tại không có dữ liệu để hiển thị',
   action
 }: EmptyStateProps) {
@@ -122,18 +122,18 @@ export function Pagination({
   const getVisiblePages = () => {
     const pages: number[] = []
     const halfVisible = Math.floor(maxVisiblePages / 2)
-    
+
     let start = Math.max(1, currentPage - halfVisible)
     let end = Math.min(totalPages, start + maxVisiblePages - 1)
-    
+
     if (end - start + 1 < maxVisiblePages) {
       start = Math.max(1, end - maxVisiblePages + 1)
     }
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i)
     }
-    
+
     return pages
   }
 
@@ -149,7 +149,7 @@ export function Pagination({
           Đầu
         </button>
       )}
-      
+
       {showPrevNext && currentPage > 1 && (
         <button
           onClick={() => onPageChange(currentPage - 1)}
@@ -158,7 +158,7 @@ export function Pagination({
           Trước
         </button>
       )}
-      
+
       {visiblePages.map(page => (
         <button
           key={page}
@@ -173,7 +173,7 @@ export function Pagination({
           {page}
         </button>
       ))}
-      
+
       {showPrevNext && currentPage < totalPages && (
         <button
           onClick={() => onPageChange(currentPage + 1)}
@@ -182,7 +182,7 @@ export function Pagination({
           Sau
         </button>
       )}
-      
+
       {showFirstLast && currentPage < totalPages && (
         <button
           onClick={() => onPageChange(totalPages)}
@@ -203,11 +203,11 @@ interface BadgeProps {
   className?: string
 }
 
-export function Badge({ 
-  children, 
-  variant = 'default', 
-  size = 'md', 
-  className 
+export function Badge({
+  children,
+  variant = 'default',
+  size = 'md',
+  className
 }: BadgeProps) {
   const variantClasses = {
     default: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',

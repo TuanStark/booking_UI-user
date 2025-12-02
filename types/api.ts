@@ -1,29 +1,27 @@
-// API Response Types
-export interface ApiResponse<T = any> {
-  success: boolean
-  data?: T
-  message?: string
-  error?: string
+export type PaginationMeta = {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
+export type PaginatedResponse<T> = {
+  items: T
+  meta: PaginationMeta
+}
 // Backend API Response with nested data structure
 export interface BackendApiResponse<T = any> {
-  data?: {
-    data?: T | T[]
-    meta?: {
-      total?: number
-      pageNumber?: number
-      limitNumber?: number
-      totalPages?: number
-    }
-  } | T | T[] // Support both nested and flat structures
-  statusCode?: number
-  message?: string
+  data: {
+    data: T
+    meta: PaginationMeta
+  }
+  statusCode: number
+  message: string
 }
 
 export interface LoginResponse {
   data: {
-    accessToken: string 
+    accessToken: string
     refreshToken: string
   }
   success: boolean

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Map, Grid, Building2, Star, MapPin, DollarSign, Users, Eye } from 'lucide-react'
 import DormMap from '@/components/DormMap'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { BuildingService } from '@/services/buildingService'
 import { Building } from '@/types'
 

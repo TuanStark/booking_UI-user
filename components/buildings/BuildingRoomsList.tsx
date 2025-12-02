@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Grid, List, Search, Filter, RefreshCw } from 'lucide-react'
 import RoomCard from '@/components/RoomCard'
 import { Room, FilterState, SearchParams } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 
 interface BuildingRoomsListProps {
   rooms: Room[]

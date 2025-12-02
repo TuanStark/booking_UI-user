@@ -1,4 +1,7 @@
-import { NewsGrid, NewsSidebar } from '@/components/news'
+import { NewsGrid } from '@/components/news'
+import NewsSidebar from './sidebar/NewsSidebar'
+import { Suspense } from 'react'
+import NewsSidebarSkeleton from '@/components/news/sidebar/NewsSidebarSkeleton'
 
 export default function NewsPage() {
     return (
@@ -17,7 +20,10 @@ export default function NewsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar - Left on Desktop */}
                     <div className="lg:col-span-1 order-2 lg:order-1">
-                        <NewsSidebar />
+                        {/* <NewsSidebar /> */}
+                        <Suspense fallback={<NewsSidebarSkeleton />}>
+                            <NewsSidebar />
+                        </Suspense>
                     </div>
 
                     {/* Main Content - Right on Desktop */}

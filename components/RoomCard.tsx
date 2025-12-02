@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star, Eye } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { Room } from '@/types'
 
 interface RoomCardProps {
@@ -22,7 +22,7 @@ export default function RoomCard({ room, viewMode, onSelect, isSelected = false 
 
   if (viewMode === 'list') {
     return (
-      <div 
+      <div
         className={cn(
           'bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer',
           isSelected && 'ring-2 ring-blue-500 shadow-xl'
@@ -32,13 +32,13 @@ export default function RoomCard({ room, viewMode, onSelect, isSelected = false 
         <div className="flex">
           {/* Image */}
           <div className="w-48 h-32 flex-shrink-0">
-          <Image
-            src={room?.images?.[0] || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
-            alt={room?.roomNumber || 'Room'}
-            width={192}
-            height={128}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+            <Image
+              src={room?.images?.[0] || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+              alt={room?.roomNumber || 'Room'}
+              width={192}
+              height={128}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
           </div>
 
           {/* Content */}
@@ -74,7 +74,7 @@ export default function RoomCard({ room, viewMode, onSelect, isSelected = false 
                 <span>{room?.window || 'N/A'}</span>
                 <span className={cn(
                   'px-2 py-1 rounded-full text-xs font-medium',
-                  room?.available 
+                  room?.available
                     ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
                     : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                 )}>
@@ -98,7 +98,7 @@ export default function RoomCard({ room, viewMode, onSelect, isSelected = false 
 
   // Grid view
   return (
-    <div 
+    <div
       className={cn(
         'bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer',
         isSelected && 'ring-2 ring-blue-500 shadow-xl'
@@ -116,7 +116,7 @@ export default function RoomCard({ room, viewMode, onSelect, isSelected = false 
         <div className="absolute top-4 right-4">
           <div className={cn(
             'px-2 py-1 rounded-full text-xs font-medium',
-            room?.available 
+            room?.available
               ? 'bg-green-500 text-white'
               : 'bg-red-500 text-white'
           )}>

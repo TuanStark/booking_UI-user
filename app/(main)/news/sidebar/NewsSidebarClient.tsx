@@ -1,98 +1,118 @@
-// 'use client'
+// src/app/(main)/news/sidebar/NewsSidebarClient.tsx
+'use client'
 
-// import { useState, useTransition } from 'react'
-// import Link from 'next/link'
-// import Image from 'next/image'
-// import { Search } from 'lucide-react'
-// import { format } from 'date-fns'
-// import type { NewsSidebarData } from './types'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Search } from 'lucide-react'
 
-// interface Props {
-//   initialData: NewsSidebarData
-// }
+import { useState } from 'react'
+import { NewsSidebarData } from '@/types/post'
+import { formatDate } from '@/utils/utils'
 
-// export default function NewsSidebarClient({ initialData }: Props) {
-//   const [isPending, startTransition] = useTransition()
-//   const [activeSlug, setActiveSlug] = useState('all')
+interface Props {
+  initialData: NewsSidebarData | null // Cho phép null khi lỗi
+}
 
-//   const { categories, recentPosts } = initialData
+export default function NewsSidebarClient({ initialData }: Props) {
+  const [activeSlug, setActiveSlug] = useState('all')
 
-//   return (
-//     <aside className="space-y-8">
-//       {/* Search */}
-//       <div className="relative">
-//         <input
-//           type="text"
-//           placeholder="Search articles..."
-//           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-//         />
-//         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-//       </div>
+  // Defensive: nếu data lỗi → fallback an toàn
+  const categories = initialData?.categories ?? []
+  const recentPosts = initialData?.recentPosts ?? []
 
-//       {/* Categories */}
-//       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-//         <header className="bg-blue-600 p-4">
-//           <h3 className="text-white font-bold text-lg">Categories</h3>
-//         </header>
-//         <nav className="divide-y divide-gray-100">
-//           {categories.map((cat) => (
-//             <button
-//               key={cat.slug}
-//               onClick={() => startTransition(() => setActiveSlug(cat.slug))}
-//               className={`w-full px-6 py-4 flex items-center justify-between text-left transition-all ${
-//                 activeSlug === cat.slug
-//                   ? 'bg-blue-50 text-blue-600 font-bold'
-//                   : 'text-gray-700 hover:bg-gray-50'
-//               }`}
-//             >
-//               <span>{cat.name}</span>
-//               <span className="text-sm font-medium textrikan-500">
-//                 {cat.count}
-//               </span>
-//             </button>
-//           ))}
-//         </nav>
-//       </section>
+  // Tạo active state an toàn
+  const categoriesWithActive = categories.map(cat => ({
+    ...cat,
+    active: cat.slug === activeSlug,
+  }))
 
-//       {/* Recent Posts */}
-//       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-//         <header className="bg-blue-600 p-4">
-//           <h3 className="text-white font-bold text-lg">Recent Posts</h3>
-//         </header>
-//         <div className="p-4 space-y-5">
-//           {recentPosts.map((post) => (
-//             <Link
-//               key={post.id}
-//               href={`/news/${post.slug}`}
-//               className="flex gap-4 group transition-all hover:translate-x-1"
-//             >
-//               <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden shadow-md">
-//                 {post.featuredImage ? (
-//                   <Image
-//                     src={post.featuredImage}
-//                     alt={post.title}
-//                     fill
-//                     sizes="80px"
-//                     className="object-cover group-hover:scale-110 transition-transform duration-300"
-//                     priority={false}
-//                   />
-//                 ) : (
-//                   <div className="bg-gray-200 border-2 border-dashed border-gray-300 w-full h-full" />
-//                 )}
-//               </div>
 
-//               <div className="flex-1">
-//                 <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm leading-tight">
-//                   {post.title}
-//                 </h4>
-//                 <time className="text-xs text-gray-500 mt-1 block">
-//                   {format(new Date(post.publishedAt), 'MMMM d, yyyy')}
-//                 </time>
-//               </div>
-//             </Link>
-//           ))}
-//         </div>
-//       </section>
-//     </aside>
-//   )
-// }
+  // Nếu không có data → hiện thông báo nhẹ nhàng (UX tốt)
+  // if (categories.length === 0 && recentPosts.length === 0) {
+  //   return (
+
+  //   )
+  // }
+
+  return (
+    <div className="space-y-8">
+      {/* Search */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+        />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+      </div>
+
+      {/* Categories */}
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+        <div className="bg-blue-600 p-4">
+          <h3 className="text-white font-bold text-lg">Danh mục bài viết</h3>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {categories ? (
+            <div>
+              <button
+                className={`w-full text-left px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors`}
+              >
+                <span>Tất cả</span>
+              </button>
+              {categoriesWithActive.map((category) => (
+                <button
+                  key={category.slug}
+                  onClick={() => setActiveSlug(category.slug)}
+                  className={`w-full text-left px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors ${category.active ? 'font-bold text-blue-600 bg-blue-50' : 'text-gray-600'
+                    }`}
+                >
+                  <span>{category.name}</span>
+                </button>
+              ))}
+            </div>
+          ) : (<div className="text-center text-gray-500 py-8">
+            <p>Không tải được dữ liệu</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-blue-600 text-sm underline mt-2"
+            >
+              Thử lại
+            </button>
+          </div>)}
+        </div>
+      </div>
+
+      {/* Recent Posts */}
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+        <div className="bg-blue-600 p-4">
+          <h3 className="text-white font-bold text-lg">Bài viết gần đây</h3>
+        </div>
+        <div className="p-4 space-y-4">
+          {recentPosts.length > 0 ? (
+            recentPosts.map((post) => (
+              <Link key={post.id} href={`/news/${post.slug}`} className="flex space-x-4 group">
+                <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                  <Image
+                    src={post.thumbnailUrl}
+                    alt={post.title}
+                    fill
+                    sizes="80px"
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm mb-1">
+                    {post.title}
+                  </h4>
+                  <p className="text-xs text-gray-500">{formatDate(post.createdAt)}</p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-4">Chưa có bài viết</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

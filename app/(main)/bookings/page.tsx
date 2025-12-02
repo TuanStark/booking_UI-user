@@ -24,7 +24,7 @@ import { useUser } from '@/contexts/UserContext'
 import { BookingService } from '@/services/bookingService'
 import { RoomService } from '@/services/roomService'
 import { Room } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 
 type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CHECKED_IN' | 'CANCELLED' | 'COMPLETED'
 

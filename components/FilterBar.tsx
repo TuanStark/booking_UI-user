@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { FilterState, SearchParams } from '@/types'
 
 interface FilterBarProps {
@@ -11,11 +11,11 @@ interface FilterBarProps {
   onSearchParamsChange: (params: SearchParams) => void
 }
 
-export default function FilterBar({ 
-  filters, 
-  onFiltersChange, 
-  searchParams, 
-  onSearchParamsChange 
+export default function FilterBar({
+  filters,
+  onFiltersChange,
+  searchParams,
+  onSearchParamsChange
 }: FilterBarProps) {
   const roomTypes = ['Phòng đơn', 'Phòng đôi', 'Phòng nhóm']
   const sortOptions = [
@@ -85,9 +85,9 @@ export default function FilterBar({
             max="2000"
             step="50"
             value={filters.priceRange[1]}
-            onChange={(e) => onFiltersChange({ 
-              ...filters, 
-              priceRange: [filters.priceRange[0], parseInt(e.target.value)] 
+            onChange={(e) => onFiltersChange({
+              ...filters,
+              priceRange: [filters.priceRange[0], parseInt(e.target.value)]
             })}
             className="w-full"
           />

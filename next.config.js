@@ -5,8 +5,8 @@ const nextConfig = {
   },
   images: {
     domains: [
-      'images.unsplash.com', 
-      'source.unsplash.com', 
+      'images.unsplash.com',
+      'source.unsplash.com',
       'res.cloudinary.com',
       'lh3.googleusercontent.com',
       'platform-lookaside.fbsbx.com',
