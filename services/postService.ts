@@ -60,7 +60,7 @@ export async function getAllPosts({
   status = 'PUBLISHED',
   sortBy = 'publishedAt',
   sortOrder = 'desc',
-  categoryId = '',
+  categorySlug = '',
   search = ''
 }: {
   page?: number
@@ -68,11 +68,12 @@ export async function getAllPosts({
   status?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
-  categoryId?: string
+  categorySlug?: string
   search?: string
 } = {}): Promise<PaginatedResponse<Post[]>> {
+  // console.log(`/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categoryId=${categorySlug}&search=${search}`)
   const response = await api<BackendApiResponse<Post[]>>(
-    `/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categoryId=${categoryId}&search=${search}`,
+    `/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categorySlug=${categorySlug}&search=${search}`,
     {
       next: { revalidate: 600, tags: ['posts', `posts-page-${page}`] },
     }
