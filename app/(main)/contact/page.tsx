@@ -49,7 +49,7 @@ export default function ContactPage() {
     {
       icon: MapPin,
       title: 'Địa chỉ',
-      content: '123 Đường Đại Học, Quận 1, TP.HCM',
+      content: '03 Quang Trung, Phường 1, Quận Bình Tân, TP.HCM',
       link: 'https://maps.google.com'
     },
     {
@@ -131,7 +131,7 @@ export default function ContactPage() {
 
         {/* Contact Form Section */}
         <section className="py-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-12">
               {/* Left Side - Info */}
               <div>
