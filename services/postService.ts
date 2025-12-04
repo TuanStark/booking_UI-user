@@ -92,3 +92,24 @@ export async function getAllPosts({
     },
   }
 }
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const response = await api<BackendApiResponse<Post>>(
+      `/posts/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 600, tags: [`post-${slug}`] } }
+    );
+    return response.data.data;
+  } catch {
+    return null;
+  }
+}
+
+
+export async function getRelatedPosts(categorySlug: string, excludeId: string): Promise<Post[]> {
+  console.log(`/posts/related?categorySlug=${categorySlug}&excludeId=${excludeId}&limit=6`)
+  const response = await api<any>(`/posts/related?categorySlug=${categorySlug}&excludeId=${excludeId}&limit=6`, {
+    next: { revalidate: 600, tags: [`post-related-${categorySlug}`] }
+  })
+  return response.data.data || []
+}

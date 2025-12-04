@@ -11,7 +11,7 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({ post }: NewsCardProps) {
-    const { id, title, summary, createdAt, category, thumbnailUrl } = post
+    const { id, title, summary, createdAt, category, thumbnailUrl, slug } = post
     return (
         <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group flex flex-col h-full">
             <div className="relative h-64 w-full overflow-hidden">
@@ -43,7 +43,7 @@ export default function NewsCard({ post }: NewsCardProps) {
                 </p>
 
                 <Link
-                    href={`/news/${id}`}
+                    href={`/news/${slug}`}
                     className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors"
                 >
                     View Detail
