@@ -18,9 +18,9 @@ export default function PartnersSection() {
     return (
         <div className="relative -mt-24 z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-8 flex flex-col md:flex-row items-center justify-between">
-                <div className="text-gray-500 font-semibold mb-4 md:mb-0 md:mr-8 whitespace-nowrap">
-                    OUR PARTNERS:
-                </div>
+                {/* <div className="text-gray-500 font-semibold mb-4 md:mb-0 md:mr-8 whitespace-nowrap">
+                    Đối tác của chúng tôi:
+                </div> */}
 
                 <div className="flex-1 w-full overflow-hidden">
                     <Swiper
