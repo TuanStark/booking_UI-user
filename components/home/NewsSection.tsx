@@ -1,28 +1,33 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { getAllPosts } from '@/services/postService'
+import { formatDate } from '@/utils/utils'
 
-export default function NewsSection() {
-    const news = [
-        {
-            id: 1,
-            title: 'Kinh nghiệm tìm phòng trọ cho tân sinh viên',
-            excerpt: 'Những điều cần lưu ý khi tìm phòng trọ lần đầu tiên tại các thành phố lớn...',
-            date: '20/11/2024',
-            image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-            category: 'Cẩm nang'
-        },
-        {
-            id: 2,
-            title: 'Top 5 ký túc xá hiện đại nhất TP.HCM',
-            excerpt: 'Khám phá những ký túc xá có cơ sở vật chất tốt nhất và giá cả hợp lý...',
-            date: '18/11/2024',
-            image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-            category: 'Review'
-        }
-    ]
+export default async function NewsSection() {
+    const currentPage = Number(1) || 1
+    const { items: news, meta } = await getAllPosts({
+        page: currentPage,
+        limit: 2,
+    })
+    // const news = [
+    //     {
+    //         id: 1,
+    //         title: 'Kinh nghiệm tìm phòng trọ cho tân sinh viên',
+    //         excerpt: 'Những điều cần lưu ý khi tìm phòng trọ lần đầu tiên tại các thành phố lớn...',
+    //         date: '20/11/2024',
+    //         image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    //         category: 'Cẩm nang'
+    //     },
+    //     {
+    //         id: 2,
+    //         title: 'Top 5 ký túc xá hiện đại nhất TP.HCM',
+    //         excerpt: 'Khám phá những ký túc xá có cơ sở vật chất tốt nhất và giá cả hợp lý...',
+    //         date: '18/11/2024',
+    //         image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    //         category: 'Review'
+    //     }
+    // ]
 
     return (
         <section className="py-20 bg-gray-50">
@@ -39,7 +44,7 @@ export default function NewsSection() {
                             <div className="flex flex-col md:flex-row h-full">
                                 <div className="md:w-2/5 relative h-48 md:h-auto overflow-hidden">
                                     <Image
-                                        src={item.image}
+                                        src={item.thumbnailUrl}
                                         alt={item.title}
                                         fill
                                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -49,15 +54,15 @@ export default function NewsSection() {
                                     <div>
                                         <div className="flex items-center justify-between mb-3">
                                             <span className="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                                                {item.category}
+                                                {item.category?.name}
                                             </span>
-                                            <span className="text-sm text-gray-500">{item.date}</span>
+                                            <span className="text-sm text-gray-500">{formatDate(item.publishedAt)}</span>
                                         </div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
                                             {item.title}
                                         </h3>
                                         <p className="text-gray-600 line-clamp-2 mb-4">
-                                            {item.excerpt}
+                                            {item.summary}
                                         </p>
                                     </div>
                                     <Link
