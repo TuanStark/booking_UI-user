@@ -13,6 +13,8 @@
  */
 
 import { NetworkError, ServerError, ValidationError } from '@/lib/errors'
+import axiosInstance, { api } from '@/lib/axios'
+import { AxiosRequestConfig } from 'axios'
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
@@ -44,6 +46,7 @@ function serializeQueryParams(params: Record<string, any>): string {
 /**
  * API Client Class
  * Handles all HTTP communication with the backend API
+ * Uses axios for all HTTP requests
  */
 class ApiClient {
   private baseURL: string
@@ -53,10 +56,10 @@ class ApiClient {
   }
 
   /**
-   * Core request method - handles all HTTP requests
+   * Core request method - handles all HTTP requests using axios
    * 
    * @param endpoint - API endpoint (e.g., '/buildings')
-   * @param options - Fetch options (method, headers, body, etc.)
+   * @param config - Axios request configuration
    * @returns Promise<T> - Parsed JSON response
    * @throws {NetworkError} - If network request fails
    * @throws {ServerError} - If server returns error status
@@ -64,59 +67,18 @@ class ApiClient {
    */
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    config: AxiosRequestConfig = {}
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
-
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    }
-
     try {
-      const response = await fetch(url, config)
-
-      // Handle non-OK responses
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({
-          message: `HTTP error! status: ${response.status}`,
-        }))
-
-        // Map HTTP status codes to appropriate error types
-        if (response.status >= 400 && response.status < 500) {
-          if (response.status === 404) {
-            throw new ValidationError(errorData.message || 'Resource not found')
-          }
-          throw new ValidationError(errorData.message || `Client error: ${response.status}`)
-        }
-
-        if (response.status >= 500) {
-          throw new ServerError(
-            errorData.message || `Server error: ${response.status}`,
-            response.status
-          )
-        }
-
-        throw new ServerError(errorData.message || `HTTP error: ${response.status}`, response.status)
-      }
-
-      return await response.json()
+      const response = await axiosInstance.request<T>({
+        url: endpoint,
+        ...config,
+      })
+      return response.data
     } catch (error: any) {
-      // Re-throw known errors
-      if (error instanceof NetworkError || error instanceof ServerError || error instanceof ValidationError) {
-        throw error
-      }
-
-      // Handle network errors (fetch failures)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new NetworkError('Network request failed. Please check your connection.')
-      }
-
-      // Wrap unknown errors
-      throw new NetworkError(error.message || 'An unexpected error occurred')
+      // Errors are already handled by axios interceptor
+      // Re-throw them as-is
+      throw error
     }
   }
 
@@ -128,7 +90,7 @@ class ApiClient {
   async login(credentials: { email: string; password: string }) {
     return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      data: credentials,
     })
   }
 
@@ -144,7 +106,7 @@ class ApiClient {
   }) {
     return this.request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      data: userData,
     })
   }
 
@@ -153,6 +115,7 @@ class ApiClient {
    */
   async getProfile(token: string) {
     return this.request('/auth/user/profile', {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -171,14 +134,18 @@ class ApiClient {
     filters?: Record<string, any>
   }) {
     const queryString = params ? serializeQueryParams(params) : ''
-    return this.request(`/buildings${queryString ? `?${queryString}` : ''}`)
+    return this.request(`/buildings${queryString ? `?${queryString}` : ''}`, {
+      method: 'GET',
+    })
   }
 
   /**
    * Get building by ID
    */
   async getBuildingById(id: string) {
-    return this.request(`/buildings/${id}`)
+    return this.request(`/buildings/${id}`, {
+      method: 'GET',
+    })
   }
 
   /**
@@ -186,7 +153,9 @@ class ApiClient {
    * Endpoint: GET /building/:buildingId
    */
   async getBuildingDetail(buildingId: string) {
-    return this.request(`/building/${buildingId}`)
+    return this.request(`/building/${buildingId}`, {
+      method: 'GET',
+    })
   }
 
   /**
@@ -198,7 +167,9 @@ class ApiClient {
     filters?: Record<string, any>
   }) {
     const queryString = params ? serializeQueryParams(params) : ''
-    return this.request(`/rooms/building/${buildingId}${queryString ? `?${queryString}` : ''}`)
+    return this.request(`/rooms/building/${buildingId}${queryString ? `?${queryString}` : ''}`, {
+      method: 'GET',
+    })
   }
 
   // ==================== Rooms Endpoints ====================
@@ -207,7 +178,9 @@ class ApiClient {
    * Get room by ID
    */
   async getRoomById(id: string) {
-    return this.request(`/rooms/${id}`)
+    return this.request(`/rooms/${id}`, {
+      method: 'GET',
+    })
   }
 
   // ==================== Bookings Endpoints ====================
@@ -236,9 +209,8 @@ class ApiClient {
       headers: {
         Authorization: `Bearer ${token}`,
         'x-user-id': userId,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(bookingData),
+      data: bookingData,
     })
   }
 
@@ -247,6 +219,7 @@ class ApiClient {
    */
   async getUserBookings(token: string) {
     return this.request('/bookings/my-bookings', {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -258,6 +231,7 @@ class ApiClient {
    */
   async getBookingById(id: string, token: string) {
     return this.request(`/bookings/${id}`, {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -273,7 +247,7 @@ class ApiClient {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ status }),
+      data: { status },
     })
   }
 
@@ -292,7 +266,7 @@ class ApiClient {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(reviewData),
+      data: reviewData,
     })
   }
 
@@ -300,7 +274,9 @@ class ApiClient {
    * Get reviews for a room
    */
   async getRoomReviews(roomId: string) {
-    return this.request(`/rooms/${roomId}/reviews`)
+    return this.request(`/rooms/${roomId}/reviews`, {
+      method: 'GET',
+    })
   }
 
   // ==================== Notifications Endpoints ====================
@@ -310,6 +286,7 @@ class ApiClient {
    */
   async getNotifications(token: string) {
     return this.request('/notifications', {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -341,8 +318,9 @@ class ApiClient {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
       },
-      body: formData,
+      data: formData,
     })
   }
 
@@ -354,7 +332,7 @@ class ApiClient {
   async verifyVNPayPayment(params: Record<string, string>) {
     return this.request('/payments/vnpay/verify', {
       method: 'POST',
-      body: JSON.stringify(params),
+      data: params,
     })
   }
 }

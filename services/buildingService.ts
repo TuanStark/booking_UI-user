@@ -1,302 +1,106 @@
-/**
- * Building Service - Business Logic Layer
- * 
- * Enterprise patterns used:
- * - Service Layer Pattern
- * - Separation of Concerns
- * - Proper Error Handling with Custom Error Types
- * - Input Validation
- * - Type Safety
- * - Mapper Pattern for Data Transformation
- * - Single Responsibility Principle
- * 
- * @example
- * ```typescript
- * // Get all buildings
- * const buildings = await BuildingService.getAllBuildings({ page: 1, limit: 10 })
- * 
- * // Get building by ID
- * const building = await BuildingService.getBuildingById('building-id')
- * 
- * // Get featured buildings
- * const featured = await BuildingService.getFeaturedBuildings(4)
- * 
- * // Get building detail with rooms (for SSR)
- * const { building, rooms } = await BuildingService.getBuildingDetailWithRooms('building-id')
- * ```
- */
-
-import { apiClient } from './apiClient'
-import { Building, Room } from '@/types'
-import { BackendApiResponse } from '@/types/api'
+import { Building } from '@/types'
+import { BackendApiResponse, PaginatedResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
-import { mapApiBuildingToBuilding, mapApiBuildingsToBuildings, ApiBuilding } from './mappers/buildingMapper'
-import { RoomService } from './roomService'
+import { api } from '@/lib/axios'
 
-interface GetBuildingsParams {
+function validatePaginationParams(params: {
   page?: number
   limit?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
   search?: string
-  filters?: Record<string, any>
-}
+}): void {
+  if (params.page !== undefined && (params.page < 1 || !Number.isInteger(params.page))) {
+    throw new ValidationError('Page must be a positive integer')
+  }
 
-type BuildingsResponse = BackendApiResponse<ApiBuilding | ApiBuilding[]>
+  if (params.limit !== undefined && (params.limit < 1 || params.limit > 100 || !Number.isInteger(params.limit))) {
+    throw new ValidationError('Limit must be between 1 and 100')
+  }
 
-/**
- * Validate building ID
- */
-function validateBuildingId(buildingId: string): void {
-  if (!buildingId || typeof buildingId !== 'string' || buildingId.trim() === '') {
-    throw new ValidationError('Building ID is required and must be a non-empty string')
+  if (params.sortOrder && !['asc', 'desc'].includes(params.sortOrder)) {
+    throw new ValidationError('Sort order must be either "asc" or "desc"')
+  }
+
+  if (params.search && params.search.length > 200) {
+    throw new ValidationError('Search query must be less than 200 characters')
   }
 }
 
-/**
- * Handle API errors and convert to appropriate error types
- */
-function resolveStatusCode(error: any): number | undefined {
-  return typeof error?.statusCode === 'number'
-    ? error.statusCode
-    : error?.response?.status
-}
 
-function handleApiError(error: any, context: string): never {
+function handleApiError(error: unknown, context: string): never {
   if (error instanceof ValidationError || error instanceof NotFoundError) {
     throw error
   }
 
-  if (error instanceof NetworkError || error.message?.includes('fetch')) {
+  if (error instanceof NetworkError) {
     throw new NetworkError(`Failed to ${context}: ${error.message}`)
   }
 
-  const status = resolveStatusCode(error)
-
-  if (status && status >= 400 && status < 500) {
-    if (status === 404) {
-      throw new NotFoundError('Building', context)
-    }
-    throw new ValidationError(`Invalid request: ${error.message}`)
+  if (error instanceof ServerError) {
+    throw error
   }
 
-  if (status && status >= 500) {
-    throw new ServerError(`Server error while ${context}: ${error.message}`, status)
-  }
-
-  throw new ServerError(`Unexpected error while ${context}: ${error.message}`)
+  // Handle unknown errors
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+  throw new ServerError(`Unexpected error while ${context}: ${errorMessage}`)
 }
 
-function normalizeBuildingsResponse(response: BuildingsResponse): ApiBuilding[] {
-  if (!response?.data) {
-    return []
-  }
+export async function getAllBuildings({
+  page = 1,
+  limit = 10,
+  sortBy = 'createdAt',
+  sortOrder = 'desc',
+  search = ''
+}: {
+  page?: number
+  limit?: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  search?: string
+} = {}): Promise<PaginatedResponse<Building[]>> {
+  try {
+    // Validate parameters
+    validatePaginationParams({ page, limit, sortBy, sortOrder, search })
 
-  const payload = response.data
+    // Build query string
+    const queryParams = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      sortBy,
+      sortOrder,
+    })
 
-  if (Array.isArray(payload)) {
-    return payload as ApiBuilding[]
-  }
-
-  if (payload && typeof payload === 'object') {
-    const nestedData = (payload as { data?: ApiBuilding | ApiBuilding[] }).data
-    if (Array.isArray(nestedData)) {
-      return nestedData as ApiBuilding[]
+    if (search.trim()) {
+      queryParams.append('search', search.trim())
     }
-    if (nestedData && !Array.isArray(nestedData)) {
-      return [nestedData]
+
+    const response = await api.get<BackendApiResponse<Building[]>>(
+      `/buildings?${queryParams.toString()}`
+    )
+
+    if (!response?.data?.data || !Array.isArray(response.data.data)) {
+      throw new ServerError('Invalid response format from server')
     }
 
-    const maybeBuilding = payload as Partial<ApiBuilding>
-    if (typeof maybeBuilding.id === 'string' && typeof maybeBuilding.name === 'string') {
-      return [maybeBuilding as ApiBuilding]
+    const { data, meta } = response.data
+
+    const normalizedMeta = {
+      total: meta?.total ?? 0,
+      page: meta?.page ?? page,
+      limit: meta?.limit ?? limit,
+      totalPages: meta?.totalPages ?? Math.ceil((meta?.total ?? 0) / limit),
     }
-  }
 
-  return []
-}
-
-function validatePagination(params?: GetBuildingsParams): void {
-  if (params?.page !== undefined && params.page < 1) {
-    throw new ValidationError('Page number must be greater than 0')
-  }
-  if (params?.limit !== undefined && params.limit < 1) {
-    throw new ValidationError('Limit must be greater than 0')
-  }
-}
-
-export class BuildingService {
-  /**
-   * Get all buildings with optional pagination and filters
-   * 
-   * @param params - Optional pagination and filter parameters
-   * @returns Promise<Building[]> - Array of buildings
-   * @throws {ValidationError} - If params are invalid
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   * 
-   * @example
-   * ```typescript
-   * const buildings = await BuildingService.getAllBuildings({
-   *   page: 1,
-   *   limit: 10,
-   *   search: 'keyword',
-   *   filters: { city: 'HCM' }
-   * })
-   * ```
-   */
-  static async getAllBuildings(params?: GetBuildingsParams): Promise<Building[]> {
-    try {
-      validatePagination(params)
-
-      const response = await apiClient.getBuildings(params) as BuildingsResponse
-      const buildingsData = normalizeBuildingsResponse(response)
-
-      if (!buildingsData.length) {
-        return []
-      }
-
-      return mapApiBuildingsToBuildings(buildingsData)
-    } catch (error: any) {
-      handleApiError(error, 'fetching buildings')
+    return {
+      items: data,
+      meta: {
+        ...normalizedMeta,
+        hasNextPage: normalizedMeta.page < normalizedMeta.totalPages,
+        hasPrevPage: normalizedMeta.page > 1,
+      },
     }
-  }
-
-  /**
-   * Get a specific building by ID
-   * 
-   * @param id - The building ID
-   * @returns Promise<Building> - The building object
-   * @throws {ValidationError} - If buildingId is invalid
-   * @throws {NotFoundError} - If building is not found
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   * 
-   * @example
-   * ```typescript
-   * const building = await BuildingService.getBuildingById('building-123')
-   * ```
-   */
-  static async getBuildingById(id: string): Promise<Building> {
-    try {
-      // Input validation
-      validateBuildingId(id)
-
-      const response = await apiClient.getBuildingById(id) as BuildingsResponse
-      const [buildingData] = normalizeBuildingsResponse(response)
-
-      if (!buildingData) {
-        throw new NotFoundError('Building', id)
-      }
-
-      // Transform API data to domain model
-      return mapApiBuildingToBuilding(buildingData)
-    } catch (error: any) {
-      handleApiError(error, `fetching building ${id}`)
-    }
-  }
-
-  /**
-   * Get featured buildings (limited results)
-   * 
-   * @param limit - Maximum number of buildings to return (default: 4)
-   * @returns Promise<Building[]> - Array of featured buildings
-   * @throws {ValidationError} - If limit is invalid
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   * 
-   * @example
-   * ```typescript
-   * const featured = await BuildingService.getFeaturedBuildings(6)
-   * ```
-   */
-  static async getFeaturedBuildings(limit: number = 4): Promise<Building[]> {
-    try {
-      if (limit < 1) {
-        throw new ValidationError('Limit must be greater than 0')
-      }
-
-      const response = await apiClient.getBuildings({ limit }) as BuildingsResponse
-      const buildingsData = normalizeBuildingsResponse(response)
-
-      if (!buildingsData.length) {
-        return []
-      }
-
-      return mapApiBuildingsToBuildings(buildingsData)
-    } catch (error: any) {
-      handleApiError(error, 'fetching featured buildings')
-    }
-  }
-
-  /**
-   * Get building detail with rooms (for SSR/SEO)
-   * 
-   * Uses the endpoint: GET /rooms/building/:buildingId
-   * Extracts building info from rooms response (each room contains building info)
-   * 
-   * @param buildingId - The building ID
-   * @returns Promise<{ building: Building | null; rooms: Room[] }> - Building and its rooms
-   * @throws {ValidationError} - If buildingId is invalid
-   * @throws {NotFoundError} - If building is not found
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   * 
-   * @example
-   * ```typescript
-   * const { building, rooms } = await BuildingService.getBuildingDetailWithRooms('building-id')
-   * ```
-   */
-  static async getBuildingDetailWithRooms(buildingId: string): Promise<{ building: Building | null; rooms: Room[] }> {
-    try {
-      // Input validation
-      validateBuildingId(buildingId)
-
-      // Use RoomService to get rooms (endpoint: GET /rooms/building/:buildingId)
-      const rooms = await RoomService.getRoomsByBuildingId(buildingId)
-      // If no rooms found, return null
-      if (rooms.length === 0) {
-        return { building: null, rooms: [] }
-      }
-
-      // Extract building info from first room
-      const firstRoom = rooms[0]
-      const buildingData = firstRoom.buildingInfo ?? {
-        id: buildingId,
-        name: firstRoom.buildingName,
-        address: firstRoom.buildingAddress,
-      }
-      const availableRooms = rooms.filter(r => r.available)
-      const averagePrice = rooms.length
-        ? Math.round(rooms.reduce((sum, r) => sum + r.price, 0) / rooms.length)
-        : 0
-
-      const building: Building = {
-        id: buildingData?.id || buildingId,
-        name: buildingData?.name || firstRoom.buildingName || '',
-        address: buildingData?.address || firstRoom.buildingAddress || '',
-        images: buildingData?.images || null,
-        totalRooms: typeof buildingData?.roomsCount === 'number' ? buildingData.roomsCount : rooms.length,
-        availableRooms: availableRooms.length,
-        averagePrice,
-        rating: (buildingData as any)?.rating || 0,
-        totalReviews: (buildingData as any)?.totalReviews || 0,
-        description: buildingData?.description || '',
-        amenities: Array.isArray((buildingData as any)?.amenities) ? (buildingData as any).amenities : [],
-        latitude: typeof buildingData?.latitude === 'number'
-          ? buildingData.latitude
-          : Number(buildingData?.latitude ?? 0) || 0,
-        longitude: typeof buildingData?.longitude === 'number'
-          ? buildingData.longitude
-          : Number(buildingData?.longitude ?? buildingData?.longtitude ?? 0) || 0,
-      }
-
-      return { building, rooms }
-    } catch (error: any) {
-      // Handle specific errors
-      if (error instanceof NotFoundError) {
-        return { building: null, rooms: [] }
-      }
-      
-      handleApiError(error, `fetching building detail with rooms for ${buildingId}`)
-    }
+  } catch (error) {
+    return handleApiError(error, 'fetching buildings')
   }
 }

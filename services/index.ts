@@ -11,7 +11,7 @@
  */
 
 // Core Services
-export { BuildingService } from './buildingService'
+export { getAllBuildings } from './buildingService'
 export { RoomService } from './roomService'
 export { BookingService } from './bookingService'
 export { ReviewService } from './reviewService'

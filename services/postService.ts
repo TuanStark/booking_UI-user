@@ -1,49 +1,29 @@
 import { BackendApiResponse, PaginatedResponse } from '@/types/api'
-import type { NewsSidebarData, CategoriesResponse, RecentPostsResponse, Post, CategoriesPost, FeaturedNewsData } from '@/types/post'
+import type { NewsSidebarData, Post, CategoriesPost } from '@/types/post'
+import { api } from '@/lib/axios'
 
-// Wrapper fetch chung (giữ nguyên của bạn, rất tốt)
-async function api<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`
-
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
-  })
-
-  if (!res.ok) {
-    throw new Error(`API ${endpoint} failed: ${res.status} ${res.statusText}`)
-  }
-  return res.json()
+/**
+ * Generic API wrapper using axios
+ * Reusable across the entire application
+ */
+async function apiRequest<T>(endpoint: string, config?: any): Promise<T> {
+  return api.get<T>(endpoint, config)
 }
 
-// 2 cách làm – bạn chọn 1 cái phù hợp
-
-// Cách 1: Backend có 1 endpoint tổng hợp (tốt nhất)
 export async function getNewsSidebar(): Promise<NewsSidebarData> {
-  return api<NewsSidebarData>('/news/sidebar', {
-    next: { revalidate: 600, tags: ['news-sidebar'] },
-  })
+  return apiRequest<NewsSidebarData>('/news/sidebar')
 }
 
-// Cách 2: Backend chưa có → bạn tự compose (vẫn chuẩn Senior)
 export async function getPostCategories(): Promise<CategoriesPost[]> {
-  const response = await api<BackendApiResponse<CategoriesPost[]>>('/post-categories', {
-    next: { revalidate: 3600, tags: ['categories'] }, // category ít thay đổi hơn
-  })
+  const response = await apiRequest<BackendApiResponse<CategoriesPost[]>>('/post-categories')
   return response.data.data;
 }
 
 export async function getRecentPosts(): Promise<Post[]> {
-  const response = await api<BackendApiResponse<Post[]>>('/posts?status=PUBLISHED&sortOrder=desc&limit=5', {
-    next: { revalidate: 600, tags: ['recent-posts'] },
-  })
+  const response = await apiRequest<BackendApiResponse<Post[]>>('/posts?status=PUBLISHED&sortOrder=desc&limit=5')
   return response.data.data;
 }
 
-// Helper: Gộp lại thành 1 object (dùng trong Server Component)
 export async function getNewsSidebarData(): Promise<NewsSidebarData> {
   const [categories, recentPosts] = await Promise.all([
     getPostCategories(),
@@ -71,12 +51,8 @@ export async function getAllPosts({
   categorySlug?: string
   search?: string
 } = {}): Promise<PaginatedResponse<Post[]>> {
-  // console.log(`/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categoryId=${categorySlug}&search=${search}`)
-  const response = await api<BackendApiResponse<Post[]>>(
-    `/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categorySlug=${categorySlug}&search=${search}`,
-    {
-      next: { revalidate: 600, tags: ['posts', `posts-page-${page}`] },
-    }
+  const response = await apiRequest<BackendApiResponse<Post[]>>(
+    `/posts?page=${page}&limit=${limit}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&categorySlug=${categorySlug}&search=${search}`
   )
 
   const { data, meta } = response.data
@@ -95,9 +71,8 @@ export async function getAllPosts({
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const response = await api<BackendApiResponse<Post>>(
-      `/posts/${encodeURIComponent(slug)}`,
-      { next: { revalidate: 600, tags: [`post-${slug}`] } }
+    const response = await apiRequest<BackendApiResponse<Post>>(
+      `/posts/${encodeURIComponent(slug)}`
     );
     return response.data.data;
   } catch {
@@ -107,9 +82,6 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 
 export async function getRelatedPosts(categorySlug: string, excludeId: string): Promise<Post[]> {
-  console.log(`/posts/related?categorySlug=${categorySlug}&excludeId=${excludeId}&limit=6`)
-  const response = await api<any>(`/posts/related?categorySlug=${categorySlug}&excludeId=${excludeId}&limit=6`, {
-    next: { revalidate: 600, tags: [`post-related-${categorySlug}`] }
-  })
+  const response = await apiRequest<any>(`/posts/related?categorySlug=${categorySlug}&excludeId=${excludeId}&limit=6`)
   return response.data.data || []
 }
