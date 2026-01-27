@@ -7,11 +7,26 @@ interface FeaturedDormsSectionProps {
 }
 
 export default async function FeaturedDormsSection({ limit = 6 }: FeaturedDormsSectionProps) {
-    const currentPage = Number(1) || 1
-    const { items: buildings, meta } = await getAllBuildings({
-      page: currentPage,
-      limit
-    })
+    let buildings: any[] = []
+    let hasError = false
+
+    try {
+        const currentPage = Number(1) || 1
+        const result = await getAllBuildings({
+            page: currentPage,
+            limit
+        })
+        buildings = result.items || []
+    } catch (error) {
+        // Silently handle errors - don't show buildings section if API fails
+        hasError = true
+        console.error('Failed to load buildings:', error)
+    }
+
+    // Don't render the section if there's an error or no buildings
+    if (hasError || buildings.length === 0) {
+        return null
+    }
 
   return (
     <section className="py-20 bg-gray-50">

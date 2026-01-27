@@ -5,11 +5,26 @@ import { getAllPosts } from '@/services/postService'
 import { formatDate } from '@/utils/utils'
 
 export default async function NewsSection() {
-    const currentPage = Number(1) || 1
-    const { items: news, meta } = await getAllPosts({
-        page: currentPage,
-        limit: 2,
-    })
+    let news: any[] = []
+    let hasError = false
+
+    try {
+        const currentPage = Number(1) || 1
+        const result = await getAllPosts({
+            page: currentPage,
+            limit: 2,
+        })
+        news = result.items || []
+    } catch (error) {
+        // Silently handle errors - don't show news section if API fails
+        hasError = true
+        console.error('Failed to load news:', error)
+    }
+
+    // Don't render the section if there's an error or no news
+    if (hasError || news.length === 0) {
+        return null
+    }
     // const news = [
     //     {
     //         id: 1,
