@@ -1,7 +1,8 @@
-import { Building } from '@/types'
+import { Building, Room } from '@/types'
 import { BackendApiResponse, PaginatedResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
 import { api } from '@/lib/axios'
+import { RoomService } from './roomService'
 
 function validatePaginationParams(params: {
   page?: number
@@ -44,6 +45,58 @@ function handleApiError(error: unknown, context: string): never {
   // Handle unknown errors
   const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
   throw new ServerError(`Unexpected error while ${context}: ${errorMessage}`)
+}
+
+
+
+/**
+ * BuildingService class for server-side data fetching
+ * Used by Next.js Server Components for SSR/SSG
+ */
+
+// Single resource response type (no pagination)
+interface SingleBuildingResponse {
+  data: Building
+  statusCode: number
+  message: string
+}
+
+export class BuildingService {
+  /**
+   * Get building detail along with its rooms
+   * Fetches building info and rooms in parallel for optimal performance
+   * 
+   * @param buildingId - The ID of the building
+   * @returns Promise<{ building: Building | null, rooms: Room[] }>
+   */
+  static async getBuildingDetailWithRooms(buildingId: string): Promise<{
+    building: Building | null
+    rooms: Room[]
+  }> {
+    try {
+      // Validate building ID
+      if (!buildingId || typeof buildingId !== 'string' || buildingId.trim() === '') {
+        return { building: null, rooms: [] }
+      }
+
+      // Fetch building detail and rooms in parallel
+      const [buildingResponse, rooms] = await Promise.all([
+        api.get<SingleBuildingResponse>(`/buildings/${buildingId}`),
+        RoomService.getRoomsByBuildingId(buildingId).catch(() => [] as Room[])
+      ])
+
+      const building = buildingResponse?.data || null
+
+      if (!building) {
+        return { building: null, rooms: [] }
+      }
+
+      return { building, rooms }
+    } catch (error) {
+      console.error(`Error fetching building detail for ${buildingId}:`, error)
+      return { building: null, rooms: [] }
+    }
+  }
 }
 
 export async function getAllBuildings({
