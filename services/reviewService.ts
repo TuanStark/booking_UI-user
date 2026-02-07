@@ -1,47 +1,6 @@
-/**
- * Review Service - Business Logic Layer
- * 
- * Enterprise patterns used:
- * - Service Layer Pattern
- * - Proper Error Handling
- * - Input Validation
- * - Type Safety
- * - Separation of Concerns
- */
-
 import { apiClient } from './apiClient'
-import { BackendApiResponse } from '@/types/api'
+import { CreateReviewRequest, PaginatedReviewsResponse } from '@/types/review'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
-
-interface CreateReviewData {
-  roomId: string
-  rating: number
-  comment: string
-}
-
-/**
- * Validate review data
- */
-function validateReviewData(data: CreateReviewData): void {
-  if (!data.roomId || typeof data.roomId !== 'string' || data.roomId.trim() === '') {
-    throw new ValidationError('Room ID is required')
-  }
-  if (data.rating < 1 || data.rating > 5) {
-    throw new ValidationError('Rating must be between 1 and 5')
-  }
-  if (!data.comment || data.comment.trim() === '') {
-    throw new ValidationError('Comment is required')
-  }
-}
-
-/**
- * Validate token
- */
-function validateToken(token: string): void {
-  if (!token || typeof token !== 'string' || token.trim() === '') {
-    throw new ValidationError('Authentication token is required')
-  }
-}
 
 /**
  * Handle API errors
@@ -72,18 +31,12 @@ function handleApiError(error: any, context: string): never {
 export class ReviewService {
   /**
    * Create a review for a room
-   * 
-   * @param reviewData - Review information
-   * @param token - Authentication token
-   * @returns Promise<any> - Created review data
-   * @throws {ValidationError} - If review data is invalid
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
    */
-  static async createReview(reviewData: CreateReviewData, token: string) {
+  static async createReview(reviewData: CreateReviewRequest, token: string) {
     try {
-      validateReviewData(reviewData)
-      validateToken(token)
+      if (!reviewData.bookingId) throw new ValidationError('Booking ID is required')
+      if (!reviewData.ratingOverall) throw new ValidationError('Overall rating is required')
+      if (!token) throw new ValidationError('Authentication token is required')
 
       const response = await apiClient.createReview(reviewData, token)
       return response
@@ -94,23 +47,25 @@ export class ReviewService {
 
   /**
    * Get reviews for a room
-   * 
-   * @param roomId - Room ID
-   * @returns Promise<any[]> - Array of reviews
-   * @throws {ValidationError} - If roomId is invalid
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
    */
-  static async getRoomReviews(roomId: string): Promise<any[]> {
+  /**
+   * Get reviews for a room
+   */
+  static async getRoomReviews(roomId: string, limit = 10, cursor?: string): Promise<PaginatedReviewsResponse> {
     try {
-      if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
-        throw new ValidationError('Room ID is required')
+      if (!roomId) throw new ValidationError('Room ID is required')
+
+      // Define response structure that matches Review Service (cursor pagination)
+      interface ReviewApiResponse {
+        data: PaginatedReviewsResponse
+        statusCode: number
+        message: string
       }
 
-      const response = await apiClient.getRoomReviews(roomId) as BackendApiResponse<any>
-      const reviewsData = response.data?.data
-      
-      return Array.isArray(reviewsData) ? reviewsData : []
+      const response = await apiClient.getRoomReviews(roomId, { limit, cursor }) as ReviewApiResponse
+
+      // Return the data directly as it matches PaginatedReviewsResponse
+      return response.data || { data: [], nextCursor: null, hasMore: false, total: 0 }
     } catch (error: any) {
       handleApiError(error, `fetching reviews for room ${roomId}`)
     }

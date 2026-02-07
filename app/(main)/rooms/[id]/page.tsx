@@ -29,6 +29,7 @@ import {
   CreditCard,
 } from 'lucide-react'
 import BookingModal from '@/components/BookingModal'
+import { ReviewSection } from '@/components/reviews/ReviewSection'
 import { RoomService } from '@/services/roomService'
 import { BookingService } from '@/services/bookingService'
 import { cn } from '@/utils/utils'
@@ -512,68 +513,7 @@ export default function RoomDetailPage() {
 
               {/* Reviews Section */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-5">
-                  Đánh giá từ sinh viên
-                </h2>
-
-                <div className="space-y-6">
-                  {room.reviews > 0 ? (
-                    // Mock reviews - in real app, fetch from API
-                    <>
-                      <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
-                        <div className="flex items-center space-x-4 mb-3">
-                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            A
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900 dark:text-white">Anh Minh</div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">2 tuần trước</span>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          Phòng rất đẹp và sạch sẽ, tiện nghi đầy đủ. Vị trí thuận tiện, gần trường học.
-                          Giá cả hợp lý so với chất lượng. Rất hài lòng!
-                        </p>
-                      </div>
-
-                      <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
-                        <div className="flex items-center space-x-4 mb-3">
-                          <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            T
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900 dark:text-white">Thu Hà</div>
-                            <div className="flex items-center space-x-1">
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                              <Star className="h-4 w-4 text-gray-300" />
-                              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">1 tháng trước</span>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-400">
-                          Phòng tốt, giá cả phải chăng. Chỉ có một chút ồn vào buổi tối nhưng không ảnh hưởng nhiều.
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Star className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Chưa có đánh giá nào cho phòng này
-                      </p>
-                    </div>
-                  )}
-                </div>
+                <ReviewSection roomId={roomId} />
               </div>
             </div>
 

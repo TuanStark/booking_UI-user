@@ -76,17 +76,6 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-
-        <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-500 text-sm mb-4 md:mb-0">
-            © 2024 DormBooking. All rights reserved.
-          </p>
-          <div className="flex space-x-6 text-sm text-gray-500">
-            <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-            <Link href="/cookies" className="hover:text-blue-600 transition-colors">Cookie Policy</Link>
-          </div>
-        </div>
       </div>
     </footer>
   )

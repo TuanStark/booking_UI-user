@@ -257,9 +257,14 @@ class ApiClient {
    * Create a review
    */
   async createReview(reviewData: {
-    roomId: string
-    rating: number
-    comment: string
+    bookingId: string
+    roomId?: string
+    ratingOverall: number
+    ratingClean?: number
+    ratingLocation?: number
+    ratingPrice?: number
+    ratingService?: number
+    comment?: string
   }, token: string) {
     return this.request('/reviews', {
       method: 'POST',
@@ -273,8 +278,12 @@ class ApiClient {
   /**
    * Get reviews for a room
    */
-  async getRoomReviews(roomId: string) {
-    return this.request(`/rooms/${roomId}/reviews`, {
+  async getRoomReviews(roomId: string, params?: {
+    limit?: number
+    cursor?: string
+  }) {
+    const queryString = params ? serializeQueryParams(params) : ''
+    return this.request(`/reviews/room/${roomId}${queryString ? `?${queryString}` : ''}`, {
       method: 'GET',
     })
   }
