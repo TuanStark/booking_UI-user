@@ -122,6 +122,19 @@ class ApiClient {
     })
   }
 
+  /**
+   * Update user profile
+   */
+  async updateProfile(userId: string, userData: { name?: string; phone?: string; address?: string }, token: string) {
+    return this.request(`/auth/user/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      data: userData,
+    })
+  }
+
   // ==================== Buildings Endpoints ====================
 
   /**
@@ -368,6 +381,7 @@ export const {
   getNotifications,
   markNotificationAsRead,
   uploadImage,
+  updateProfile,
 } = apiClient
 
 export default apiClient
