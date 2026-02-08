@@ -54,6 +54,7 @@ export interface Room {
   rules: string[]
   nearbyFacilities: NearbyFacility[]
   buildingInfo?: BuildingReference
+  name?: string
 }
 
 export interface ContactInfo {
@@ -110,7 +111,7 @@ export interface BookingFormData {
   duration: number
 
   // Payment
-  paymentMethod: 'VIETQR' | 'VNPAY'
+  paymentMethod: 'VIETQR' | 'VNPAY' | 'MOMO'
 
   // Additional Info
   specialRequests: string

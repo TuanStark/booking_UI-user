@@ -13,7 +13,7 @@ import { apiClient } from './apiClient'
 import { BackendApiResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
 
-const SUPPORTED_PAYMENT_METHODS = ['VIETQR', 'VNPAY'] as const
+const SUPPORTED_PAYMENT_METHODS = ['VIETQR', 'VNPAY', 'MOMO'] as const
 type SupportedPaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number]
 
 interface CreateBookingData {
@@ -31,7 +31,7 @@ interface CreateBookingData {
 function normalizePaymentMethod(value: string): SupportedPaymentMethod {
   const normalized = (value ?? '').toUpperCase()
   if (!SUPPORTED_PAYMENT_METHODS.includes(normalized as SupportedPaymentMethod)) {
-    throw new ValidationError('Payment method must be either VIETQR or VNPAY')
+    throw new ValidationError('Payment method must be either VIETQR, VNPAY or MOMO')
   }
   return normalized as SupportedPaymentMethod
 }
@@ -95,16 +95,7 @@ function handleApiError(error: any, context: string): never {
 }
 
 export class BookingService {
-  /**
-   * Create a new booking
-   * 
-   * @param bookingData - Booking information
-   * @param token - Authentication token
-   * @returns Promise<any> - Created booking data
-   * @throws {ValidationError} - If booking data is invalid
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   */
+
   static async createBooking(
     bookingData: CreateBookingData,
     token: string,
@@ -151,21 +142,12 @@ export class BookingService {
     }
   }
 
-  /**
-   * Get user's bookings
-   * 
-   * @param token - Authentication token
-   * @returns Promise<any[]> - Array of user bookings
-   * @throws {ValidationError} - If token is invalid
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   */
   static async getUserBookings(token: string): Promise<any[]> {
     try {
       validateToken(token)
 
-      const response = await apiClient.getUserBookings(token) as BackendApiResponse<any>
-      const bookingsData = response.data?.data
+      const response = await apiClient.getUserBookings(token) as any
+      const bookingsData = response.data
 
       return Array.isArray(bookingsData) ? bookingsData : []
     } catch (error: any) {
@@ -173,17 +155,6 @@ export class BookingService {
     }
   }
 
-  /**
-   * Get booking by ID
-   * 
-   * @param id - Booking ID
-   * @param token - Authentication token
-   * @returns Promise<any> - Booking data
-   * @throws {ValidationError} - If ID or token is invalid
-   * @throws {NotFoundError} - If booking is not found
-   * @throws {NetworkError} - If network request fails
-   * @throws {ServerError} - If server returns an error
-   */
   static async getBookingById(id: string, token: string): Promise<any> {
     try {
       if (!id || typeof id !== 'string' || id.trim() === '') {
@@ -191,8 +162,8 @@ export class BookingService {
       }
       validateToken(token)
 
-      const response = await apiClient.getBookingById(id, token) as BackendApiResponse<any>
-      const bookingData = response.data?.data
+      const response = await apiClient.getBookingById(id, token) as any
+      const bookingData = response.data
 
       if (!bookingData) {
         throw new NotFoundError('Booking', id)

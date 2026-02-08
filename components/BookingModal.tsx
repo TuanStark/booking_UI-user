@@ -428,6 +428,20 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       <div className="font-medium text-gray-900 dark:text-white">VNPay</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán qua VNPay</div>
                     </button>
+
+                    <button
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'MOMO' })}
+                      className={cn(
+                        'p-4 border rounded-lg text-left transition-colors duration-200',
+                        formData.paymentMethod === 'MOMO'
+                          ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                      )}
+                    >
+                      <Smartphone className="h-6 w-6 text-pink-600 dark:text-pink-400 mb-2" />
+                      <div className="font-medium text-gray-900 dark:text-white">MoMo</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Ví điện tử MoMo</div>
+                    </button>
                   </div>
                 </div>
 

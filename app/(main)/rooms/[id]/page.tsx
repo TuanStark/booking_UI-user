@@ -145,8 +145,8 @@ export default function RoomDetailPage() {
         bookingResultData?.payment?.vnpUrl
 
       if (paymentUrl) {
-        // Mở payment URL trong tab mới
-        window.open(paymentUrl, '_blank', 'noopener,noreferrer')
+        // Chuyển hướng đến trang thanh toán trong cùng cửa sổ
+        window.location.href = paymentUrl
       } else {
         // Nếu không có payment URL, chuyển đến trang bookings sau 2 giây
         setTimeout(() => {
@@ -269,7 +269,9 @@ export default function RoomDetailPage() {
                 <div className="space-y-2">
                   <p className="text-sm text-gray-500 dark:text-gray-400">Phương thức thanh toán</p>
                   <p className="text-base font-semibold text-gray-900 dark:text-white">
-                    {bookingResult.payment.method === 'VNPAY' ? 'VNPay' : 'VietQR'}
+                    {bookingResult.payment.method === 'VNPAY' ? 'VNPay' :
+                      bookingResult.payment.method === 'MOMO' ? 'MoMo' :
+                        bookingResult.payment.method === 'PAYOS' ? 'PayOS' : 'VietQR'}
                   </p>
                 </div>
                 <div className="space-y-2">
