@@ -104,19 +104,25 @@ export async function getAllBuildings({
   limit = 10,
   sortBy = 'createdAt',
   sortOrder = 'desc',
-  search = ''
+  search = '',
+  name = '',
+  address = '',
+  city = '',
 }: {
   page?: number
   limit?: number
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   search?: string
+  name?: string
+  address?: string
+  city?: string
 } = {}): Promise<PaginatedResponse<Building[]>> {
+
   try {
-    // Validate parameters
+
     validatePaginationParams({ page, limit, sortBy, sortOrder, search })
 
-    // Build query string
     const queryParams = new URLSearchParams({
       page: String(page),
       limit: String(limit),
@@ -128,6 +134,18 @@ export async function getAllBuildings({
       queryParams.append('search', search.trim())
     }
 
+    if (name.trim()) {
+      queryParams.append('name', name.trim())
+    }
+
+    if (address.trim()) {
+      queryParams.append('address', address.trim())
+    }
+
+    if (city.trim()) {
+      queryParams.append('city', city.trim())
+    }
+
     const response = await api.get<BackendApiResponse<Building[]>>(
       `/buildings?${queryParams.toString()}`
     )
@@ -136,23 +154,25 @@ export async function getAllBuildings({
       throw new ServerError('Invalid response format from server')
     }
 
-    const { data, meta } = response.data
+    const resData: any = response.data.data;
+    const resMeta: any = response.data.meta;
 
     const normalizedMeta = {
-      total: meta?.total ?? 0,
-      page: meta?.page ?? page,
-      limit: meta?.limit ?? limit,
-      totalPages: meta?.totalPages ?? Math.ceil((meta?.total ?? 0) / limit),
+      total: resMeta?.total ?? 0,
+      page: resMeta?.pageNumber ?? page,
+      limit: resMeta?.limitNumber ?? limit,
+      totalPages: resMeta?.totalPages ?? Math.ceil((resMeta?.total ?? 0) / limit),
     }
 
     return {
-      items: data,
+      items: resData,
       meta: {
         ...normalizedMeta,
         hasNextPage: normalizedMeta.page < normalizedMeta.totalPages,
         hasPrevPage: normalizedMeta.page > 1,
       },
     }
+
   } catch (error) {
     return handleApiError(error, 'fetching buildings')
   }
