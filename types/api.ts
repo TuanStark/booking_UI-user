@@ -14,11 +14,11 @@ export type PaginatedResponse<T> = {
   }
 }
 
-export interface BackendApiResponse<T = any> {
-  data: {
+export interface BackendApiResponse<T = any, IsPaginated = true> {
+  data: IsPaginated extends true ? {
     data: T
     meta: PaginationMeta
-  }
+  } : T
   statusCode: number
   message: string
 }

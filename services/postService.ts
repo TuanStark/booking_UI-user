@@ -71,10 +71,10 @@ export async function getAllPosts({
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const response = await apiRequest<BackendApiResponse<Post>>(
+    const response = await apiRequest<BackendApiResponse<Post, false>>(
       `/posts/${encodeURIComponent(slug)}`
     );
-    return response.data.data;
+    return response.data;
   } catch {
     return null;
   }
@@ -83,5 +83,5 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function getRelatedPosts(categorySlug: string, excludeId: string): Promise<Post[]> {
   const response = await apiRequest<any>(`/posts/related?categorySlug=${categorySlug}&excludeId=${excludeId}&limit=6`)
-  return response.data.data || []
+  return response.data || []
 }
