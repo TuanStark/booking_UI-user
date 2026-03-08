@@ -19,7 +19,13 @@ interface BuildingsPageProps {
   searchParams: {
     page?: string
     search?: string
+    name?: string
+    address?: string
+    adress?: string
+    city?: string
     limit?: string
+    sortBy?: string
+    sortOrder?: 'asc' | 'desc'
   }
 }
 
@@ -27,12 +33,22 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
   try {
     const currentPage = Number(searchParams.page) || 1
     const search = searchParams.search || ''
-    const limit = Number(searchParams.limit) || 6
+    const name = searchParams.name || ''
+    const address = searchParams.address || searchParams.adress || ''
+    const city = searchParams.city || ''
+    const limit = Number(searchParams.limit) || 10
+    const sortBy = searchParams.sortBy || 'createdAt'
+    const sortOrder = searchParams.sortOrder || 'desc'
 
     const { items: buildings, meta } = await getAllBuildings({
       page: currentPage,
       limit,
       search,
+      name,
+      address,
+      city,
+      sortBy,
+      sortOrder
     })
 
     return (
@@ -50,8 +66,8 @@ export default async function BuildingsPage({ searchParams }: BuildingsPageProps
           </div>
         </header>
 
-        <BuildingsView 
-          buildings={buildings} 
+        <BuildingsView
+          buildings={buildings}
           paginationMeta={meta}
           currentPage={currentPage}
         />

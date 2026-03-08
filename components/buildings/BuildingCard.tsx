@@ -47,10 +47,10 @@ export default function BuildingCard({ building, onSelect, isSelected }: Buildin
             </div>
           </div>
         </div> */}
-        {building.availableRooms > 0 && (
+        {building.roomsCount > 0 && (
           <div className="absolute bottom-4 left-4">
             <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-md">
-              {building.availableRooms} phòng trống
+              {building.roomsCount} phòng
             </div>
           </div>
         )}
@@ -85,7 +85,7 @@ export default function BuildingCard({ building, onSelect, isSelected }: Buildin
             </div>
             <div className="flex items-center text-blue-600 dark:text-blue-400">
               <Users className="h-4 w-4 mr-1" />
-              <span>{building.totalRooms} phòng</span>
+              <span>{building.roomsCount} phòng</span>
             </div>
           </div>
 

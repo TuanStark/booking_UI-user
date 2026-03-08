@@ -5,14 +5,15 @@ export interface Building {
   address: string
   images: string | null
   totalRooms: number
-  availableRooms: number
+  roomsCount: number
   averagePrice: number
   rating: number
   totalReviews: number
   description: string
   amenities: string[]
-  latitude: number
-  longitude: number
+  latitude: number | string
+  longitude?: number | string
+  longtitude?: number | string
   contact?: ContactInfo
   rules?: string[]
 }

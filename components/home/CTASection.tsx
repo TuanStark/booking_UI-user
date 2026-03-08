@@ -21,16 +21,16 @@ export default function CTASection() {
 
             <div className="md:w-1/2 p-8 md:p-12 text-white text-center md:text-left">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Trở thành Đối tác của DormBooking
+                Liên hệ với chúng tôi
               </h2>
               <p className="text-lg text-blue-100 mb-8 leading-relaxed">
-                Bạn là chủ nhà trọ hoặc quản lý ký túc xá? Hợp tác với chúng tôi để tiếp cận hàng ngàn sinh viên và quản lý phòng hiệu quả hơn.
+                Bạn có bất kỳ câu hỏi hoặc cần hỗ trợ? Hãy liên hệ với chúng tôi qua các kênh dưới đây.
               </p>
               <Link
-                href="/partner/register"
+                href="/contact"
                 className="inline-block px-8 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
-                Đăng ký ngay
+                Liên hệ ngay
               </Link>
             </div>
           </div>

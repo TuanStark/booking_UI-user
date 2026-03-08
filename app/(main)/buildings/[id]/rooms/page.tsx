@@ -179,13 +179,13 @@ export default function BuildingRoomsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {building.totalRooms}
+                      {building.roomsCount}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Tổng phòng</div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {building.availableRooms}
+                      {building.roomsCount}
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Còn trống</div>
                   </div>

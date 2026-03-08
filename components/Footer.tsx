@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Building2, Facebook, Instagram, Twitter, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import Image from 'next/image'
 
 export default function Footer() {
   return (
@@ -12,7 +13,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-6">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-white" />
+                <Image src="/logo.png" alt="Logo" width={32} height={32} />
               </div>
               <span className="text-xl font-bold text-gray-900">
                 DormBooking
@@ -62,16 +63,16 @@ export default function Footer() {
             <h3 className="font-bold text-gray-900 mb-6">Liên Hệ</h3>
             <ul className="space-y-4">
               <li className="flex items-start space-x-3 text-gray-500">
-                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600" />
-                <span>123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM</span>
+                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5 text-blue-600 whitespace-nowrap" />
+                <span>03 Quang Trung, Hải Châu, Đà Nẵng</span>
               </li>
               <li className="flex items-center space-x-3 text-gray-500">
                 <Phone className="h-5 w-5 flex-shrink-0 text-blue-600" />
-                <span>(028) 1234 5678</span>
+                <span>0845663357</span>
               </li>
               <li className="flex items-center space-x-3 text-gray-500">
                 <Mail className="h-5 w-5 flex-shrink-0 text-blue-600" />
-                <span>contact@dormbooking.com</span>
+                <span>support@gmail.com</span>
               </li>
             </ul>
           </div>

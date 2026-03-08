@@ -9,6 +9,7 @@ import { cn } from '@/utils/utils'
 import { NAV_ITEMS } from '../constants'
 import AuthStatus from './AuthStatus'
 import { useUser } from '@/contexts/UserContext'
+import Image from 'next/image'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -35,7 +36,7 @@ export default function Navbar() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Building2 className="h-5 w-5 text-white" />
+                <Image src="/logo.png" alt="Logo" width={32} height={32} />
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 DormBooking

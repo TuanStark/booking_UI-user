@@ -139,6 +139,7 @@ export default function RoomDetailPage() {
       setIsBookingModalOpen(false)
 
       // Tự động chuyển hướng đến payment URL nếu có
+      console.log('Booking result data:', bookingResultData)
       const paymentUrl =
         bookingResultData?.payment?.paymentUrl ||
         bookingResultData?.paymentUrl ||
@@ -148,10 +149,7 @@ export default function RoomDetailPage() {
         // Chuyển hướng đến trang thanh toán trong cùng cửa sổ
         window.location.href = paymentUrl
       } else {
-        // Nếu không có payment URL, chuyển đến trang bookings sau 2 giây
-        setTimeout(() => {
-          router.push('/bookings')
-        }, 2000)
+        // Không tự động chuyển hướng để người dùng có thời gian quét mã QR.
       }
     } catch (err: any) {
       console.error('Error creating booking:', err)
@@ -310,6 +308,18 @@ export default function RoomDetailPage() {
                       className="w-48 h-48 object-contain"
                     />
                   </div>
+                </div>
+              )}
+
+              {/* Thêm nút bấm thủ công để tới trang danh sách booking */}
+              {!bookingResult.payment.paymentUrl && (
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <button
+                    onClick={() => router.push('/bookings')}
+                    className="w-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                  >
+                    Xem đơn đặt phòng của tôi
+                  </button>
                 </div>
               )}
             </div>
