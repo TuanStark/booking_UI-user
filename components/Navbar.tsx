@@ -1,32 +1,32 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import { Menu, X, Sun, Moon, Building2, User, ChevronDown } from 'lucide-react'
-import { cn } from '@/utils/utils'
-import { NAV_ITEMS } from '../constants'
-import AuthStatus from './AuthStatus'
-import { useUser } from '@/contexts/UserContext'
-import Image from 'next/image'
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { Menu, X, Sun, Moon, Building2, User, ChevronDown } from "lucide-react";
+import { cn } from "@/utils/utils";
+import { NAV_ITEMS } from "../constants";
+import AuthStatus from "./AuthStatus";
+import { useUser } from "@/contexts/UserContext";
+import Image from "next/image";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const pathname = usePathname()
-  const { user, isAuthenticated } = useUser()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const pathname = usePathname();
+  const { user, isAuthenticated } = useUser();
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle('dark')
-  }
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark");
+  };
 
   const handleSignOut = async () => {
-    setIsUserMenuOpen(false)
-    await signOut({ callbackUrl: '/' })
-  }
+    setIsUserMenuOpen(false);
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-lg sticky top-0 z-50 transition-colors duration-200">
@@ -35,11 +35,15 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Image src="/logo.png" alt="Logo" width={32} height={32} />
-              </div>
+              <Image
+                src="/logoDorm.png"
+                alt="Logo"
+                width={48}
+                height={48}
+                className="rounded-lg object-contain"
+              />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
-                DormBooking
+                KTX Online
               </span>
             </Link>
           </div>
@@ -52,10 +56,14 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'px-3 py-2 text-sm font-medium transition-colors duration-200',
-                    (item.href === '/' ? pathname === '/' : pathname.startsWith(item.href))
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                    "px-3 py-2 text-sm font-medium transition-colors duration-200",
+                    (
+                      item.href === "/"
+                        ? pathname === "/"
+                        : pathname.startsWith(item.href)
+                    )
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400",
                   )}
                 >
                   {item.name}
@@ -94,10 +102,10 @@ export default function Navbar() {
             </button> */}
             <button
               onClick={() => {
-                const nextState = !isMenuOpen
-                setIsMenuOpen(nextState)
+                const nextState = !isMenuOpen;
+                setIsMenuOpen(nextState);
                 if (!nextState) {
-                  setIsUserMenuOpen(false)
+                  setIsUserMenuOpen(false);
                 }
               }}
               className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
@@ -120,14 +128,18 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'block px-3 py-2 text-base font-medium transition-colors duration-200',
-                    (item.href === '/' ? pathname === '/' : pathname.startsWith(item.href))
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                    "block px-3 py-2 text-base font-medium transition-colors duration-200",
+                    (
+                      item.href === "/"
+                        ? pathname === "/"
+                        : pathname.startsWith(item.href)
+                    )
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400",
                   )}
                   onClick={() => {
-                    setIsMenuOpen(false)
-                    setIsUserMenuOpen(false)
+                    setIsMenuOpen(false);
+                    setIsUserMenuOpen(false);
                   }}
                 >
                   {item.name}
@@ -142,15 +154,15 @@ export default function Navbar() {
                       className="w-full px-3 py-2 mb-2 flex items-center justify-between rounded-lg bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors duration-200"
                     >
                       <span className="flex items-center space-x-2">
-                        <span className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
                           <User className="h-4 w-4 text-white" />
                         </span>
-                        <span>{user?.name || user?.email || 'User'}</span>
+                        <span>{user?.name || user?.email || "User"}</span>
                       </span>
                       <ChevronDown
                         className={cn(
-                          'h-4 w-4 transition-transform duration-200',
-                          isUserMenuOpen ? 'rotate-180' : 'rotate-0'
+                          "h-4 w-4 transition-transform duration-200",
+                          isUserMenuOpen ? "rotate-180" : "rotate-0",
                         )}
                       />
                     </button>
@@ -160,8 +172,8 @@ export default function Navbar() {
                           href="/profile"
                           className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
                           onClick={() => {
-                            setIsMenuOpen(false)
-                            setIsUserMenuOpen(false)
+                            setIsMenuOpen(false);
+                            setIsUserMenuOpen(false);
                           }}
                         >
                           Hồ sơ
@@ -170,17 +182,17 @@ export default function Navbar() {
                           href="/bookings"
                           className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
                           onClick={() => {
-                            setIsMenuOpen(false)
-                            setIsUserMenuOpen(false)
+                            setIsMenuOpen(false);
+                            setIsUserMenuOpen(false);
                           }}
                         >
                           Đặt phòng của tôi
                         </Link>
                         <button
                           onClick={async () => {
-                            setIsMenuOpen(false)
-                            setIsUserMenuOpen(false)
-                            await handleSignOut()
+                            setIsMenuOpen(false);
+                            setIsUserMenuOpen(false);
+                            await handleSignOut();
                           }}
                           className="text-red-600 dark:text-red-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
                         >
@@ -195,18 +207,18 @@ export default function Navbar() {
                       href="/auth/signin"
                       className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 block px-3 py-2 text-base font-medium w-full text-left transition-colors duration-200"
                       onClick={() => {
-                        setIsMenuOpen(false)
-                        setIsUserMenuOpen(false)
+                        setIsMenuOpen(false);
+                        setIsUserMenuOpen(false);
                       }}
                     >
                       Đăng nhập
                     </Link>
                     <Link
                       href="/auth/signup"
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-2 rounded-lg text-base font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 w-full mt-2 block text-center"
+                      className="bg-brand text-white px-3 py-2 rounded-lg text-base font-medium hover:bg-brand-dark transition-all duration-200 w-full mt-2 block text-center"
                       onClick={() => {
-                        setIsMenuOpen(false)
-                        setIsUserMenuOpen(false)
+                        setIsMenuOpen(false);
+                        setIsUserMenuOpen(false);
                       }}
                     >
                       Đăng ký
@@ -219,5 +231,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }

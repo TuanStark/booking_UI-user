@@ -1,89 +1,105 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { MapPin, Phone, Mail, Clock, Send, MessageSquare, User, Mail as MailIcon } from 'lucide-react'
+import { useState } from "react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  MessageSquare,
+  User,
+  Mail as MailIcon,
+} from "lucide-react";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitStatus('idle')
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
 
     // Simulate API call
     setTimeout(() => {
-      setIsSubmitting(false)
-      setSubmitStatus('success')
+      setIsSubmitting(false);
+      setSubmitStatus("success");
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      })
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+      });
 
       // Reset success message after 5 seconds
       setTimeout(() => {
-        setSubmitStatus('idle')
-      }, 5000)
-    }, 1000)
-  }
+        setSubmitStatus("idle");
+      }, 5000);
+    }, 1000);
+  };
 
   const contactInfo = [
     {
       icon: MapPin,
-      title: 'Địa chỉ',
-      content: '03 Quang Trung, Phường 1, Quận Bình Tân, TP.HCM',
-      link: 'https://maps.google.com'
+      title: "Địa chỉ",
+      content: "03 Quang Trung, Phường 1, Quận Bình Tân, TP.HCM",
+      link: "https://maps.google.com",
     },
     {
       icon: Phone,
-      title: 'Điện thoại',
-      content: '028 1234 5678',
-      link: 'tel:02812345678'
+      title: "Điện thoại",
+      content: "028 1234 5678",
+      link: "tel:02812345678",
     },
     {
       icon: Mail,
-      title: 'Email',
-      content: 'support@dormbooking.com',
-      link: 'mailto:support@dormbooking.com'
+      title: "Email",
+      content: "support@dormbooking.com",
+      link: "mailto:support@dormbooking.com",
     },
     {
       icon: Clock,
-      title: 'Giờ làm việc',
-      content: 'Thứ 2 - Chủ nhật: 8:00 - 22:00',
-      link: null
-    }
-  ]
+      title: "Giờ làm việc",
+      content: "Thứ 2 - Chủ nhật: 8:00 - 22:00",
+      link: null,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="space-y-16">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-20">
+        <section className="bg-brand text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
                 Liên Hệ Với Chúng Tôi
               </h1>
               <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-                Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi nào!
+                Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với
+                chúng tôi nếu bạn có bất kỳ câu hỏi nào!
               </p>
             </div>
           </div>
@@ -94,10 +110,10 @@ export default function ContactPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {contactInfo.map((info, index) => {
-                const IconComponent = info.icon
+                const IconComponent = info.icon;
                 const content = (
                   <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl hover:shadow-lg transition-shadow duration-300 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-brand rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <IconComponent className="h-8 w-8 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -116,14 +132,14 @@ export default function ContactPage() {
                       </p>
                     )}
                   </div>
-                )
+                );
                 return info.link ? (
                   <a key={index} href={info.link} className="block">
                     {content}
                   </a>
                 ) : (
                   <div key={index}>{content}</div>
-                )
+                );
               })}
             </div>
           </div>
@@ -139,7 +155,8 @@ export default function ContactPage() {
                   Gửi Tin Nhắn Cho Chúng Tôi
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">
-                  Bạn có câu hỏi, góp ý hoặc cần hỗ trợ? Hãy điền form bên cạnh và chúng tôi sẽ phản hồi trong thời gian sớm nhất.
+                  Bạn có câu hỏi, góp ý hoặc cần hỗ trợ? Hãy điền form bên cạnh
+                  và chúng tôi sẽ phản hồi trong thời gian sớm nhất.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
@@ -182,7 +199,10 @@ export default function ContactPage() {
               <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >
                       Họ và tên *
                     </label>
                     <input
@@ -198,7 +218,10 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >
                       Email *
                     </label>
                     <input
@@ -214,7 +237,10 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >
                       Số điện thoại
                     </label>
                     <input
@@ -229,7 +255,10 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label
+                      htmlFor="subject"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >
                       Chủ đề *
                     </label>
                     <select
@@ -250,7 +279,10 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >
                       Tin nhắn *
                     </label>
                     <textarea
@@ -265,13 +297,14 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  {submitStatus === 'success' && (
+                  {submitStatus === "success" && (
                     <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg">
-                      Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.
+                      Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có
+                      thể.
                     </div>
                   )}
 
-                  {submitStatus === 'error' && (
+                  {submitStatus === "error" && (
                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
                       Có lỗi xảy ra. Vui lòng thử lại sau.
                     </div>
@@ -280,7 +313,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-brand text-white py-3 px-6 rounded-lg font-semibold hover:bg-brand-dark transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       <>
@@ -301,6 +334,5 @@ export default function ContactPage() {
         </section>
       </div>
     </div>
-  )
+  );
 }
-

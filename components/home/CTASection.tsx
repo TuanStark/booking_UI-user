@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import Image from 'next/image'
+import Link from "next/link";
+import Image from "next/image";
 
 export default function CTASection() {
   return (
     <section className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-brand rounded-3xl overflow-hidden shadow-2xl">
           <div className="flex flex-col md:flex-row items-center">
             <div className="md:w-1/2 relative h-64 md:h-96 w-full">
               <Image
@@ -16,7 +16,7 @@ export default function CTASection() {
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-blue-600/90 md:to-transparent md:bg-gradient-to-l md:from-blue-600 md:via-blue-600/50 md:to-transparent opacity-50 md:opacity-100" />
+              <div className="absolute inset-0 bg-brand-dark/60 md:bg-transparent" />
             </div>
 
             <div className="md:w-1/2 p-8 md:p-12 text-white text-center md:text-left">
@@ -24,11 +24,12 @@ export default function CTASection() {
                 Liên hệ với chúng tôi
               </h2>
               <p className="text-lg text-blue-100 mb-8 leading-relaxed">
-                Bạn có bất kỳ câu hỏi hoặc cần hỗ trợ? Hãy liên hệ với chúng tôi qua các kênh dưới đây.
+                Bạn có bất kỳ câu hỏi hoặc cần hỗ trợ? Hãy liên hệ với chúng tôi
+                qua các kênh dưới đây.
               </p>
               <Link
                 href="/contact"
-                className="inline-block px-8 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="inline-block px-8 py-4 bg-white text-brand rounded-full font-bold text-lg hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 Liên hệ ngay
               </Link>
@@ -37,5 +38,5 @@ export default function CTASection() {
         </div>
       </div>
     </section>
-  )
+  );
 }
