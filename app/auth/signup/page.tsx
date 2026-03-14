@@ -1,43 +1,52 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Phone, GraduationCap } from 'lucide-react'
-import { apiClient } from '@/services/apiClient'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  ArrowLeft,
+  Phone,
+  GraduationCap,
+} from "lucide-react";
+import { apiClient } from "@/services/apiClient";
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    studentId: '',
-    phone: '',
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const router = useRouter()
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    studentId: "",
+    phone: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-    setSuccess('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp')
-      setIsLoading(false)
-      return
+      setError("Mật khẩu xác nhận không khớp");
+      setIsLoading(false);
+      return;
     }
 
     if (formData.password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự')
-      setIsLoading(false)
-      return
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setIsLoading(false);
+      return;
     }
 
     try {
@@ -47,37 +56,41 @@ export default function SignUpPage() {
         password: formData.password,
         studentId: formData.studentId,
         phone: formData.phone,
-      })) as { success: boolean; message?: string }
+      })) as { success: boolean; message?: string };
 
       if (response.success) {
-        setSuccess('Đăng ký thành công! Vui lòng đăng nhập.')
+        setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
         setTimeout(() => {
-          router.push('/auth/signin')
-        }, 2000)
+          router.push("/auth/signin");
+        }, 2000);
       } else {
-        setError(response.message || 'Đã có lỗi xảy ra')
+        setError(response.message || "Đã có lỗi xảy ra");
       }
     } catch (error: any) {
-      setError(error.message || 'Đã có lỗi xảy ra, vui lòng thử lại')
+      setError(error.message || "Đã có lỗi xảy ra, vui lòng thử lại");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-2xl">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Đăng Ký</h1>
-            <p className="text-gray-600 dark:text-gray-400">Tạo tài khoản để bắt đầu đặt phòng</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Đăng Ký
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Tạo tài khoản để bắt đầu đặt phòng
+            </p>
           </div>
 
           {error && (
@@ -88,13 +101,18 @@ export default function SignUpPage() {
 
           {success && (
             <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-              <p className="text-green-600 dark:text-green-400 text-sm">{success}</p>
+              <p className="text-green-600 dark:text-green-400 text-sm">
+                {success}
+              </p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Họ và tên
               </label>
               <div className="relative">
@@ -115,7 +133,10 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Email
               </label>
               <div className="relative">
@@ -136,7 +157,10 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="studentId"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Mã sinh viên
               </label>
               <div className="relative">
@@ -157,7 +181,10 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Số điện thoại
               </label>
               <div className="relative">
@@ -178,7 +205,10 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Mật khẩu
               </label>
               <div className="relative">
@@ -188,7 +218,7 @@ export default function SignUpPage() {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -210,7 +240,10 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Xác nhận mật khẩu
               </label>
               <div className="relative">
@@ -220,7 +253,7 @@ export default function SignUpPage() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -252,13 +285,22 @@ export default function SignUpPage() {
                 />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-gray-700 dark:text-gray-300">
-                  Tôi đồng ý với{' '}
-                  <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
+                <label
+                  htmlFor="terms"
+                  className="text-gray-700 dark:text-gray-300"
+                >
+                  Tôi đồng ý với{" "}
+                  <Link
+                    href="/terms"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300"
+                  >
                     Điều khoản sử dụng
-                  </Link>{' '}
-                  và{' '}
-                  <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
+                  </Link>{" "}
+                  và{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300"
+                  >
                     Chính sách bảo mật
                   </Link>
                 </label>
@@ -268,15 +310,15 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="w-full bg-brand text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              {isLoading ? 'Đang đăng ký...' : 'Đăng Ký'}
+              {isLoading ? "Đang đăng ký..." : "Đăng Ký"}
             </button>
           </form>
 
           <div className="mt-8 text-center">
             <p className="text-gray-600 dark:text-gray-400">
-              Đã có tài khoản?{' '}
+              Đã có tài khoản?{" "}
               <Link
                 href="/auth/signin"
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-semibold"
@@ -288,5 +330,5 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

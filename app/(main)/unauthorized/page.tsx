@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Shield, ArrowLeft, Home } from 'lucide-react'
+import Link from "next/link";
+import { Shield, ArrowLeft, Home } from "lucide-react";
 
 export default function UnauthorizedPage() {
   return (
@@ -20,11 +20,11 @@ export default function UnauthorizedPage() {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
               Truy Cập Bị Từ Chối
             </h1>
-            
+
             <p className="text-xl text-gray-600 dark:text-gray-400">
               Bạn không có quyền truy cập vào trang này
             </p>
-            
+
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
               <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-3">
                 Có thể bạn đang tìm kiếm:
@@ -40,12 +40,12 @@ export default function UnauthorizedPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/"
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center px-6 py-3 bg-brand text-white font-semibold rounded-lg hover:bg-brand-dark transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Home className="h-5 w-5 mr-2" />
                 Về trang chủ
               </Link>
-              
+
               <Link
                 href="/auth/signin"
                 className="inline-flex items-center px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
@@ -62,7 +62,8 @@ export default function UnauthorizedPage() {
               Cần hỗ trợ?
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Nếu bạn tin rằng đây là lỗi hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi
+              Nếu bạn tin rằng đây là lỗi hoặc cần hỗ trợ, vui lòng liên hệ với
+              chúng tôi
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -83,5 +84,5 @@ export default function UnauthorizedPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

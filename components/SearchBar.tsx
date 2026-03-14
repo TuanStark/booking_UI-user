@@ -16,7 +16,9 @@ function SearchBarContent({ onSearch, className }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || "",
+  );
   const [location, setLocation] = useState(searchParams.get("city") || "");
   const [open, setOpen] = useState(false);
 
@@ -70,14 +72,12 @@ function SearchBarContent({ onSearch, className }: SearchBarProps) {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <div className={cn("w-full max-w-4xl mx-auto", className)}>
       <form onSubmit={handleSearch} className="space-y-4">
-
         {/* Search input */}
         <div className="relative">
           <Search className="absolute left-3 top-4 h-5 w-5 text-gray-400 pointer-events-none" />
@@ -92,7 +92,6 @@ function SearchBarContent({ onSearch, className }: SearchBarProps) {
 
         {/* Location + buttons */}
         <div className="flex gap-4">
-
           {/* City selector */}
           <div className="relative flex-1" ref={wrapperRef}>
             <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
@@ -122,11 +121,10 @@ function SearchBarContent({ onSearch, className }: SearchBarProps) {
 
           <button
             type="submit"
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 rounded-xl font-medium transition-all active:scale-95 shadow-md"
+            className="bg-brand hover:bg-brand-dark text-white px-6 rounded-xl font-medium transition-all active:scale-95 shadow-md"
           >
             Tìm kiếm
           </button>
-
         </div>
       </form>
     </div>
@@ -135,15 +133,22 @@ function SearchBarContent({ onSearch, className }: SearchBarProps) {
 
 export default function SearchBar(props: SearchBarProps) {
   return (
-    <Suspense fallback={
-      <div className={cn("w-full max-w-4xl mx-auto space-y-4 animate-pulse", props.className)}>
-        <div className="w-full h-[58px] border rounded-2xl bg-gray-200 dark:bg-gray-800" />
-        <div className="flex gap-4">
-          <div className="flex-1 h-[50px] border rounded-xl bg-gray-200 dark:bg-gray-800" />
-          <div className="w-[100px] h-[50px] rounded-xl bg-gray-300 dark:bg-gray-700" />
+    <Suspense
+      fallback={
+        <div
+          className={cn(
+            "w-full max-w-4xl mx-auto space-y-4 animate-pulse",
+            props.className,
+          )}
+        >
+          <div className="w-full h-[58px] border rounded-2xl bg-gray-200 dark:bg-gray-800" />
+          <div className="flex gap-4">
+            <div className="flex-1 h-[50px] border rounded-xl bg-gray-200 dark:bg-gray-800" />
+            <div className="w-[100px] h-[50px] rounded-xl bg-gray-300 dark:bg-gray-700" />
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SearchBarContent {...props} />
     </Suspense>
   );

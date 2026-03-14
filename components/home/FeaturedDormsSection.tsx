@@ -1,32 +1,34 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { getAllBuildings } from '@/services/buildingService'
+import Link from "next/link";
+import Image from "next/image";
+import { getAllBuildings } from "@/services/buildingService";
 
 interface FeaturedDormsSectionProps {
-  limit?: number
+  limit?: number;
 }
 
-export default async function FeaturedDormsSection({ limit = 6 }: FeaturedDormsSectionProps) {
-    let buildings: any[] = []
-    let hasError = false
+export default async function FeaturedDormsSection({
+  limit = 6,
+}: FeaturedDormsSectionProps) {
+  let buildings: any[] = [];
+  let hasError = false;
 
-    try {
-        const currentPage = Number(1) || 1
-        const result = await getAllBuildings({
-            page: currentPage,
-            limit
-        })
-        buildings = result.items || []
-    } catch (error) {
-        // Silently handle errors - don't show buildings section if API fails
-        hasError = true
-        console.error('Failed to load buildings:', error)
-    }
+  try {
+    const currentPage = Number(1) || 1;
+    const result = await getAllBuildings({
+      page: currentPage,
+      limit,
+    });
+    buildings = result.items || [];
+  } catch (error) {
+    // Silently handle errors - don't show buildings section if API fails
+    hasError = true;
+    console.error("Failed to load buildings:", error);
+  }
 
-    // Don't render the section if there's an error or no buildings
-    if (hasError || buildings.length === 0) {
-        return null
-    }
+  // Don't render the section if there's an error or no buildings
+  if (hasError || buildings.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-20 bg-gray-50">
@@ -36,7 +38,8 @@ export default async function FeaturedDormsSection({ limit = 6 }: FeaturedDormsS
             Ký Túc Xá Nổi Bật
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Khám phá những ký túc xá được sinh viên yêu thích nhất với đầy đủ tiện nghi và môi trường sống tuyệt vời.
+            Khám phá những ký túc xá được sinh viên yêu thích nhất với đầy đủ
+            tiện nghi và môi trường sống tuyệt vời.
           </p>
         </div>
 
@@ -49,7 +52,7 @@ export default async function FeaturedDormsSection({ limit = 6 }: FeaturedDormsS
             >
               <div className="relative h-64 overflow-hidden">
                 <Image
-                  src={building.images || '/placeholder-building.jpg'}
+                  src={building.images || "/placeholder-building.jpg"}
                   alt={building.name}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -68,12 +71,12 @@ export default async function FeaturedDormsSection({ limit = 6 }: FeaturedDormsS
         <div className="text-center mt-12">
           <Link
             href="/buildings"
-            className="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            className="inline-block px-8 py-3 bg-brand text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 hover:bg-brand-dark"
           >
             Xem tất cả ký túc xá
           </Link>
         </div>
       </div>
     </section>
-  )
+  );
 }

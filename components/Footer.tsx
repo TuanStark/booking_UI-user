@@ -1,8 +1,17 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Building2, Facebook, Instagram, Twitter, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
-import Image from 'next/image'
+import Link from "next/link";
+import {
+  Building2,
+  Facebook,
+  Instagram,
+  Twitter,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -12,27 +21,40 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-6">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Image src="/logo.png" alt="Logo" width={32} height={32} />
+              <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+                <Image src="/logoDorm.png" alt="Logo" width={32} height={32} />
               </div>
               <span className="text-xl font-bold text-gray-900">
-                DormBooking
+                KTX Online
               </span>
             </Link>
             <p className="text-gray-500 mb-6 max-w-sm leading-relaxed">
-              Nền tảng đặt phòng ký túc xá hàng đầu, kết nối sinh viên với những không gian sống tiện nghi và an toàn nhất.
+              Nền tảng đặt phòng ký túc xá hàng đầu, kết nối sinh viên với những
+              không gian sống tiện nghi và an toàn nhất.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              >
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-pink-50 hover:text-pink-600 transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+              >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-400 transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-400 transition-colors"
+              >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+              <a
+                href="#"
+                className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+              >
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>
@@ -42,20 +64,76 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-gray-900 mb-6">Về Chúng Tôi</h3>
             <ul className="space-y-4">
-              <li><Link href="/about" className="text-gray-500 hover:text-blue-600 transition-colors">Giới thiệu</Link></li>
-              <li><Link href="/careers" className="text-gray-500 hover:text-blue-600 transition-colors">Tuyển dụng</Link></li>
-              <li><Link href="/news" className="text-gray-500 hover:text-blue-600 transition-colors">Tin tức</Link></li>
-              <li><Link href="/contact" className="text-gray-500 hover:text-blue-600 transition-colors">Liên hệ</Link></li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Giới thiệu
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/careers"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Tuyển dụng
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/news"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Tin tức
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Liên hệ
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-bold text-gray-900 mb-6">Dịch Vụ</h3>
             <ul className="space-y-4">
-              <li><Link href="/buildings" className="text-gray-500 hover:text-blue-600 transition-colors">Tìm phòng</Link></li>
-              <li><Link href="/partner" className="text-gray-500 hover:text-blue-600 transition-colors">Đăng tin</Link></li>
-              <li><Link href="/pricing" className="text-gray-500 hover:text-blue-600 transition-colors">Bảng giá</Link></li>
-              <li><Link href="/support" className="text-gray-500 hover:text-blue-600 transition-colors">Hỗ trợ</Link></li>
+              <li>
+                <Link
+                  href="/buildings"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Tìm phòng
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/partner"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Đăng tin
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/pricing"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Bảng giá
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/support"
+                  className="text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  Hỗ trợ
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -79,5 +157,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

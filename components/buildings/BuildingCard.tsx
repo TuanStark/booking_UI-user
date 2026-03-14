@@ -1,37 +1,41 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { Star, MapPin, Users, DollarSign, Eye } from 'lucide-react'
-import { Building } from '@/types'
-import { cn } from '@/lib/utils'
+import Link from "next/link";
+import Image from "next/image";
+import { Star, MapPin, Users, DollarSign, Eye } from "lucide-react";
+import { Building } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface BuildingCardProps {
-  building: Building
-  onSelect?: (buildingId: string) => void
-  isSelected?: boolean
+  building: Building;
+  onSelect?: (buildingId: string) => void;
+  isSelected?: boolean;
 }
 
-export default function BuildingCard({ building, onSelect, isSelected }: BuildingCardProps) {
+export default function BuildingCard({
+  building,
+  onSelect,
+  isSelected,
+}: BuildingCardProps) {
   const handleClick = () => {
     if (onSelect) {
-      onSelect(building.id)
+      onSelect(building.id);
     }
-  }
+  };
 
   return (
     <div
       className={cn(
-        'bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group',
-        isSelected && 'ring-2 ring-blue-500 shadow-xl',
-        onSelect && 'cursor-pointer'
+        "bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group",
+        isSelected && "ring-2 ring-blue-500 shadow-xl",
+        onSelect && "cursor-pointer",
       )}
       onClick={handleClick}
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <Image
-          src={building.images || '/placeholder-building.jpg'}
+          src={building.images || "/placeholder-building.jpg"}
           alt={building.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -81,7 +85,13 @@ export default function BuildingCard({ building, onSelect, isSelected }: Buildin
           <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center text-green-600 dark:text-green-400">
               <DollarSign className="h-4 w-4 mr-1" />
-              <span className="font-semibold">{building?.averagePrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}/tháng</span>
+              <span className="font-semibold">
+                {building?.averagePrice?.toLocaleString("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                })}
+                /tháng
+              </span>
             </div>
             <div className="flex items-center text-blue-600 dark:text-blue-400">
               <Users className="h-4 w-4 mr-1" />
@@ -126,11 +136,11 @@ export default function BuildingCard({ building, onSelect, isSelected }: Buildin
         <div className="mt-6">
           <Link
             href={`/buildings/${building.id}`}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2.5 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
+            className="w-full bg-brand text-white py-2.5 px-4 rounded-lg font-medium hover:bg-brand-dark transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center space-x-2"
             onClick={(e) => {
-              e.stopPropagation()
+              e.stopPropagation();
               if (onSelect) {
-                onSelect(building.id)
+                onSelect(building.id);
               }
             }}
           >
@@ -140,5 +150,5 @@ export default function BuildingCard({ building, onSelect, isSelected }: Buildin
         </div>
       </div>
     </div>
-  )
+  );
 }
