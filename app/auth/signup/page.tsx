@@ -43,31 +43,58 @@ export default function SignUpPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+    if (formData.password.length < 8) {
+      setError("Mật khẩu phải có ít nhất 8 ký tự");
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = (await apiClient.register({
+      const response = await apiClient.register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        studentId: formData.studentId,
-        phone: formData.phone,
-      })) as { success: boolean; message?: string };
+        confirmPassword: formData.confirmPassword,
+        studentId: formData.studentId || undefined,
+        phone: formData.phone || undefined,
+      });
 
-      if (response.success) {
-        setSuccess("Đăng ký thành công! Vui lòng đăng nhập.");
+      // Handle both direct auth response and gateway-wrapped response
+      const payload = (response as any)?.data ?? response;
+      const statusCode = payload?.statusCode ?? (response as any)?.status;
+      const isSuccess =
+        statusCode === 201 ||
+        statusCode === 200 ||
+        (payload?.data != null) ||
+        ((response as any)?.data != null);
+
+      if (isSuccess) {
+        const user = payload?.data ?? payload;
+        const userId = user?.id ?? (payload as any)?.id;
+        const email = user?.email ?? (payload as any)?.email ?? formData.email;
+
+        setSuccess("Đăng ký thành công! Vui lòng kiểm tra email và nhập mã xác thực.");
         setTimeout(() => {
-          router.push("/auth/signin");
-        }, 2000);
+          if (userId && email) {
+            router.push(
+              `/auth/verify-email?email=${encodeURIComponent(email)}&userId=${encodeURIComponent(userId)}`
+            );
+          } else {
+            router.push("/auth/signin");
+          }
+        }, 1500);
       } else {
-        setError(response.message || "Đã có lỗi xảy ra");
+        setError((response as { message?: string })?.message || "Đã có lỗi xảy ra");
       }
-    } catch (error: any) {
-      setError(error.message || "Đã có lỗi xảy ra, vui lòng thử lại");
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string; data?: { message?: string } } } }).response?.data?.data?.message ||
+            (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : err instanceof Error
+            ? err.message
+            : "Đã có lỗi xảy ra, vui lòng thử lại";
+      setError(message || "Đã có lỗi xảy ra, vui lòng thử lại");
     } finally {
       setIsLoading(false);
     }

@@ -44,3 +44,13 @@ export class ServerError extends ServiceError {
   }
 }
 
+/** Thrown when user tries to login but email is not verified yet */
+export class EmailNotVerifiedError extends ServiceError {
+  constructor(
+    public readonly userId: string,
+    public readonly email: string
+  ) {
+    super('Vui lòng xác thực email trước khi đăng nhập', 'EMAIL_NOT_VERIFIED', 403)
+  }
+}
+

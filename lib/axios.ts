@@ -13,7 +13,7 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios'
-import { NetworkError, ServerError, ValidationError } from '@/lib/errors'
+import { NetworkError, ServerError, ValidationError, EmailNotVerifiedError } from '@/lib/errors'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
@@ -36,12 +36,39 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    return response
+    const body = response.data as any;
+    if (body && typeof body === 'object' && body.statusCode >= 400) {
+      const status = body.statusCode;
+      const errorData = body;
+      const data = errorData?.data ?? errorData;
+
+      if (status === 403 && data?.code === 'EMAIL_NOT_VERIFIED' && data?.userId && data?.email) {
+        return Promise.reject(new EmailNotVerifiedError(data.userId, data.email));
+      }
+
+      if (status === 404) {
+        return Promise.reject(new ValidationError(errorData.message || 'Resource not found'));
+      }
+      
+      if (status >= 400 && status < 500) {
+        return Promise.reject(new ValidationError(errorData.message || `Client error: ${status}`));
+      }
+
+      return Promise.reject(new ServerError(errorData.message || `Server error: ${status}`, status));
+    }
+
+    return response;
   },
   (error: AxiosError) => {
     if (error.response) {
       const status = error.response.status
       const errorData = (error.response.data as any) || {}
+      const data = errorData?.data ?? errorData
+
+      // 403 with EMAIL_NOT_VERIFIED: preserve userId+email for redirect to verify page
+      if (status === 403 && data?.code === 'EMAIL_NOT_VERIFIED' && data?.userId && data?.email) {
+        throw new EmailNotVerifiedError(data.userId, data.email)
+      }
 
       if (status >= 400 && status < 500) {
         if (status === 404) {

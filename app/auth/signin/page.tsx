@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -11,12 +11,23 @@ export default function SignInPage() {
     email: "",
     password: "",
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const justVerified = searchParams.get("verified") === "1";
+
+  // Chuẩn Architecture: Pre-fill email từ localStorage nếu user đã từng chọn Ghi nhớ
+  useEffect(() => {
+    const savedEmail = window.localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setFormData((prev) => ({ ...prev, email: savedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,18 +38,38 @@ export default function SignInPage() {
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
+        rememberMe: rememberMe.toString(),
         redirect: false,
       });
       if (result?.error) {
-        setError("Email hoặc mật khẩu không đúng");
+        try {
+          const parsed = JSON.parse(result.error ?? "{}");
+          if (parsed?.code === "EMAIL_NOT_VERIFIED" && parsed?.userId && parsed?.email) {
+            router.push(
+              `/auth/verify-email?email=${encodeURIComponent(parsed.email)}&userId=${encodeURIComponent(parsed.userId)}`
+            );
+            return;
+          }
+        } catch {
+          /* not JSON, fall through */
+        }
+        // Change the fallback error text slightly
+        setError("Tài khoản chưa được xác thực hoặc thông tin đăng nhập không đúng.");
       } else {
+        // Prepare storage persistence
+        if (rememberMe) {
+          window.localStorage.setItem("rememberedEmail", formData.email);
+        } else {
+          window.localStorage.removeItem("rememberedEmail");
+        }
+
         const session = await getSession();
         if (session) {
           router.push(callbackUrl);
           router.refresh();
         }
       }
-    } catch (error) {
+    } catch {
       setError("Đã có lỗi xảy ra, vui lòng thử lại");
     } finally {
       setIsLoading(false);
@@ -64,6 +95,14 @@ export default function SignInPage() {
               Chào mừng bạn quay trở lại!
             </p>
           </div>
+
+          {justVerified && (
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-green-600 dark:text-green-400 text-sm">
+                Xác thực email thành công! Bạn có thể đăng nhập ngay.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -138,8 +177,10 @@ export default function SignInPage() {
               <div className="flex items-center">
                 <input
                   id="remember-me"
-                  name="remember-me"
+                  name="rememberMe"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                 />
                 <label

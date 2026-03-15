@@ -86,6 +86,7 @@ class ApiClient {
 
   /**
    * Login user
+   * @throws {EmailNotVerifiedError} When email exists but not verified
    */
   async login(credentials: { email: string; password: string }) {
     return this.request('/auth/login', {
@@ -95,16 +96,37 @@ class ApiClient {
   }
 
   /**
-   * Register new user
+   * Verify email with code from email
+   */
+  async verifyEmailCode(payload: { codeId: string; id: string }) {
+    return this.request('/auth/check-code', {
+      method: 'POST',
+      data: payload,
+    })
+  }
+
+  /**
+   * Resend verification code to email
+   */
+  async resendVerificationCode(payload: { id: string; email: string }) {
+    return this.request('/auth/resend-code', {
+      method: 'POST',
+      data: payload,
+    })
+  }
+
+  /**
+   * Register new user (auth-service: name, email, studentId?, phone?, password, confirmPassword)
    */
   async register(userData: {
     name: string
     email: string
     password: string
-    studentId: string
-    phone: string
+    confirmPassword: string
+    studentId?: string
+    phone?: string
   }) {
-    return this.request('/auth/register', {
+    return this.request<{ data?: unknown; statusCode?: number; message?: string }>('/auth/register', {
       method: 'POST',
       data: userData,
     })
@@ -366,6 +388,8 @@ export const apiClient = new ApiClient(API_BASE_URL)
 export const {
   login,
   register,
+  verifyEmailCode,
+  resendVerificationCode,
   getProfile,
   getBuildings,
   getBuildingById,
