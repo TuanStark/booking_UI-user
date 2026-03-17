@@ -86,11 +86,7 @@ export default function BuildingCard({
             <div className="flex items-center text-green-600 dark:text-green-400">
               <DollarSign className="h-4 w-4 mr-1" />
               <span className="font-semibold">
-                {building?.averagePrice?.toLocaleString("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                })}
-                /tháng
+                {building?.averagePrice?.toLocaleString("vi-VN")}đ /tháng
               </span>
             </div>
             <div className="flex items-center text-blue-600 dark:text-blue-400">

@@ -590,7 +590,7 @@ export default function RoomDetailPage() {
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-5">
                   <div className="text-center mb-5">
                     <div className="text-2xl font-semibold text-green-600 dark:text-green-400 mb-2">
-                      {room.price.toLocaleString()}đ/tháng
+                      {room.price.toLocaleString("vi-VN")}đ/tháng
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       Giá đã bao gồm điện nước

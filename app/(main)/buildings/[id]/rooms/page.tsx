@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { useState, useMemo } from 'react'
-import { useParams } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useMemo } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   Building2,
@@ -11,98 +11,101 @@ import {
   DollarSign,
   Star,
   Grid,
-  List
-} from 'lucide-react'
-import FilterBar from '@/components/FilterBar'
-import RoomCard from '@/components/RoomCard'
-import { LoadingState, EmptyState } from '@/components/ui/UtilityComponents'
-import { cn } from '@/utils/utils'
-import { MockDataService } from '@/services/mockDataService'
-import { Room, FilterState, SearchParams } from '@/types'
+  List,
+} from "lucide-react";
+import FilterBar from "@/components/FilterBar";
+import RoomCard from "@/components/RoomCard";
+import { LoadingState, EmptyState } from "@/components/ui/UtilityComponents";
+import { cn } from "@/utils/utils";
+import { MockDataService } from "@/services/mockDataService";
+import { Room, FilterState, SearchParams } from "@/types";
 
 export default function BuildingRoomsPage() {
-  const params = useParams()
-  const buildingId = params.id as string
+  const params = useParams();
+  const buildingId = params.id as string;
 
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>()
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>();
 
   // Get building and rooms data
-  const building = MockDataService.getBuildingById(buildingId)
-  const rooms = MockDataService.getRoomsByBuildingId(buildingId)
+  const building = MockDataService.getBuildingById(buildingId);
+  const rooms = MockDataService.getRoomsByBuildingId(buildingId);
 
   const [filters, setFilters] = useState<FilterState>({
-    building: '',
-    gender: '',
-    roomType: '',
-    priceRange: [0, 2000]
-  })
+    building: "",
+    gender: "",
+    roomType: "",
+    priceRange: [0, 2000],
+  });
 
   const [searchParams, setSearchParams] = useState<SearchParams>({
-    searchTerm: '',
-    sortBy: 'roomNumber',
-    filterType: 'all',
-    viewMode: 'grid'
-  })
+    searchTerm: "",
+    sortBy: "roomNumber",
+    filterType: "all",
+    viewMode: "grid",
+  });
 
   // Filter and search logic
   const filteredRooms = useMemo(() => {
-    let filtered = rooms
+    let filtered = rooms;
 
     // Apply search term
     if (searchParams.searchTerm) {
-      const searchLower = searchParams.searchTerm.toLowerCase()
-      filtered = filtered.filter(room =>
-        room.roomNumber.toLowerCase().includes(searchLower) ||
-        room.type.toLowerCase().includes(searchLower) ||
-        room.description.toLowerCase().includes(searchLower)
-      )
+      const searchLower = searchParams.searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (room) =>
+          room.roomNumber.toLowerCase().includes(searchLower) ||
+          room.type.toLowerCase().includes(searchLower) ||
+          room.description.toLowerCase().includes(searchLower),
+      );
     }
 
     // Apply filters
     if (filters.roomType) {
-      filtered = filtered.filter(room => room.type === filters.roomType)
+      filtered = filtered.filter((room) => room.type === filters.roomType);
     }
     if (filters.priceRange[0] > 0 || filters.priceRange[1] < 2000) {
-      filtered = filtered.filter(room =>
-        room.price >= filters.priceRange[0] && room.price <= filters.priceRange[1]
-      )
+      filtered = filtered.filter(
+        (room) =>
+          room.price >= filters.priceRange[0] &&
+          room.price <= filters.priceRange[1],
+      );
     }
 
     // Apply filter type
-    if (searchParams.filterType === 'available') {
-      filtered = filtered.filter(room => room.available)
+    if (searchParams.filterType === "available") {
+      filtered = filtered.filter((room) => room.available);
     }
 
     // Apply sorting
     filtered.sort((a, b) => {
       switch (searchParams.sortBy) {
-        case 'price':
-          return a.price - b.price
-        case 'roomNumber':
-          return a.roomNumber.localeCompare(b.roomNumber)
-        case 'rating':
-          return b.rating - a.rating
-        case 'floor':
-          return a.floor - b.floor
+        case "price":
+          return a.price - b.price;
+        case "roomNumber":
+          return a.roomNumber.localeCompare(b.roomNumber);
+        case "rating":
+          return b.rating - a.rating;
+        case "floor":
+          return a.floor - b.floor;
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    return filtered
-  }, [rooms, filters, searchParams])
+    return filtered;
+  }, [rooms, filters, searchParams]);
 
   const handleRoomSelect = (roomId: string) => {
-    setSelectedRoomId(roomId)
+    setSelectedRoomId(roomId);
     // Scroll to room card if in grid view
-    if (viewMode === 'grid') {
-      const element = document.getElementById(`room-${roomId}`)
+    if (viewMode === "grid") {
+      const element = document.getElementById(`room-${roomId}`);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-  }
+  };
 
   if (!building) {
     return (
@@ -118,7 +121,7 @@ export default function BuildingRoomsPage() {
           }
         />
       </div>
-    )
+    );
   }
 
   return (
@@ -128,11 +131,16 @@ export default function BuildingRoomsPage() {
         <div className="bg-white dark:bg-gray-800 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <nav className="flex items-center space-x-2 text-sm">
-              <Link href="/buildings" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              <Link
+                href="/buildings"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
                 Tòa nhà
               </Link>
               <span className="text-gray-400">/</span>
-              <span className="text-gray-900 dark:text-white font-medium">{building.name}</span>
+              <span className="text-gray-900 dark:text-white font-medium">
+                {building.name}
+              </span>
             </nav>
           </div>
         </div>
@@ -144,7 +152,7 @@ export default function BuildingRoomsPage() {
               {/* Building Image */}
               <div className="lg:w-1/3">
                 <img
-                  src={building.images || '/placeholder-building.jpg'}
+                  src={building.images || "/placeholder-building.jpg"}
                   alt={building.name}
                   className="w-full h-64 lg:h-80 object-cover rounded-2xl shadow-lg"
                 />
@@ -181,19 +189,25 @@ export default function BuildingRoomsPage() {
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {building.roomsCount}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Tổng phòng</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Tổng phòng
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {building.roomsCount}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Còn trống</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Còn trống
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {building.averagePrice.toLocaleString()}đ
+                      {building.averagePrice.toLocaleString("vi-VN")}đ
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Giá TB/tháng</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Giá TB/tháng
+                    </div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center justify-center mb-1">
@@ -202,7 +216,9 @@ export default function BuildingRoomsPage() {
                         {building.rating}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Đánh giá</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Đánh giá
+                    </div>
                   </div>
                 </div>
 
@@ -255,33 +271,35 @@ export default function BuildingRoomsPage() {
                     Danh sách phòng
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Tìm thấy <span className="font-semibold text-gray-900 dark:text-white">
+                    Tìm thấy{" "}
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {filteredRooms.length}
-                    </span> phòng
+                    </span>{" "}
+                    phòng
                   </p>
                 </div>
 
                 {/* View Mode Toggle */}
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode("grid")}
                     className={cn(
-                      'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200',
-                      viewMode === 'grid'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
+                      viewMode === "grid"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600",
                     )}
                   >
                     <Grid className="h-4 w-4 mr-2" />
                     Lưới
                   </button>
                   <button
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode("list")}
                     className={cn(
-                      'flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200',
-                      viewMode === 'list'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200",
+                      viewMode === "list"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600",
                     )}
                   >
                     <List className="h-4 w-4 mr-2" />
@@ -292,11 +310,13 @@ export default function BuildingRoomsPage() {
 
               {/* Rooms Content */}
               {filteredRooms.length > 0 ? (
-                <div className={cn(
-                  viewMode === 'grid'
-                    ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
-                    : 'space-y-4'
-                )}>
+                <div
+                  className={cn(
+                    viewMode === "grid"
+                      ? "grid grid-cols-1 md:grid-cols-2 gap-6"
+                      : "space-y-4",
+                  )}
+                >
                   {filteredRooms.map((room) => (
                     <div key={room.id} id={`room-${room.id}`}>
                       <RoomCard
@@ -320,6 +340,5 @@ export default function BuildingRoomsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   X,
   Calendar,
@@ -8,140 +8,154 @@ import {
   CheckCircle,
   CreditCard,
   Banknote,
-  Smartphone
-} from 'lucide-react'
-import { cn } from '@/utils/utils'
-import { Room, BookingFormData } from '@/types'
-import { useUser } from '@/contexts/UserContext'
+  Smartphone,
+} from "lucide-react";
+import { cn } from "@/utils/utils";
+import { Room, BookingFormData } from "@/types";
+import { useUser } from "@/contexts/UserContext";
 
 interface BookingModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (data: BookingFormData) => void
-  room: Room
-  building: any
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: BookingFormData) => void;
+  room: Room;
+  building: any;
 }
 
-export default function BookingModal({ isOpen, onClose, onSubmit, room, building }: BookingModalProps) {
-  const { user } = useUser()
-  const [currentStep, setCurrentStep] = useState(1)
+export default function BookingModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  room,
+  building,
+}: BookingModalProps) {
+  const { user } = useUser();
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<BookingFormData>({
     // Personal Info
-    fullName: '',
-    email: '',
-    phone: '',
-    studentId: '',
+    fullName: "",
+    email: "",
+    phone: "",
+    studentId: "",
 
     // Booking Details
-    moveInDate: '',
-    moveOutDate: '',
+    moveInDate: "",
+    moveOutDate: "",
     duration: 12,
 
     // Payment
-    paymentMethod: 'VIETQR',
+    paymentMethod: "VIETQR",
 
     // Additional Info
-    specialRequests: '',
-    emergencyContact: '',
-    emergencyPhone: '',
+    specialRequests: "",
+    emergencyContact: "",
+    emergencyPhone: "",
 
     // Terms
     agreeToTerms: false,
-    agreeToPrivacy: false
-  })
+    agreeToPrivacy: false,
+  });
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Pre-fill user information when modal opens
   useEffect(() => {
     if (isOpen && user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         // Pre-fill user info only if fields are empty (preserve user edits during session)
-        fullName: prev.fullName || user.name || '',
-        email: prev.email || user.email || '',
-        phone: prev.phone || user.phone || '',
+        fullName: prev.fullName || user.name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phone || "",
         // Use user id as studentId if available
-        studentId: prev.studentId || user.id || '',
-      }))
+        studentId: prev.studentId || user.id || "",
+      }));
     }
-  }, [isOpen, user])
+  }, [isOpen, user]);
 
   // Reset form and step when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setCurrentStep(1)
-      setErrors({})
+      setCurrentStep(1);
+      setErrors({});
       // Reset all form fields to empty
       setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        studentId: '',
-        moveInDate: '',
-        moveOutDate: '',
+        fullName: "",
+        email: "",
+        phone: "",
+        studentId: "",
+        moveInDate: "",
+        moveOutDate: "",
         duration: 12,
-        paymentMethod: 'VIETQR',
-        specialRequests: '',
-        emergencyContact: '',
-        emergencyPhone: '',
+        paymentMethod: "VIETQR",
+        specialRequests: "",
+        emergencyContact: "",
+        emergencyPhone: "",
         agreeToTerms: false,
         agreeToPrivacy: false,
-      })
+      });
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (step === 1) {
-      if (!formData.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên'
-      if (!formData.email.trim()) newErrors.email = 'Vui lòng nhập email'
-      if (!formData.phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại'
-      if (!formData.studentId.trim()) newErrors.studentId = 'Vui lòng nhập mã sinh viên'
+      if (!formData.fullName.trim())
+        newErrors.fullName = "Vui lòng nhập họ tên";
+      if (!formData.email.trim()) newErrors.email = "Vui lòng nhập email";
+      if (!formData.phone.trim())
+        newErrors.phone = "Vui lòng nhập số điện thoại";
+      if (!formData.studentId.trim())
+        newErrors.studentId = "Vui lòng nhập mã sinh viên";
     }
 
     if (step === 2) {
-      if (!formData.moveInDate) newErrors.moveInDate = 'Vui lòng chọn ngày nhận phòng'
-      if (!formData.moveOutDate) newErrors.moveOutDate = 'Vui lòng chọn ngày trả phòng'
-      if (formData.duration && formData.duration < 1) newErrors.duration = 'Thời gian thuê phải ít nhất 1 tháng'
+      if (!formData.moveInDate)
+        newErrors.moveInDate = "Vui lòng chọn ngày nhận phòng";
+      if (!formData.moveOutDate)
+        newErrors.moveOutDate = "Vui lòng chọn ngày trả phòng";
+      if (formData.duration && formData.duration < 1)
+        newErrors.duration = "Thời gian thuê phải ít nhất 1 tháng";
     }
 
     if (step === 3) {
-      if (!formData.agreeToTerms) newErrors.agreeToTerms = 'Vui lòng đồng ý với điều khoản'
-      if (!formData.agreeToPrivacy) newErrors.agreeToPrivacy = 'Vui lòng đồng ý với chính sách bảo mật'
+      if (!formData.agreeToTerms)
+        newErrors.agreeToTerms = "Vui lòng đồng ý với điều khoản";
+      if (!formData.agreeToPrivacy)
+        newErrors.agreeToPrivacy = "Vui lòng đồng ý với chính sách bảo mật";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const handlePrev = () => {
-    setCurrentStep(currentStep - 1)
-  }
+    setCurrentStep(currentStep - 1);
+  };
 
   const handleSubmit = () => {
-    console.log('formData booking modal', formData)
+    console.log("formData booking modal", formData);
     if (validateStep(currentStep)) {
-      onSubmit(formData)
+      onSubmit(formData);
     }
-  }
+  };
 
   const calculateTotal = () => {
-    return formData.duration * room.price
-  }
+    return formData.duration * room.price;
+  };
 
   const calculateDeposit = () => {
-    return Math.round(calculateTotal() * 0.3) // 30% deposit
-  }
+    return Math.round(calculateTotal() * 0.3); // 30% deposit
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -171,34 +185,44 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
           <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900">
             <div className="flex items-center justify-between">
               {[
-                { step: 1, title: 'Thông tin cá nhân', icon: User },
-                { step: 2, title: 'Chi tiết đặt phòng', icon: Calendar },
-                { step: 3, title: 'Xác nhận & Thanh toán', icon: CheckCircle }
+                { step: 1, title: "Thông tin cá nhân", icon: User },
+                { step: 2, title: "Chi tiết đặt phòng", icon: Calendar },
+                { step: 3, title: "Xác nhận & Thanh toán", icon: CheckCircle },
               ].map(({ step, title, icon: Icon }, index) => (
                 <div key={step} className="flex items-center">
-                  <div className={cn(
-                    'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold',
-                    currentStep >= step
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                  )}>
-                    {currentStep > step ? <CheckCircle className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold",
+                      currentStep >= step
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400",
+                    )}
+                  >
+                    {currentStep > step ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : (
+                      <Icon className="h-4 w-4" />
+                    )}
                   </div>
-                  <span className={cn(
-                    'ml-2 text-sm font-medium',
-                    currentStep >= step
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-gray-500 dark:text-gray-400'
-                  )}>
+                  <span
+                    className={cn(
+                      "ml-2 text-sm font-medium",
+                      currentStep >= step
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-500 dark:text-gray-400",
+                    )}
+                  >
                     {title}
                   </span>
                   {index < 3 && (
-                    <div className={cn(
-                      'w-16 h-0.5 mx-4',
-                      currentStep > step
-                        ? 'bg-blue-500'
-                        : 'bg-gray-200 dark:bg-gray-700'
-                    )} />
+                    <div
+                      className={cn(
+                        "w-16 h-0.5 mx-4",
+                        currentStep > step
+                          ? "bg-blue-500"
+                          : "bg-gray-200 dark:bg-gray-700",
+                      )}
+                    />
                   )}
                 </div>
               ))}
@@ -222,15 +246,21 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <input
                       type="text"
                       value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullName: e.target.value })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.fullName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.fullName
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                       placeholder="Nhập họ và tên đầy đủ"
                     />
                     {errors.fullName && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.fullName}
+                      </p>
                     )}
                   </div>
 
@@ -241,15 +271,21 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.email
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                       placeholder="example@email.com"
                     />
                     {errors.email && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.email}
+                      </p>
                     )}
                   </div>
 
@@ -260,15 +296,21 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.phone
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                       placeholder="0123456789"
                     />
                     {errors.phone && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.phone}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.phone}
+                      </p>
                     )}
                   </div>
 
@@ -279,15 +321,21 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <input
                       type="text"
                       value={formData.studentId}
-                      onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, studentId: e.target.value })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.studentId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.studentId
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                       placeholder="SV123456"
                     />
                     {errors.studentId && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.studentId}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.studentId}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -309,14 +357,20 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <input
                       type="date"
                       value={formData.moveInDate}
-                      onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, moveInDate: e.target.value })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.moveInDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.moveInDate
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                     />
                     {errors.moveInDate && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.moveInDate}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.moveInDate}
+                      </p>
                     )}
                   </div>
 
@@ -327,14 +381,23 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     <input
                       type="date"
                       value={formData.moveOutDate}
-                      onChange={(e) => setFormData({ ...formData, moveOutDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          moveOutDate: e.target.value,
+                        })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.moveOutDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.moveOutDate
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                     />
                     {errors.moveOutDate && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.moveOutDate}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.moveOutDate}
+                      </p>
                     )}
                   </div>
 
@@ -347,41 +410,72 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       min="1"
                       max="24"
                       value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 1 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          duration: parseInt(e.target.value) || 1,
+                        })
+                      }
                       className={cn(
-                        'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.duration ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white",
+                        errors.duration
+                          ? "border-red-500"
+                          : "border-gray-300 dark:border-gray-600",
                       )}
                     />
                     {errors.duration && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.duration}</p>
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.duration}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 {/* Room Summary */}
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Tóm tắt phòng</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+                    Tóm tắt phòng
+                  </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Phòng:</span>
-                      <span className="text-gray-900 dark:text-white">{room.roomNumber}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Phòng:
+                      </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {room.roomNumber}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Loại:</span>
-                      <span className="text-gray-900 dark:text-white">{room.type}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Loại:
+                      </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {room.type}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Giá/tháng:</span>
-                      <span className="text-gray-900 dark:text-white">{room.price.toLocaleString()}đ</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Giá/tháng:
+                      </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {room.price.toLocaleString("vi-VN")}đ
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Thời gian:</span>
-                      <span className="text-gray-900 dark:text-white">{formData.duration} tháng</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Thời gian:
+                      </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {formData.duration} tháng
+                      </span>
                     </div>
                     <div className="flex justify-between font-semibold border-t border-gray-200 dark:border-gray-600 pt-2">
-                      <span className="text-gray-900 dark:text-white">Tổng cộng:</span>
-                      <span className="text-green-600 dark:text-green-400">{calculateTotal().toLocaleString()}đ</span>
+                      <span className="text-gray-900 dark:text-white">
+                        Tổng cộng:
+                      </span>
+                      <span className="text-green-600 dark:text-green-400">
+                        {calculateTotal().toLocaleString("vi-VN")}đ
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -402,64 +496,96 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'VIETQR' })}
+                      onClick={() =>
+                        setFormData({ ...formData, paymentMethod: "VIETQR" })
+                      }
                       className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'VIETQR'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                        "p-4 border rounded-lg text-left transition-colors duration-200",
+                        formData.paymentMethod === "VIETQR"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                          : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
                       )}
                     >
                       <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">VietQR</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Quét mã QR ngân hàng</div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        VietQR
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Quét mã QR ngân hàng
+                      </div>
                     </button>
 
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'VNPAY' })}
+                      onClick={() =>
+                        setFormData({ ...formData, paymentMethod: "VNPAY" })
+                      }
                       className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'VNPAY'
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                        "p-4 border rounded-lg text-left transition-colors duration-200",
+                        formData.paymentMethod === "VNPAY"
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                          : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
                       )}
                     >
                       <CreditCard className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">VNPay</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán qua VNPay</div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        VNPay
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Thanh toán qua VNPay
+                      </div>
                     </button>
 
                     <button
-                      onClick={() => setFormData({ ...formData, paymentMethod: 'MOMO' })}
+                      onClick={() =>
+                        setFormData({ ...formData, paymentMethod: "MOMO" })
+                      }
                       className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
-                        formData.paymentMethod === 'MOMO'
-                          ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                        "p-4 border rounded-lg text-left transition-colors duration-200",
+                        formData.paymentMethod === "MOMO"
+                          ? "border-pink-500 bg-pink-50 dark:bg-pink-900/20"
+                          : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500",
                       )}
                     >
                       <Smartphone className="h-6 w-6 text-pink-600 dark:text-pink-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">MoMo</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Ví điện tử MoMo</div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        MoMo
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Ví điện tử MoMo
+                      </div>
                     </button>
                   </div>
                 </div>
 
                 {/* Payment Summary */}
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Tóm tắt thanh toán</h4>
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+                    Tóm tắt thanh toán
+                  </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Tiền phòng ({formData.duration} tháng):</span>
-                      <span className="text-gray-900 dark:text-white">{calculateTotal().toLocaleString()}đ</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Tiền phòng ({formData.duration} tháng):
+                      </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {calculateTotal().toLocaleString("vi-VN")}đ
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Tiền cọc (30%):</span>
-                      <span className="text-gray-900 dark:text-white">{calculateDeposit().toLocaleString()}đ</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Tiền cọc (30%):
+                      </span>
+                      <span className="text-gray-900 dark:text-white">
+                        {calculateDeposit().toLocaleString("vi-VN")}đ
+                      </span>
                     </div>
                     <div className="flex justify-between font-semibold text-lg border-t border-gray-200 dark:border-gray-600 pt-3">
-                      <span className="text-gray-900 dark:text-white">Tổng cộng:</span>
-                      <span className="text-green-600 dark:text-green-400">{calculateTotal().toLocaleString()}đ</span>
+                      <span className="text-gray-900 dark:text-white">
+                        Tổng cộng:
+                      </span>
+                      <span className="text-green-600 dark:text-green-400">
+                        {calculateTotal().toLocaleString("vi-VN")}đ
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -471,7 +597,12 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                   </label>
                   <textarea
                     value={formData.specialRequests}
-                    onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        specialRequests: e.target.value,
+                      })
+                    }
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                     placeholder="Nhập yêu cầu đặc biệt (ví dụ: tầng cao, hướng cửa sổ, v.v.)"
@@ -485,15 +616,29 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       type="checkbox"
                       id="terms"
                       checked={formData.agreeToTerms}
-                      onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          agreeToTerms: e.target.checked,
+                        })
+                      }
                       className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="terms" className="text-sm text-gray-600 dark:text-gray-400">
-                      Tôi đồng ý với <a href="#" className="text-blue-600 hover:underline">điều khoản và điều kiện</a> của dịch vụ *
+                    <label
+                      htmlFor="terms"
+                      className="text-sm text-gray-600 dark:text-gray-400"
+                    >
+                      Tôi đồng ý với{" "}
+                      <a href="#" className="text-blue-600 hover:underline">
+                        điều khoản và điều kiện
+                      </a>{" "}
+                      của dịch vụ *
                     </label>
                   </div>
                   {errors.agreeToTerms && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{errors.agreeToTerms}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {errors.agreeToTerms}
+                    </p>
                   )}
 
                   <div className="flex items-start space-x-3">
@@ -501,15 +646,29 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       type="checkbox"
                       id="privacy"
                       checked={formData.agreeToPrivacy}
-                      onChange={(e) => setFormData({ ...formData, agreeToPrivacy: e.target.checked })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          agreeToPrivacy: e.target.checked,
+                        })
+                      }
                       className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="privacy" className="text-sm text-gray-600 dark:text-gray-400">
-                      Tôi đồng ý với <a href="#" className="text-blue-600 hover:underline">chính sách bảo mật</a> *
+                    <label
+                      htmlFor="privacy"
+                      className="text-sm text-gray-600 dark:text-gray-400"
+                    >
+                      Tôi đồng ý với{" "}
+                      <a href="#" className="text-blue-600 hover:underline">
+                        chính sách bảo mật
+                      </a>{" "}
+                      *
                     </label>
                   </div>
                   {errors.agreeToPrivacy && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{errors.agreeToPrivacy}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {errors.agreeToPrivacy}
+                    </p>
                   )}
                 </div>
               </div>
@@ -522,7 +681,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
               onClick={currentStep === 1 ? onClose : handlePrev}
               className="px-6 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
             >
-              {currentStep === 1 ? 'Hủy' : 'Quay lại'}
+              {currentStep === 1 ? "Hủy" : "Quay lại"}
             </button>
 
             <div className="flex space-x-3">
@@ -546,5 +705,5 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
         </div>
       </div>
     </div>
-  )
+  );
 }

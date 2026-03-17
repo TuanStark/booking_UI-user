@@ -63,7 +63,7 @@ export default function RoomCard({
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {room?.price?.toLocaleString() || "0"}đ/tháng
+                  {room?.price?.toLocaleString("vi-VN") || "0"}đ/tháng
                 </div>
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
@@ -173,7 +173,7 @@ export default function RoomCard({
           {/* Price and Rating */}
           <div className="flex items-center justify-between">
             <div className="text-xl font-bold text-green-600 dark:text-green-400">
-              {room?.price?.toLocaleString() || "0"}đ/tháng
+              {room?.price?.toLocaleString("vi-VN") || "0"}đ/tháng
             </div>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
