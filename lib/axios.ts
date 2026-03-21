@@ -17,6 +17,39 @@ import { NetworkError, ServerError, ValidationError, EmailNotVerifiedError } fro
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
+/**
+ * Normalize gateway / Nest error bodies:
+ * - Gateway AllExceptionsFilter: { status, error: string | { message } }
+ * - Review/auth: { statusCode, message }
+ */
+function parseApiErrorMessage(payload: unknown, status: number, fallback: string): string {
+  if (payload == null || typeof payload !== 'object') {
+    return typeof payload === 'string' && payload.trim() ? payload : fallback
+  }
+  const p = payload as Record<string, unknown>
+
+  const fromMessage = (m: unknown): string | null => {
+    if (typeof m === 'string' && m.trim()) return m
+    if (Array.isArray(m)) {
+      const parts = m.filter((x) => typeof x === 'string') as string[]
+      if (parts.length) return parts.join(', ')
+    }
+    return null
+  }
+
+  const top = fromMessage(p.message)
+  if (top) return top
+
+  const err = p.error
+  if (typeof err === 'string' && err.trim()) return err
+  if (err && typeof err === 'object') {
+    const nested = fromMessage((err as Record<string, unknown>).message)
+    if (nested) return nested
+  }
+
+  return fallback
+}
+
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -47,14 +80,27 @@ axiosInstance.interceptors.response.use(
       }
 
       if (status === 404) {
-        return Promise.reject(new ValidationError(errorData.message || 'Resource not found'));
-      }
-      
-      if (status >= 400 && status < 500) {
-        return Promise.reject(new ValidationError(errorData.message || `Client error: ${status}`));
+        return Promise.reject(
+          new ValidationError(
+            parseApiErrorMessage(errorData, status, 'Resource not found'),
+          ),
+        )
       }
 
-      return Promise.reject(new ServerError(errorData.message || `Server error: ${status}`, status));
+      if (status >= 400 && status < 500) {
+        return Promise.reject(
+          new ValidationError(
+            parseApiErrorMessage(errorData, status, `Client error: ${status}`),
+          ),
+        )
+      }
+
+      return Promise.reject(
+        new ServerError(
+          parseApiErrorMessage(errorData, status, `Server error: ${status}`),
+          status,
+        ),
+      )
     }
 
     return response;
@@ -72,19 +118,26 @@ axiosInstance.interceptors.response.use(
 
       if (status >= 400 && status < 500) {
         if (status === 404) {
-          throw new ValidationError(errorData.message || 'Resource not found')
+          throw new ValidationError(
+            parseApiErrorMessage(errorData, status, 'Resource not found'),
+          )
         }
-        throw new ValidationError(errorData.message || `Client error: ${status}`)
+        throw new ValidationError(
+          parseApiErrorMessage(errorData, status, `Client error: ${status}`),
+        )
       }
 
       if (status >= 500) {
         throw new ServerError(
-          errorData.message || `Server error: ${status}`,
-          status
+          parseApiErrorMessage(errorData, status, `Server error: ${status}`),
+          status,
         )
       }
 
-      throw new ServerError(errorData.message || `HTTP error: ${status}`, status)
+      throw new ServerError(
+        parseApiErrorMessage(errorData, status, `HTTP error: ${status}`),
+        status,
+      )
     } else if (error.request) {
       throw new NetworkError('Network request failed. Please check your connection.')
     } else {

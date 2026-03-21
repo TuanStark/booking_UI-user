@@ -1,8 +1,10 @@
 export enum ReviewStatus {
+    VISIBLE = 'VISIBLE',
+    HIDDEN = 'HIDDEN',
+    DELETED = 'DELETED',
     PENDING = 'PENDING',
     APPROVED = 'APPROVED',
     REJECTED = 'REJECTED',
-    HIDDEN = 'HIDDEN',
 }
 
 export interface UserSummary {
@@ -22,7 +24,7 @@ export interface Review {
     ratingPrice?: number | null;
     ratingService?: number | null;
     comment?: string | null;
-    status: ReviewStatus;
+    status: ReviewStatus | string;
     createdAt: string; // ISO date string
     updatedAt: string; // ISO date string
     user?: UserSummary;

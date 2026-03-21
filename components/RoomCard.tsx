@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { Room } from "@/types";
+import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
 
 interface RoomCardProps {
   room: Room;
@@ -65,11 +66,13 @@ export default function RoomCard({
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {room?.price?.toLocaleString() || "0"}đ/tháng
                 </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
-                  <span>{room?.rating || 0}</span>
-                  <span className="ml-2">({room?.reviews || 0} đánh giá)</span>
-                </div>
+                <RatingSummaryBadge
+                  averageRating={room?.rating ?? 0}
+                  totalReviews={room?.reviews ?? 0}
+                  mode="full"
+                  className="text-sm"
+                  href={room?.id ? `/rooms/${room.id}#reviews` : undefined}
+                />
               </div>
             </div>
 
@@ -89,7 +92,7 @@ export default function RoomCard({
                       : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
                   )}
                 >
-                  {room?.available ? "Còn trống" : "Đã thuê"}
+                  {room?.available ? "Còn trống" : "Hết phòng"}
                 </span>
               </div>
               <Link
@@ -136,17 +139,17 @@ export default function RoomCard({
                 : "bg-red-500 text-white",
             )}
           >
-            {room?.available ? "Còn trống" : "Đã thuê"}
+            {room?.available ? "Còn trống" : "Hết phòng"}
           </div>
         </div>
         <div className="absolute bottom-4 left-4">
-          <div className="bg-white dark:bg-gray-800 px-2 py-1 rounded-full shadow-md">
-            <div className="flex items-center space-x-1">
-              <Star className="h-3 w-3 text-yellow-500 fill-current" />
-              <span className="text-xs font-semibold text-gray-900 dark:text-white">
-                {room?.rating || 0}
-              </span>
-            </div>
+          <div className="bg-white/95 dark:bg-gray-800/95 px-2 py-1 rounded-full shadow-md backdrop-blur-sm">
+            <RatingSummaryBadge
+              averageRating={room?.rating ?? 0}
+              totalReviews={room?.reviews ?? 0}
+              mode="minimal"
+              href={room?.id ? `/rooms/${room.id}#reviews` : undefined}
+            />
           </div>
         </div>
       </div>
@@ -175,10 +178,12 @@ export default function RoomCard({
             <div className="text-xl font-bold text-green-600 dark:text-green-400">
               {room?.price?.toLocaleString() || "0"}đ/tháng
             </div>
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
-              <span>{room?.rating || 0}</span>
-            </div>
+            <RatingSummaryBadge
+              averageRating={room?.rating ?? 0}
+              totalReviews={room?.reviews ?? 0}
+              mode="compact"
+              href={room?.id ? `/rooms/${room.id}#reviews` : undefined}
+            />
           </div>
 
           {/* Room Info */}

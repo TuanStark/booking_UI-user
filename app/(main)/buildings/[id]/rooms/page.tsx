@@ -9,12 +9,12 @@ import {
   MapPin,
   Users,
   DollarSign,
-  Star,
   Grid,
   List
 } from 'lucide-react'
 import FilterBar from '@/components/FilterBar'
 import RoomCard from '@/components/RoomCard'
+import { RatingSummaryBadge } from '@/components/reviews/RatingSummaryBadge'
 import { LoadingState, EmptyState } from '@/components/ui/UtilityComponents'
 import { cn } from '@/utils/utils'
 import { MockDataService } from '@/services/mockDataService'
@@ -196,11 +196,12 @@ export default function BuildingRoomsPage() {
                     <div className="text-sm text-gray-600 dark:text-gray-400">Giá TB/tháng</div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="flex items-center justify-center mb-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">
-                        {building.rating}
-                      </span>
+                    <div className="flex justify-center mb-2">
+                      <RatingSummaryBadge
+                        averageRating={building.rating}
+                        totalReviews={building.totalReviews ?? 0}
+                        mode="compact"
+                      />
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Đánh giá</div>
                   </div>

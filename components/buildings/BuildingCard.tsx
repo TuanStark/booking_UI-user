@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Star, MapPin, Users, DollarSign, Eye } from "lucide-react";
+import { MapPin, Users, DollarSign, Eye } from "lucide-react";
 import { Building } from "@/types";
 import { cn } from "@/lib/utils";
+import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
 
 interface BuildingCardProps {
   building: Building;
@@ -41,16 +42,16 @@ export default function BuildingCard({
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {/* <div className="absolute top-4 right-4">
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-md">
-            <div className="flex items-center space-x-1">
-              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                {building.rating.toFixed(1)}
-              </span>
-            </div>
+        <div className="absolute top-4 right-4">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-md max-w-[min(100%,11rem)]">
+            <RatingSummaryBadge
+              averageRating={building.rating}
+              totalReviews={building.totalReviews ?? 0}
+              mode="compact"
+              href={`/buildings/${building.id}#rooms`}
+            />
           </div>
-        </div> */}
+        </div>
         {building.roomsCount > 0 && (
           <div className="absolute bottom-4 left-4">
             <div className="bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-md">
@@ -118,18 +119,13 @@ export default function BuildingCard({
             </div>
           )}
 
-          {/* Reviews */}
-          {/* {building.totalReviews > 0 && (
-            <div className="flex items-center space-x-1 text-sm">
-              <Star className="h-4 w-4 text-yellow-500 fill-current" />
-              <span className="font-medium text-gray-900 dark:text-white">
-                {building.rating?.toFixed(1)}
-              </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                ({building.totalReviews} đánh giá)
-              </span>
-            </div>
-          )} */}
+          <RatingSummaryBadge
+            averageRating={building.rating}
+            totalReviews={building.totalReviews ?? 0}
+            mode="full"
+            className="text-sm pt-1"
+            href={`/buildings/${building.id}#rooms`}
+          />
         </div>
 
         {/* Action Button */}

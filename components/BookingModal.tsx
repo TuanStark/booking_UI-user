@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   X,
   Calendar,
@@ -11,6 +11,15 @@ import {
   Smartphone
 } from 'lucide-react'
 import { cn } from '@/utils/utils'
+import {
+  BOOKING_MIN_STAY_DAYS,
+  addCalendarDays,
+  formatDateInputValue,
+  getMinMoveOutInputValue,
+  getTodayMinInputValue,
+  startOfTodayLocal,
+  validateBookingDates,
+} from '@/utils/bookingDates'
 import { Room, BookingFormData } from '@/types'
 import { useUser } from '@/contexts/UserContext'
 
@@ -51,6 +60,16 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const minCheckIn = getTodayMinInputValue()
+  const minCheckOut = useMemo(() => {
+    return (
+      getMinMoveOutInputValue(formData.moveInDate) ??
+      formatDateInputValue(
+        addCalendarDays(startOfTodayLocal(), BOOKING_MIN_STAY_DAYS),
+      )
+    )
+  }, [formData.moveInDate])
 
   // Pre-fill user information when modal opens
   useEffect(() => {
@@ -102,9 +121,13 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     }
 
     if (step === 2) {
-      if (!formData.moveInDate) newErrors.moveInDate = 'Vui lòng chọn ngày nhận phòng'
-      if (!formData.moveOutDate) newErrors.moveOutDate = 'Vui lòng chọn ngày trả phòng'
-      if (formData.duration && formData.duration < 1) newErrors.duration = 'Thời gian thuê phải ít nhất 1 tháng'
+      Object.assign(
+        newErrors,
+        validateBookingDates(formData.moveInDate, formData.moveOutDate),
+      )
+      if (formData.duration && formData.duration < 1) {
+        newErrors.duration = 'Thời gian thuê phải ít nhất 1 tháng'
+      }
     }
 
     if (step === 3) {
@@ -127,10 +150,19 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
   }
 
   const handleSubmit = () => {
-    console.log('formData booking modal', formData)
-    if (validateStep(currentStep)) {
-      onSubmit(formData)
+    if (!validateStep(3)) return
+
+    const dateErrors = validateBookingDates(
+      formData.moveInDate,
+      formData.moveOutDate,
+    )
+    if (Object.keys(dateErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...dateErrors }))
+      setCurrentStep(2)
+      return
     }
+
+    onSubmit(formData)
   }
 
   const calculateTotal = () => {
@@ -300,6 +332,11 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Chi tiết đặt phòng
                 </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Không được chọn ngày nhận trong quá khứ. Thời gian lưu trú tối thiểu{' '}
+                  {BOOKING_MIN_STAY_DAYS} ngày (ngày trả phòng cách ngày nhận ít nhất{' '}
+                  {BOOKING_MIN_STAY_DAYS} ngày).
+                </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -308,8 +345,19 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     </label>
                     <input
                       type="date"
+                      min={minCheckIn}
                       value={formData.moveInDate}
-                      onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })}
+                      onChange={(e) => {
+                        const moveInDate = e.target.value
+                        setFormData((prev) => {
+                          const minOut = getMinMoveOutInputValue(moveInDate)
+                          let moveOutDate = prev.moveOutDate
+                          if (minOut && moveOutDate && moveOutDate < minOut) {
+                            moveOutDate = ''
+                          }
+                          return { ...prev, moveInDate, moveOutDate }
+                        })
+                      }}
                       className={cn(
                         'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
                         errors.moveInDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
@@ -326,8 +374,11 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     </label>
                     <input
                       type="date"
+                      min={minCheckOut}
                       value={formData.moveOutDate}
-                      onChange={(e) => setFormData({ ...formData, moveOutDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, moveOutDate: e.target.value })
+                      }
                       className={cn(
                         'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
                         errors.moveOutDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'

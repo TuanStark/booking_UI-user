@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   MapPin,
-  Star,
   Phone,
   Calendar,
   BedDouble,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import BuildingRoomsList from "@/components/buildings/BuildingRoomsList";
 import BuildingImageCarousel from "@/components/buildings/BuildingImageCarousel";
+import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
 import { BuildingService } from "@/services/buildingService";
 import type { Building, Room, ContactInfo } from "@/types";
 
@@ -271,10 +271,12 @@ export default async function BuildingDetailPage({
                       <MapPin className="h-5 w-5" />
                       {building.address}
                     </span>
-                    <span className="inline-flex items-center gap-2">
-                      <Star className="h-5 w-5 text-yellow-400" />
-                      {building.rating} · {building.totalReviews} đánh giá
-                    </span>
+                    <RatingSummaryBadge
+                      averageRating={building.rating}
+                      totalReviews={building.totalReviews ?? 0}
+                      variant="onDark"
+                      mode="full"
+                    />
                   </div>
                   <p className="text-base text-white/80 leading-relaxed max-w-3xl">
                     {building.description ||
@@ -493,7 +495,7 @@ export default async function BuildingDetailPage({
           </div>
         </section>
 
-        <section className="pb-24">
+        <section id="rooms" className="pb-24 scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>

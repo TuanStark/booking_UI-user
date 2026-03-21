@@ -11,7 +11,7 @@ interface ReviewSummaryProps {
 
 export function ReviewSummary({ totalReviews, averageRating, ratingBreakdown }: ReviewSummaryProps) {
     return (
-        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start bg-white p-6 rounded-xl border">
+        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start bg-white dark:bg-gray-800/80 p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="text-center md:text-left">
                 <div className="text-5xl font-bold text-primary">{averageRating.toFixed(1)}</div>
                 <div className="flex justify-center md:justify-start my-2">

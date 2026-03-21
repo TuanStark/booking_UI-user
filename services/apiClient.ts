@@ -262,6 +262,22 @@ class ApiClient {
   }
 
   /**
+   * Returns { bookingId: string | null } when the user may review this room (completed stay).
+   */
+  async getCheckReviewed(roomId: string, token: string) {
+    const q = encodeURIComponent(roomId)
+    return this.request<{
+      bookingId: string | null
+      alreadyReviewed?: boolean
+    }>(`/bookings/check-reviewed?roomId=${q}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  }
+
+  /**
    * Get booking by ID
    */
   async getBookingById(id: string, token: string) {
@@ -319,6 +335,33 @@ class ApiClient {
   }) {
     const queryString = params ? serializeQueryParams(params) : ''
     return this.request(`/reviews/room/${roomId}${queryString ? `?${queryString}` : ''}`, {
+      method: 'GET',
+    })
+  }
+
+  /**
+   * Danh sách đánh giá công khai (review-service GET /reviews), dùng trang chủ / testimonials.
+   */
+  async getPublicReviews(params?: { page?: number; limit?: number }) {
+    const queryString = serializeQueryParams({
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 12,
+      status: 'VISIBLE',
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    })
+    return this.request<unknown>(`/reviews?${queryString}`, {
+      method: 'GET',
+    })
+  }
+
+  /** Aggregated rating for a room (review-service). */
+  async getRoomRatingStats(roomId: string) {
+    return this.request<{
+      roomId?: string
+      totalReviews?: number
+      avgRating?: string | number
+    }>(`/rating-stats/${encodeURIComponent(roomId)}`, {
       method: 'GET',
     })
   }
@@ -398,10 +441,13 @@ export const {
   getRoomById,
   createBooking,
   getUserBookings,
+  getCheckReviewed,
   getBookingById,
   updateBookingStatus,
   createReview,
   getRoomReviews,
+  getPublicReviews,
+  getRoomRatingStats,
   getNotifications,
   markNotificationAsRead,
   uploadImage,

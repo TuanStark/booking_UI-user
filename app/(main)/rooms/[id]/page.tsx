@@ -13,7 +13,6 @@ import {
   Bed,
   Bath,
   Square,
-  Star,
   Calendar,
   DollarSign,
   CheckCircle,
@@ -30,6 +29,8 @@ import {
 } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
+import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
+import { useRoomRatingStats } from "@/hooks/useRoomRatingStats";
 import { RoomService } from "@/services/roomService";
 import { BookingService } from "@/services/bookingService";
 import { cn } from "@/utils/utils";
@@ -49,6 +50,7 @@ export default function RoomDetailPage() {
   const params = useParams();
   const router = useRouter();
   const roomId = params.id as string;
+  const ratingStats = useRoomRatingStats(roomId);
 
   // Require authentication for room booking
   const { isLoading: authLoading, isAuthenticated } = useRequireAuth();
@@ -436,16 +438,22 @@ export default function RoomDetailPage() {
                         {building.name} • {building.address}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center text-yellow-500">
-                        <Star className="h-5 w-5 fill-current mr-1" />
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                          {room.rating}
-                        </span>
-                        <span className="text-gray-600 dark:text-gray-400 ml-1">
-                          ({room.reviews} đánh giá)
-                        </span>
-                      </div>
+                    <div className="flex items-center space-x-4 flex-wrap gap-y-2">
+                      <RatingSummaryBadge
+                        averageRating={
+                          ratingStats.loading
+                            ? room.rating
+                            : ratingStats.averageRating
+                        }
+                        totalReviews={
+                          ratingStats.loading
+                            ? room.reviews
+                            : ratingStats.totalReviews
+                        }
+                        mode="full"
+                        showStarRow
+                        href="#reviews"
+                      />
                       <div
                         className={cn(
                           "px-3 py-1 rounded-full text-sm font-medium",
@@ -454,7 +462,7 @@ export default function RoomDetailPage() {
                             : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
                         )}
                       >
-                        {room.available ? "Còn trống" : "Đã thuê"}
+                        {room.available ? "Còn trống" : "Hết phòng"}
                       </div>
                     </div>
                   </div>
@@ -618,25 +626,31 @@ export default function RoomDetailPage() {
                         ) : (
                           <>
                             <XCircle className="h-4 w-4" />
-                            <span className="font-medium">Đã thuê</span>
+                            <span className="font-medium">Hết phòng</span>
                           </>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Đánh giá
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-gray-600 dark:text-gray-400 shrink-0">
+                        Đánh giá phòng
                       </span>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          {room.rating}
-                        </span>
-                        <span className="text-gray-600 dark:text-gray-400">
-                          ({room.reviews})
-                        </span>
-                      </div>
+                      <RatingSummaryBadge
+                        averageRating={
+                          ratingStats.loading
+                            ? room.rating
+                            : ratingStats.averageRating
+                        }
+                        totalReviews={
+                          ratingStats.loading
+                            ? room.reviews
+                            : ratingStats.totalReviews
+                        }
+                        mode="compact"
+                        href="#reviews"
+                        className="justify-end"
+                      />
                     </div>
                   </div>
 
@@ -689,11 +703,24 @@ export default function RoomDetailPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-3">
-                      <Star className="h-5 w-5 text-gray-400" />
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Đánh giá {building.rating}/5
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        Đánh giá phòng này
                       </span>
+                      <RatingSummaryBadge
+                        averageRating={
+                          ratingStats.loading
+                            ? room.rating
+                            : ratingStats.averageRating
+                        }
+                        totalReviews={
+                          ratingStats.loading
+                            ? room.reviews
+                            : ratingStats.totalReviews
+                        }
+                        mode="compact"
+                        href="#reviews"
+                      />
                     </div>
                   </div>
 

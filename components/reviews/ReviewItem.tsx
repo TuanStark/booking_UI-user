@@ -24,14 +24,14 @@ export function ReviewItem({ review }: ReviewItemProps) {
                         </span>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                        <StarRating rating={review.ratingOverall} size={14} />
-                        <span className="text-xs font-medium">{review.ratingOverall}</span>
+                        <StarRating rating={Number(review.ratingOverall)} size={14} />
+                        <span className="text-xs font-medium">{Number(review.ratingOverall)}</span>
                     </div>
                 </div>
             </CardHeader>
             <CardContent className="p-0 pl-14">
-                <p className="text-sm text-gray-700 leading-relaxed">
-                    {review.comment}
+                <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                    {review.comment?.trim() ? review.comment : <span className="text-muted-foreground italic">Không có bình luận</span>}
                 </p>
                 {/* Optional: Display detailed ratings if available and expanded */}
                 {(review.ratingClean || review.ratingLocation || review.ratingService) && (
