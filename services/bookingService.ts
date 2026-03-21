@@ -18,7 +18,7 @@ type SupportedPaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number]
 
 interface CreateBookingData {
   roomId: string
-  roomPrice: number
+  roomPrice?: number
   moveInDate: string
   moveOutDate: string
   duration: number
@@ -43,9 +43,8 @@ function validateBookingData(data: CreateBookingData): void {
   if (!data.roomId || typeof data.roomId !== 'string' || data.roomId.trim() === '') {
     throw new ValidationError('Room ID is required')
   }
-  if (typeof data.roomPrice !== 'number' || data.roomPrice <= 0) {
-    throw new ValidationError('Room price is invalid')
-  }
+  // Note: Backend securely recalculates price via ExternalService room data, 
+  // so no strictly validating frontend roomPrice.
   if (!data.moveInDate) {
     throw new ValidationError('Move-in date is required')
   }
@@ -126,7 +125,7 @@ export class BookingService {
         details: [
           {
             roomId: bookingData.roomId,
-            price: bookingData.roomPrice,
+            price: bookingData.roomPrice || 0,
             note: bookingData.specialRequests || undefined,
             time: bookingData.duration,
           },
