@@ -48,6 +48,28 @@ const formatCurrency = (value?: number) => {
   return currencyFormatter.format(value);
 };
 
+const parseGeoCoordinate = (
+  value: Building["latitude"] | undefined | null,
+): number | null => {
+  if (value == null || value === "") return null;
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+  const n = parseFloat(String(value).trim().replace(",", "."));
+  return Number.isFinite(n) ? n : null;
+};
+
+/** API có thể trả `longitude` hoặc typo `longtitude`. Bỏ qua (0,0) khi mapper mặc định. */
+const getBuildingCoordinates = (
+  building: Building,
+): { lat: number; lng: number } | null => {
+  const lat = parseGeoCoordinate(building.latitude);
+  const lng = parseGeoCoordinate(building.longitude ?? building.longtitude);
+  if (lat == null || lng == null) return null;
+  if (lat === 0 && lng === 0) return null;
+  return { lat, lng };
+};
+
 const deriveRoomStats = (rooms: Room[], fallbackAverage: number) => {
   if (!rooms.length) {
     return {
@@ -149,7 +171,7 @@ export async function generateMetadata({
     title: `${building.name} - Chi tiết tòa nhà ký túc xá | KTX Online`,
     description:
       building.description ||
-      `Thông tin chi tiết về ${building.name} - ${building.address}. ${building.totalRooms} phòng, ${building.availableRooms} phòng còn trống.`,
+      `Thông tin chi tiết về ${building.name} - ${building.address}. ${building.totalRooms} phòng, ${building.availableRooms ?? 0} phòng còn trống.`,
     keywords: `ký túc xá, ${building.name}, đặt phòng, sinh viên, ${building.address}`,
     openGraph: {
       title: `${building.name} - KTX Online`,
@@ -176,17 +198,18 @@ export default async function BuildingDetailPage({
   const amenityHighlights = getAmenityHighlights(rooms);
   const contactInfo = getPrimaryContact(building, rooms);
   const heroBackground = galleryImages[0] || FALLBACK_IMAGES[0];
+  const mapCoords = getBuildingCoordinates(building);
+  const availableRoomsCount = building.availableRooms ?? 0;
   const occupancyRate = building.totalRooms
     ? Math.round(
-        ((building.totalRooms - building.availableRooms) /
-          building.totalRooms) *
+        ((building.totalRooms - availableRoomsCount) / building.totalRooms) *
           100,
       )
     : 0;
 
   const heroStats = [
     { label: "Tổng phòng", value: building.totalRooms },
-    { label: "Còn trống", value: building.availableRooms },
+    { label: "Còn trống", value: availableRoomsCount },
     { label: "Giá trung bình", value: formatCurrency(roomStats.averagePrice) },
     {
       label: "Tỷ lệ lấp đầy",
@@ -476,15 +499,28 @@ export default async function BuildingDetailPage({
                       <span>Hạ tầng internet tốc độ cao</span>
                     </div>
                   </div>
-                  <div className="h-48 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
-                    Bản đồ đang được tích hợp
-                  </div>
-                  {building.latitude && building.longitude ? (
+                  {mapCoords ? (
+                    <div className="relative h-52 md:h-64 rounded-2xl overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700 bg-gray-100 dark:bg-gray-800">
+                      <iframe
+                        title={`Bản đồ — ${building.name}`}
+                        src={`https://www.google.com/maps?q=${encodeURIComponent(`${mapCoords.lat},${mapCoords.lng}`)}&hl=vi&z=16&output=embed`}
+                        className="absolute inset-0 h-full w-full border-0"
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-48 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm px-4 text-center">
+                      Chưa có tọa độ bản đồ cho tòa nhà này.
+                    </div>
+                  )}
+                  {mapCoords ? (
                     <a
-                      href={`https://www.google.com/maps?q=${building.latitude},${building.longitude}`}
+                      href={`https://www.google.com/maps?q=${encodeURIComponent(`${mapCoords.lat},${mapCoords.lng}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                      className="inline-flex text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
                     >
                       Mở trong Google Maps
                     </a>

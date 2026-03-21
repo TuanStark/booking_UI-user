@@ -5,6 +5,8 @@ export interface Building {
   address: string
   images: string | null
   totalRooms: number
+  /** Phòng còn trống (khi API trả về) */
+  availableRooms?: number
   roomsCount: number
   averagePrice: number
   rating: number

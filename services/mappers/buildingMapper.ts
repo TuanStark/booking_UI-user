@@ -22,6 +22,7 @@ export interface ApiBuilding {
   country?: string | null
   description?: string | null
   longtitude?: number | null
+  longitude?: number | null
   latitude?: number | null
   imagePublicId?: string
   createdAt?: string
@@ -53,8 +54,9 @@ export function mapApiBuildingToBuilding(apiBuilding: ApiBuilding): Building {
     totalReviews: 0, // Should come from reviews
     description: apiBuilding.description || '',
     amenities: [], // Default empty array
-    latitude: apiBuilding.latitude || 0,
-    longitude: apiBuilding.longtitude || 0,
+    latitude: apiBuilding.latitude ?? 0,
+    longitude: apiBuilding.longitude ?? apiBuilding.longtitude ?? 0,
+    longtitude: apiBuilding.longtitude ?? apiBuilding.longitude ?? 0,
   }
 }
 
