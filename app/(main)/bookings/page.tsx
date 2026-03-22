@@ -537,7 +537,7 @@ function BookingCard({
                 </div>
 
                 <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-medium bg-slate-50 dark:bg-slate-800/40 p-6 rounded-2xl italic">
-                  "{roomDetail.description}"
+                  {`"${roomDetail.description}"`}
                 </p>
               </div>
 

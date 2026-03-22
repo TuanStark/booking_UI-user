@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Review, PaginatedReviewsResponse } from '@/types/review'
 import { ReviewService } from '@/services/reviewService'
 import { ReviewItem } from './ReviewItem'
@@ -19,39 +19,42 @@ export function ReviewList({ roomId, refreshTrigger }: ReviewListProps) {
     const [hasMore, setHasMore] = useState(false)
     const { toast } = useToast()
 
-    const fetchReviews = async (cursor?: string, isLoadMore = false) => {
-        try {
-            if (isLoadMore) setLoadingMore(true)
-            else setLoading(true)
+    const fetchReviews = useCallback(
+        async (cursor?: string, isLoadMore = false) => {
+            try {
+                if (isLoadMore) setLoadingMore(true)
+                else setLoading(true)
 
-            const response = await ReviewService.getRoomReviews(roomId, 5, cursor)
+                const response = await ReviewService.getRoomReviews(roomId, 5, cursor)
 
-            const reviewsData = response?.data || []
+                const reviewsData = response?.data || []
 
-            if (isLoadMore) {
-                setReviews(prev => [...prev, ...reviewsData])
-            } else {
-                setReviews(reviewsData)
+                if (isLoadMore) {
+                    setReviews(prev => [...prev, ...reviewsData])
+                } else {
+                    setReviews(reviewsData)
+                }
+
+                setNextCursor(response?.nextCursor || null)
+                setHasMore(response?.hasMore || false)
+            } catch (error) {
+                console.error('Failed to fetch reviews:', error)
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'Failed to load reviews. Please try again.',
+                })
+            } finally {
+                if (isLoadMore) setLoadingMore(false)
+                else setLoading(false)
             }
-
-            setNextCursor(response?.nextCursor || null)
-            setHasMore(response?.hasMore || false)
-        } catch (error) {
-            console.error('Failed to fetch reviews:', error)
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to load reviews. Please try again.',
-            })
-        } finally {
-            if (isLoadMore) setLoadingMore(false)
-            else setLoading(false)
-        }
-    }
+        },
+        [roomId, toast],
+    )
 
     useEffect(() => {
         fetchReviews()
-    }, [roomId, refreshTrigger])
+    }, [roomId, refreshTrigger, fetchReviews])
 
     const handleLoadMore = () => {
         if (nextCursor) {
