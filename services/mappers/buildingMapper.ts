@@ -42,13 +42,15 @@ export interface ApiBuilding {
  * ```
  */
 export function mapApiBuildingToBuilding(apiBuilding: ApiBuilding): Building {
+  const roomsCount = apiBuilding.roomsCount || 0
   return {
     id: apiBuilding.id,
     name: apiBuilding.name,
     address: apiBuilding.address,
     images: apiBuilding.images || null,
-    totalRooms: apiBuilding.roomsCount || 0,
-    availableRooms: apiBuilding.roomsCount || 0, // Default to totalRooms if not available
+    totalRooms: roomsCount,
+    roomsCount,
+    availableRooms: roomsCount, // Default to totalRooms if not available
     averagePrice: 0, // Should be calculated from rooms
     rating: 0, // Should come from reviews/ratings
     totalReviews: 0, // Should come from reviews

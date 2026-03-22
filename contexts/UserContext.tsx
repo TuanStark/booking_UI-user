@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { apiClient } from '@/services/apiClient'
-import { ApiResponse, UserResponse } from '@/types/api'
+import type { ApiResponse } from '@/types'
+import type { UserResponse } from '@/types/api'
 
 interface UserContextValue {
   user: UserResponse | null
