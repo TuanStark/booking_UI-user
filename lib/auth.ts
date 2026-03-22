@@ -2,7 +2,7 @@ import { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { apiClient } from '@/services/apiClient'
 import { EmailNotVerifiedError } from '@/lib/errors'
-import { LoginResponse, RoleResponse, UserResponse } from '@/types/api'
+import { RoleResponse } from '@/types/api'
 
 interface AuthUser extends User {
   role: string
@@ -10,6 +10,63 @@ interface AuthUser extends User {
   token: string
   refreshToken?: string
   rememberMe?: boolean
+}
+
+/**
+ * API Gateway (booking_api-gateway) trả body dạng:
+ * `{ status, data: <body từ auth-service>, headers }`.
+ * Auth-service lại bọc login trong `ResponseData`: `{ data: { accessToken, ... }, statusCode, message }`.
+ * Hàm này tìm accessToken/refreshToken sâu trong cây object (không phụ thuộc số lớp bọc).
+ */
+function extractSessionTokens(raw: unknown): {
+  accessToken: string
+  refreshToken: string
+} {
+  let accessToken = ''
+  let refreshToken = ''
+  const walk = (o: unknown, depth: number) => {
+    if (!o || typeof o !== 'object' || depth > 10) return
+    const obj = o as Record<string, unknown>
+    if (typeof obj.accessToken === 'string' && obj.accessToken.length > 0) {
+      accessToken = obj.accessToken
+    }
+    if (typeof obj.refreshToken === 'string' && obj.refreshToken.length > 0) {
+      refreshToken = obj.refreshToken
+    }
+    for (const v of Object.values(obj)) {
+      if (v && typeof v === 'object') walk(v, depth + 1)
+    }
+  }
+  walk(raw, 0)
+  return { accessToken, refreshToken }
+}
+
+/** Tìm object user (có id + email) trong response đã bọc gateway / ResponseData. */
+function extractUserProfile(raw: unknown): Record<string, unknown> | null {
+  const walk = (o: unknown, depth: number): Record<string, unknown> | null => {
+    if (!o || typeof o !== 'object' || depth > 10) return null
+    const obj = o as Record<string, unknown>
+    if (
+      typeof obj.id === 'string' &&
+      typeof obj.email === 'string' &&
+      (Object.prototype.hasOwnProperty.call(obj, 'role') ||
+        Object.prototype.hasOwnProperty.call(obj, 'roleId'))
+    ) {
+      return obj
+    }
+    for (const v of Object.values(obj)) {
+      const found = walk(v, depth + 1)
+      if (found) return found
+    }
+    return null
+  }
+  return walk(raw, 0)
+}
+
+/** Gateway bọc JSON refresh: `{ data: { accessToken } }` */
+function extractAccessTokenFromRefreshBody(raw: unknown): string {
+  const { accessToken } = extractSessionTokens(raw)
+  return accessToken
 }
 
 export const authOptions: NextAuthOptions = {
@@ -30,39 +87,27 @@ export const authOptions: NextAuthOptions = {
           const response = await apiClient.login({
             email: credentials.email,
             password: credentials.password,
-          }) as any;
-          
-          let accessToken = '';
-          let refreshToken = '';
-          
-          if (response?.data?.accessToken) {
-             accessToken = response.data.accessToken;
-             refreshToken = response.data.refreshToken || '';
-          } else if (response?.data?.data?.accessToken) {
-             accessToken = response.data.data.accessToken;
-             refreshToken = response.data.data.refreshToken || '';
-          } else if (response?.accessToken) {
-             accessToken = response.accessToken;
-             refreshToken = response.refreshToken || '';
+          }) as any
+
+          const { accessToken, refreshToken } = extractSessionTokens(response)
+
+          if (!accessToken) {
+            console.error(
+              '[NextAuth] Login OK nhưng không đọc được accessToken từ body. Kiểm tra gateway + ResponseData.',
+              JSON.stringify(response)?.slice(0, 500),
+            )
+            return null
           }
-          
-          const profileResponse = await apiClient.getProfile(accessToken) as any;
-          
-          let profile = null;
-          if (profileResponse?.data?.data) {
-             profile = profileResponse.data.data;
-          } else if (profileResponse?.data?.id) {
-             profile = profileResponse.data;
-          } else if (profileResponse?.id) {
-             profile = profileResponse;
-          }
-          
+
+          const profileResponse = await apiClient.getProfile(accessToken) as any
+          const profile = extractUserProfile(profileResponse)
+
           if (profile) {
-            const roleDetail = profile.role ?? null
+            const roleDetail = (profile.role ?? null) as RoleResponse | null
             const authUser: AuthUser = {
-              id: profile.id,
-              name: profile.name ?? profile.email ?? '',
-              email: profile.email ?? '',
+              id: profile.id as string,
+              name: (profile.name as string) ?? (profile.email as string) ?? '',
+              email: (profile.email as string) ?? '',
               image: null,
               role: roleDetail?.name ?? 'USER',
               roleDetail,
@@ -72,6 +117,11 @@ export const authOptions: NextAuthOptions = {
             }
             return authUser
           }
+
+          console.error(
+            '[NextAuth] getProfile không parse được user (sai cấu trúc response?).',
+            JSON.stringify(profileResponse)?.slice(0, 500),
+          )
           return null
         } catch (error: any) {
           console.error('[NextAuth] Authorize Error: ', error);
@@ -138,9 +188,15 @@ export const authOptions: NextAuthOptions = {
           if (match) newRefreshToken = match[1];
         }
 
+        const newAccess = extractAccessTokenFromRefreshBody(refreshedData);
+        if (!newAccess) {
+          console.error('[NextAuth] Refresh: không tìm thấy accessToken trong body (gateway bọc?).', refreshedData);
+          throw new Error('No access token in refresh response');
+        }
+
         return {
           ...token,
-          accessToken: refreshedData.accessToken,
+          accessToken: newAccess,
           accessTokenExpires: Date.now() + 14 * 60 * 1000, 
           refreshToken: newRefreshToken,
         }

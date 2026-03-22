@@ -1,4 +1,7 @@
-name: CI — UI User
+# CI for dorm-booking-ui (Next.js)
+# Runs on push/PR to main and develop. Docker image is built and pushed only on push to main.
+
+name: CI
 
 on:
   push:
@@ -6,82 +9,74 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION: "20"
-  SERVICE_NAME: ui-user
+  DOCKER_IMAGE_NAME: ui-user
 
 jobs:
-  # ─────────────────────────────────────────────
-  # 1. Lint & Type Check
-  # ─────────────────────────────────────────────
-  lint:
-    name: 🔍 Lint & Type Check
+  lint-and-build:
+    name: Lint and build
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Placeholders so `next build` can load auth without repository secrets
+      NEXTAUTH_SECRET: ci-build-placeholder-secret-minimum-32-chars
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Next.js lint
+      - name: ESLint
         run: npm run lint
 
-      - name: TypeScript type check
+      - name: TypeScript (no emit)
         run: npm run type-check
 
-  # ─────────────────────────────────────────────
-  # 2. Build
-  # ─────────────────────────────────────────────
-  build:
-    name: 🏗️ Next.js Build
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Next.js application
+      - name: Next.js production build
         run: npm run build
 
-  # ─────────────────────────────────────────────
-  # 3. Docker Build & Push
-  # ─────────────────────────────────────────────
-  docker:
-    name: 🐳 Docker Build & Push
+  docker-publish:
+    name: Docker build and push
     runs-on: ubuntu-latest
-    needs: build
+    needs: lint-and-build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.SERVICE_NAME }}
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}
           tags: |
             type=sha,prefix=
             type=raw,value=latest
