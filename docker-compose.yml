@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  booking-ui-user:
+    container_name: booking-ui-user
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      my_custom_network:
+        ipv4_address: ${APP_IP}
+
+networks:
+  my_custom_network:
+    external: true
