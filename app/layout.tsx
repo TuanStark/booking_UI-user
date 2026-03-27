@@ -31,10 +31,8 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable} ${poppins.variable}`}>
       <body className="font-sans antialiased">
-        <AuthProvider>
-          {children}
-          <ChatbotWidget />
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
+        <ChatbotWidget />
       </body>
     </html>
   );
