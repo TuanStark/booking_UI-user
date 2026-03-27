@@ -6,6 +6,9 @@ RUN npm ci && npm cache clean --force
 COPY . .
 # Create public directory if it doesn't exist
 RUN mkdir -p public
+# NEXT_PUBLIC_* is inlined at build time. Browser must reach this host (not Docker service names).
+ARG NEXT_PUBLIC_AGENT_API_URL=https://dorm-agent.tuanstark.id.vn/api/v1/super-agent/query
+ENV NEXT_PUBLIC_AGENT_API_URL=$NEXT_PUBLIC_AGENT_API_URL
 RUN npm run build
 
 # Production stage
