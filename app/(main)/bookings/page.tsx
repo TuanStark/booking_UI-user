@@ -27,6 +27,9 @@ import {
   Smartphone,
   Info,
   Image as ImageIcon,
+  Timer,
+  ListOrdered,
+  PlayCircle,
 } from "lucide-react";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useUser } from "@/contexts/UserContext";
@@ -38,8 +41,10 @@ import { cn } from "@/utils/utils";
 type BookingStatus =
   | "PENDING"
   | "CONFIRMED"
-  | "CHECKED_IN"
-  | "CANCELLED"
+  | "CANCELED"
+  | "ACTIVE"
+  | "EXPIRING_SOON"
+  | "QUEUED"
   | "COMPLETED";
 
 interface BookingSummary {
@@ -50,6 +55,7 @@ interface BookingSummary {
   status: BookingStatus;
   moveInDate?: string;
   moveOutDate?: string;
+  durationMonths?: number;
   price?: number;
   createdAt?: string;
   room?: any;
@@ -66,8 +72,10 @@ const TABS: { id: BookingStatus | "ALL"; label: string; icon: any }[] = [
   { id: "ALL", label: "Tất cả", icon: LayoutGrid },
   { id: "PENDING", label: "Đang xử lý", icon: Clock },
   { id: "CONFIRMED", label: "Đã xác nhận", icon: CheckCircle2 },
-  { id: "CHECKED_IN", label: "Đang ở", icon: Smartphone },
-  { id: "CANCELLED", label: "Đã hủy", icon: XCircle },
+  { id: "ACTIVE", label: "Đang thuê", icon: PlayCircle },
+  { id: "EXPIRING_SOON", label: "Sắp hết hạn", icon: Timer },
+  { id: "QUEUED", label: "Đặt trước", icon: ListOrdered },
+  { id: "CANCELED", label: "Đã hủy", icon: XCircle },
   { id: "COMPLETED", label: "Lịch sử", icon: History },
 ];
 
@@ -118,9 +126,11 @@ export default function BookingsPage() {
     return {
       total: bookings.length,
       active: bookings.filter((b) =>
-        ["CONFIRMED", "CHECKED_IN"].includes(b.status),
+        ["CONFIRMED", "ACTIVE", "EXPIRING_SOON"].includes(b.status),
       ).length,
-      pending: bookings.filter((b) => b.status === "PENDING").length,
+      pending: bookings.filter((b) =>
+        ["PENDING", "QUEUED"].includes(b.status),
+      ).length,
     };
   }, [bookings]);
 
@@ -662,24 +672,38 @@ const statusLabel: Record<
 > = {
   PENDING: {
     title: "Đang xử lý",
-    subtitle: "Chờ xác nhận",
+    subtitle: "Chờ thanh toán",
     badgeClass:
       "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 ring-amber-500/20",
     icon: Clock,
   },
   CONFIRMED: {
     title: "Đã xác nhận",
-    subtitle: "Sắp tới",
+    subtitle: "Chờ ngày nhận phòng",
     badgeClass:
       "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-blue-500/20",
     icon: CheckCircle2,
   },
-  CHECKED_IN: {
-    title: "Đang sử dụng",
+  ACTIVE: {
+    title: "Đang thuê",
     subtitle: "Sinh viên đang ở",
     badgeClass:
       "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 ring-emerald-500/20",
-    icon: Smartphone,
+    icon: PlayCircle,
+  },
+  EXPIRING_SOON: {
+    title: "Sắp hết hạn",
+    subtitle: "Còn dưới 30 ngày",
+    badgeClass:
+      "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 ring-orange-500/20",
+    icon: Timer,
+  },
+  QUEUED: {
+    title: "Đặt trước",
+    subtitle: "Chờ phòng trống",
+    badgeClass:
+      "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 ring-purple-500/20",
+    icon: ListOrdered,
   },
   COMPLETED: {
     title: "Hoàn tất",
@@ -688,7 +712,7 @@ const statusLabel: Record<
       "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 ring-slate-500/20",
     icon: History,
   },
-  CANCELLED: {
+  CANCELED: {
     title: "Đã hủy",
     subtitle: "Không còn hiệu lực",
     badgeClass:
@@ -723,7 +747,7 @@ function mapBookingToSummary(raw: any): BookingSummary & { room?: any } {
 
   return {
     id: String(raw?.id || raw?.bookingId || crypto.randomUUID()),
-    roomId: raw?.roomId || room?.id || undefined,
+    roomId: raw?.roomId || detail?.roomId || room?.id || undefined,
     roomName:
       room?.name || raw?.roomName || raw?.roomNumber || "Phòng chưa đặt tên",
     buildingName:
@@ -734,10 +758,11 @@ function mapBookingToSummary(raw: any): BookingSummary & { room?: any } {
     status: (raw?.status || "PENDING").toUpperCase() as BookingStatus,
     moveInDate: raw?.startDate || raw?.moveInDate || raw?.checkInDate,
     moveOutDate: raw?.endDate || raw?.moveOutDate || raw?.checkOutDate,
+    durationMonths: raw?.durationMonths,
     price: Number(
       raw?.totalPrice ??
-        (detail?.price && detail?.time
-          ? detail.price * detail.time
+        (detail?.price && raw?.durationMonths
+          ? detail.price * raw.durationMonths
           : detail?.price || 0),
     ),
     createdAt: raw?.createdAt || raw?.bookingDate,

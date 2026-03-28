@@ -233,7 +233,6 @@ class ApiClient {
         roomId: string
         price: number
         note?: string
-        time: number
       }[]
     },
     token: string,

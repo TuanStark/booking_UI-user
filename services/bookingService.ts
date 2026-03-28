@@ -13,8 +13,11 @@ import { apiClient } from './apiClient'
 import { BackendApiResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
 
-const SUPPORTED_PAYMENT_METHODS = ['VIETQR', 'VNPAY', 'MOMO'] as const
+const SUPPORTED_PAYMENT_METHODS = ['VIETQR', 'VNPAY', 'MOMO', 'PAYOS'] as const
 type SupportedPaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number]
+
+/** Minimum rental duration in months */
+const MIN_RENTAL_MONTHS = 3
 
 interface CreateBookingData {
   roomId: string
@@ -31,7 +34,7 @@ interface CreateBookingData {
 function normalizePaymentMethod(value: string): SupportedPaymentMethod {
   const normalized = (value ?? '').toUpperCase()
   if (!SUPPORTED_PAYMENT_METHODS.includes(normalized as SupportedPaymentMethod)) {
-    throw new ValidationError('Payment method must be either VIETQR, VNPAY or MOMO')
+    throw new ValidationError('Payment method must be either VIETQR, VNPAY, MOMO or PAYOS')
   }
   return normalized as SupportedPaymentMethod
 }
@@ -51,8 +54,8 @@ function validateBookingData(data: CreateBookingData): void {
   if (!data.moveOutDate) {
     throw new ValidationError('Move-out date is required')
   }
-  if (data.duration < 1) {
-    throw new ValidationError('Duration must be at least 1 month')
+  if (data.duration < MIN_RENTAL_MONTHS) {
+    throw new ValidationError(`Thời gian thuê tối thiểu ${MIN_RENTAL_MONTHS} tháng`)
   }
   normalizePaymentMethod(data.paymentMethod)
   // Emergency contact is optional - no validation needed
@@ -127,12 +130,9 @@ export class BookingService {
             roomId: bookingData.roomId,
             price: bookingData.roomPrice || 0,
             note: bookingData.specialRequests || undefined,
-            time: bookingData.duration,
           },
         ],
       }
-
-      console.log('📤 Sending booking payload:', JSON.stringify(payload, null, 2))
 
       const response = await apiClient.createBooking(payload, token, userId)
       return response

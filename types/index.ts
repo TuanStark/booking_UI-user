@@ -114,7 +114,7 @@ export interface BookingFormData {
   duration: number
 
   // Payment
-  paymentMethod: 'VIETQR' | 'VNPAY' | 'MOMO'
+  paymentMethod: 'VIETQR' | 'VNPAY' | 'MOMO' | 'PAYOS'
 
   // Additional Info
   specialRequests: string

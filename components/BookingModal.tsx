@@ -44,7 +44,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     // Booking Details
     moveInDate: '',
     moveOutDate: '',
-    duration: 12,
+    duration: 3,
 
     // Payment
     paymentMethod: 'VIETQR',
@@ -99,7 +99,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
         studentId: '',
         moveInDate: '',
         moveOutDate: '',
-        duration: 12,
+        duration: 3,
         paymentMethod: 'VIETQR',
         specialRequests: '',
         emergencyContact: '',
@@ -125,8 +125,8 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
         newErrors,
         validateBookingDates(formData.moveInDate, formData.moveOutDate),
       )
-      if (formData.duration && formData.duration < 1) {
-        newErrors.duration = 'Thời gian thuê phải ít nhất 1 tháng'
+      if (formData.duration && formData.duration < 3) {
+        newErrors.duration = 'Thời gian thuê tối thiểu 3 tháng'
       }
     }
 
@@ -333,9 +333,8 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                   Chi tiết đặt phòng
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Không được chọn ngày nhận trong quá khứ. Thời gian lưu trú tối thiểu{' '}
-                  {BOOKING_MIN_STAY_DAYS} ngày (ngày trả phòng cách ngày nhận ít nhất{' '}
-                  {BOOKING_MIN_STAY_DAYS} ngày).
+                  Không được chọn ngày nhận trong quá khứ. Thời gian thuê tối thiểu{' '}
+                  <span className="font-semibold text-blue-600">3 tháng</span> ({BOOKING_MIN_STAY_DAYS} ngày).
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -395,15 +394,18 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     </label>
                     <input
                       type="number"
-                      min="1"
+                      min="3"
                       max="24"
                       value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 1 })}
+                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 3 })}
                       className={cn(
                         'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
                         errors.duration ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
                       )}
                     />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Thời gian thuê tối thiểu 3 tháng
+                    </p>
                     {errors.duration && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.duration}</p>
                     )}
@@ -492,6 +494,20 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       <Smartphone className="h-6 w-6 text-pink-600 dark:text-pink-400 mb-2" />
                       <div className="font-medium text-gray-900 dark:text-white">MoMo</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Ví điện tử MoMo</div>
+                    </button>
+
+                    <button
+                      onClick={() => setFormData({ ...formData, paymentMethod: 'PAYOS' as any })}
+                      className={cn(
+                        'p-4 border rounded-lg text-left transition-colors duration-200',
+                        (formData.paymentMethod as string) === 'PAYOS'
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                      )}
+                    >
+                      <CreditCard className="h-6 w-6 text-green-600 dark:text-green-400 mb-2" />
+                      <div className="font-medium text-gray-900 dark:text-white">PayOS</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Cổng thanh toán PayOS</div>
                     </button>
                   </div>
                 </div>

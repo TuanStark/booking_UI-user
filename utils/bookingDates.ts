@@ -3,7 +3,7 @@
  * Avoids parsing ISO midnight as UTC which shifts "today" in some locales.
  */
 
-export const BOOKING_MIN_STAY_DAYS = 7
+export const BOOKING_MIN_STAY_DAYS = 90
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
