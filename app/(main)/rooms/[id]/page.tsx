@@ -26,8 +26,10 @@ import {
   Loader2,
   AlertCircle,
   CreditCard,
+  ListOrdered,
 } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
+import { RoomAvailabilityCalendar } from "@/components/rooms/RoomAvailabilityCalendar";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
 import { useRoomRatingStats } from "@/hooks/useRoomRatingStats";
@@ -35,6 +37,7 @@ import { RoomService } from "@/services/roomService";
 import { BookingService } from "@/services/bookingService";
 import { cn } from "@/utils/utils";
 import { Room, BookingFormData } from "@/types";
+import type { OccupancySlice } from "@/utils/roomOccupancy";
 
 interface BuildingInfo {
   id: string;
@@ -65,6 +68,10 @@ export default function RoomDetailPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingResult, setBookingResult] = useState<any | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const [occupancySlices, setOccupancySlices] = useState<OccupancySlice[]>([]);
+  const [occupancyLoading, setOccupancyLoading] = useState(false);
+  const [occupancyError, setOccupancyError] = useState<string | null>(null);
+  const [bookingInitialMoveIn, setBookingInitialMoveIn] = useState<string | null>(null);
 
   // Derive building info from room data - ensures building is always available when room exists
   const building: BuildingInfo | null = useMemo(() => {
@@ -103,6 +110,36 @@ export default function RoomDetailPage() {
     fetchRoomData();
   }, [roomId]);
 
+  useEffect(() => {
+    if (!roomId || !accessToken) return;
+    let cancelled = false;
+    setOccupancyLoading(true);
+    setOccupancyError(null);
+    BookingService.getRoomOccupancySlices(roomId, accessToken)
+      .then((slices) => {
+        if (!cancelled) setOccupancySlices(slices);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          const msg =
+            err instanceof Error ? err.message : "Không tải được lịch phòng";
+          setOccupancyError(msg);
+          setOccupancySlices([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setOccupancyLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [roomId, accessToken]);
+
+  const handlePickCheckInFromCalendar = (ymd: string) => {
+    setBookingInitialMoveIn(ymd);
+    setIsBookingModalOpen(true);
+  };
+
   const handleBookingSubmit = async (bookingData: BookingFormData) => {
     if (!room || !accessToken || !user?.id) {
       setBookingError("Bạn cần đăng nhập để đặt phòng.");
@@ -123,6 +160,7 @@ export default function RoomDetailPage() {
           specialRequests: bookingData.specialRequests?.trim() || undefined,
           emergencyContact: bookingData.emergencyContact?.trim() || undefined,
           emergencyPhone: bookingData.emergencyPhone?.trim() || undefined,
+          occupancyUnits: bookingData.occupancyUnits ?? 1,
         },
         accessToken,
         user.id,
@@ -257,6 +295,47 @@ export default function RoomDetailPage() {
               </div>
             </div>
           )}
+
+          {bookingResult &&
+            String(
+              bookingResult.status ?? bookingResult.bookingStatus ?? "",
+            ).toUpperCase() === "QUEUED" && (
+              <div className="rounded-2xl border border-sky-200 bg-sky-50/90 shadow-sm p-5 space-y-3 dark:bg-gray-800 dark:border-sky-800/50 dark:bg-sky-950/30">
+                <div className="flex items-center gap-3">
+                  <ListOrdered className="h-6 w-6 text-sky-600 dark:text-sky-400 shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Đã tạo đặt trước
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
+                      Đơn ở trạng thái &quot;Đặt trước&quot; — chưa thanh toán ngay. Khi tới ngày nhận phòng và phòng sẵn sàng,
+                      hệ thống sẽ kích hoạt đơn (người đang ở được ưu tiên gia hạn; nếu họ gia hạn, đặt trước có thể bị hủy).
+                    </p>
+                  </div>
+                </div>
+                {bookingResult.id && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Mã đặt phòng:{" "}
+                    <span className="font-mono text-gray-900 dark:text-white">
+                      {bookingResult.id}
+                    </span>
+                  </p>
+                )}
+                {typeof bookingResult.message === "string" &&
+                  bookingResult.message.trim() && (
+                    <p className="text-sm text-sky-900/90 dark:text-sky-100/90">
+                      {bookingResult.message}
+                    </p>
+                  )}
+                <button
+                  type="button"
+                  onClick={() => router.push("/bookings")}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 text-white px-4 py-2.5 font-semibold hover:bg-sky-700 transition-colors"
+                >
+                  Xem đơn đặt phòng của tôi
+                </button>
+              </div>
+            )}
 
           {bookingResult?.payment && (
             <div className="rounded-2xl border border-green-200 bg-white shadow-sm p-5 space-y-4 dark:bg-gray-800 dark:border-green-900/40">
@@ -585,6 +664,15 @@ export default function RoomDetailPage() {
                 </div>
               </div>
 
+              <RoomAvailabilityCalendar
+                occupancySlices={occupancySlices}
+                roomCapacity={room.capacityMax}
+                isLoading={occupancyLoading}
+                error={occupancyError}
+                canBook={room.available}
+                onPickCheckIn={handlePickCheckInFromCalendar}
+              />
+
               {/* Reviews Section */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 p-6">
                 <ReviewSection roomId={roomId} />
@@ -740,10 +828,16 @@ export default function RoomDetailPage() {
       {/* Booking Modal */}
       <BookingModal
         isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
+        onClose={() => {
+          setIsBookingModalOpen(false);
+          setBookingInitialMoveIn(null);
+        }}
         onSubmit={handleBookingSubmit}
         room={room}
         building={building}
+        initialMoveInDate={bookingInitialMoveIn}
+        occupancySlices={occupancySlices}
+        roomCapacity={room.capacityMax}
       />
 
       {/* Booking Success Toast */}

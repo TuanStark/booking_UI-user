@@ -93,7 +93,7 @@ export function validateBookingDates(
   }
 
   const today = startOfTodayLocal()
-  if (calendarDaysBetween(checkIn, today) < 0) {
+  if (calendarDaysBetween(checkIn, today) > 0) {
     errors.moveInDate = 'Không thể đặt phòng với ngày nhận trong quá khứ'
   }
 

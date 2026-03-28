@@ -232,6 +232,7 @@ class ApiClient {
       details: {
         roomId: string
         price: number
+        occupancyUnits?: number
         note?: string
       }[]
     },
@@ -281,6 +282,18 @@ class ApiClient {
    */
   async getBookingById(id: string, token: string) {
     return this.request(`/bookings/${id}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+  }
+
+  /**
+   * Đặt phòng theo phòng (user đã đăng nhập) — dùng để hiển thị lịch bận, không hiển thị PII ra UI.
+   */
+  async getBookingsByRoomId(roomId: string, token: string) {
+    return this.request<unknown>(`/bookings/room/${encodeURIComponent(roomId)}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -442,6 +455,7 @@ export const {
   getUserBookings,
   getCheckReviewed,
   getBookingById,
+  getBookingsByRoomId,
   updateBookingStatus,
   createReview,
   getRoomReviews,

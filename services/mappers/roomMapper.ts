@@ -126,6 +126,7 @@ export function mapApiRoomToRoom(
     price: apiRoom.price || 0,
     size: apiRoom.size || `${apiRoom.squareMeter || 0}m²`,
     capacity: String(apiRoom.capacity || 1),
+    capacityMax: Math.max(1, Math.min(100, Math.floor(Number(apiRoom.capacity)) || 1)),
     beds: apiRoom.beds || `${apiRoom.bedCount || 1} giường`,
     bathrooms: apiRoom.bathrooms || `${apiRoom.bathroomCount || 1} phòng tắm`,
     available: apiRoom.available !== undefined ? apiRoom.available : isAvailable,

@@ -42,6 +42,8 @@ export interface Room {
   price: number
   size: string
   capacity: string
+  /** Số chỗ tối đa (từ API room.capacity) — dùng cho lịch & validate */
+  capacityMax: number
   beds: string
   bathrooms: string
   available: boolean
@@ -112,6 +114,8 @@ export interface BookingFormData {
   moveInDate: string
   moveOutDate: string
   duration: number
+  /** Số chỗ đặt (KTX); backend kiểm tra theo capacity phòng */
+  occupancyUnits: number
 
   // Payment
   paymentMethod: 'VIETQR' | 'VNPAY' | 'MOMO' | 'PAYOS'

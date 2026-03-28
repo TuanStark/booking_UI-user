@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { format } from 'date-fns'
+import { vi as viLocale } from 'date-fns/locale'
 import {
   X,
   Calendar,
@@ -17,11 +19,40 @@ import {
   formatDateInputValue,
   getMinMoveOutInputValue,
   getTodayMinInputValue,
+  parseLocalDateFromInput,
   startOfTodayLocal,
   validateBookingDates,
 } from '@/utils/bookingDates'
+import {
+  bookingRangeFitsCapacity,
+  defaultPairFromCheckIn,
+  EXPIRING_SOON_LEAD_DAYS,
+  getExpiringSoonLeaseEndYmd,
+  isPreBookMoveInWindow,
+  MAX_USER_BOOKING_OCCUPANCY_UNITS,
+  type OccupancySlice,
+} from '@/utils/roomOccupancy'
 import { Room, BookingFormData } from '@/types'
 import { useUser } from '@/contexts/UserContext'
+
+function createEmptyBookingForm(): BookingFormData {
+  return {
+    fullName: '',
+    email: '',
+    phone: '',
+    studentId: '',
+    moveInDate: '',
+    moveOutDate: '',
+    duration: 3,
+    occupancyUnits: 1,
+    paymentMethod: 'VIETQR',
+    specialRequests: '',
+    emergencyContact: '',
+    emergencyPhone: '',
+    agreeToTerms: false,
+    agreeToPrivacy: false,
+  }
+}
 
 interface BookingModalProps {
   isOpen: boolean
@@ -29,35 +60,42 @@ interface BookingModalProps {
   onSubmit: (data: BookingFormData) => void
   room: Room
   building: any
+  /** Khi mở từ lịch khả dụng — điền sẵn bước ngày (tối thiểu 90 ngày) */
+  initialMoveInDate?: string | null
+  /** Chiếm chỗ theo capacity (đồng bộ rule với backend) */
+  occupancySlices?: OccupancySlice[]
+  roomCapacity?: number
 }
 
-export default function BookingModal({ isOpen, onClose, onSubmit, room, building }: BookingModalProps) {
+export default function BookingModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  room,
+  building,
+  initialMoveInDate = null,
+  occupancySlices = [],
+  roomCapacity: roomCapacityProp,
+}: BookingModalProps) {
   const { user } = useUser()
+  const roomCapacity = Math.max(1, roomCapacityProp ?? room.capacityMax ?? 1)
+  const maxUserOccupancy = useMemo(
+    () => Math.min(roomCapacity, MAX_USER_BOOKING_OCCUPANCY_UNITS),
+    [roomCapacity],
+  )
+  const expiringLeaseEndYmd = useMemo(
+    () => getExpiringSoonLeaseEndYmd(occupancySlices),
+    [occupancySlices],
+  )
+  const expiringLeaseEndLabel = useMemo(() => {
+    if (!expiringLeaseEndYmd) return ''
+    const d = parseLocalDateFromInput(expiringLeaseEndYmd)
+    return d ? format(d, 'dd/MM/yyyy', { locale: viLocale }) : expiringLeaseEndYmd
+  }, [expiringLeaseEndYmd])
   const [currentStep, setCurrentStep] = useState(1)
-  const [formData, setFormData] = useState<BookingFormData>({
-    // Personal Info
-    fullName: '',
-    email: '',
-    phone: '',
-    studentId: '',
-
-    // Booking Details
-    moveInDate: '',
-    moveOutDate: '',
-    duration: 3,
-
-    // Payment
-    paymentMethod: 'VIETQR',
-
-    // Additional Info
-    specialRequests: '',
-    emergencyContact: '',
-    emergencyPhone: '',
-
-    // Terms
-    agreeToTerms: false,
-    agreeToPrivacy: false
-  })
+  const [formData, setFormData] = useState<BookingFormData>(() =>
+    createEmptyBookingForm(),
+  )
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -71,44 +109,56 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
     )
   }, [formData.moveInDate])
 
-  // Pre-fill user information when modal opens
+  const moveInIsPreBookWindow = useMemo(
+    () =>
+      Boolean(
+        expiringLeaseEndYmd &&
+          formData.moveInDate &&
+          isPreBookMoveInWindow(formData.moveInDate, expiringLeaseEndYmd),
+      ),
+    [expiringLeaseEndYmd, formData.moveInDate],
+  )
+
   useEffect(() => {
-    if (isOpen && user) {
-      setFormData(prev => ({
-        ...prev,
-        // Pre-fill user info only if fields are empty (preserve user edits during session)
-        fullName: prev.fullName || user.name || '',
-        email: prev.email || user.email || '',
-        phone: prev.phone || user.phone || '',
-        // Use user id as studentId if available
-        studentId: prev.studentId || user.id || '',
-      }))
-    }
+    if (!isOpen || !user) return
+    setFormData((prev) => ({
+      ...prev,
+      fullName: prev.fullName || user.name || '',
+      email: prev.email || user.email || '',
+      phone: prev.phone || user.phone || '',
+      studentId: prev.studentId || user.id || '',
+    }))
   }, [isOpen, user])
 
-  // Reset form and step when modal closes
+  /** Đóng: xóa form. Mở: nếu có ngày từ lịch thì điền ngay (tránh race giữa hai effect trước đây). */
   useEffect(() => {
     if (!isOpen) {
       setCurrentStep(1)
       setErrors({})
-      // Reset all form fields to empty
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        studentId: '',
-        moveInDate: '',
-        moveOutDate: '',
-        duration: 3,
-        paymentMethod: 'VIETQR',
-        specialRequests: '',
-        emergencyContact: '',
-        emergencyPhone: '',
-        agreeToTerms: false,
-        agreeToPrivacy: false,
-      })
+      setFormData(createEmptyBookingForm())
+      return
     }
-  }, [isOpen])
+    const ymd = initialMoveInDate?.trim()
+    if (!ymd) return
+    const p = defaultPairFromCheckIn(ymd)
+    setFormData((prev) => ({
+      ...prev,
+      moveInDate: p.moveIn,
+      moveOutDate: p.moveOut,
+      duration: p.duration,
+    }))
+  }, [isOpen, initialMoveInDate])
+
+  useEffect(() => {
+    if (!isOpen) return
+    setFormData((prev) => ({
+      ...prev,
+      occupancyUnits: Math.min(
+        maxUserOccupancy,
+        Math.max(1, Math.floor(prev.occupancyUnits) || 1),
+      ),
+    }))
+  }, [isOpen, maxUserOccupancy])
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {}
@@ -125,6 +175,24 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
         newErrors,
         validateBookingDates(formData.moveInDate, formData.moveOutDate),
       )
+      const units = Math.min(
+        maxUserOccupancy,
+        Math.max(1, Math.floor(formData.occupancyUnits) || 1),
+      )
+      if (
+        formData.moveInDate &&
+        formData.moveOutDate &&
+        !bookingRangeFitsCapacity(
+          formData.moveInDate,
+          formData.moveOutDate,
+          roomCapacity,
+          occupancySlices,
+          units,
+        )
+      ) {
+        newErrors.moveOutDate =
+          'Không đủ chỗ trống trong khoảng ngày đã chọn. Vui lòng chỉnh ngày hoặc số chỗ theo lịch phía trên.'
+      }
       if (formData.duration && formData.duration < 3) {
         newErrors.duration = 'Thời gian thuê tối thiểu 3 tháng'
       }
@@ -161,12 +229,37 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
       setCurrentStep(2)
       return
     }
+    const submitUnits = Math.min(
+      maxUserOccupancy,
+      Math.max(1, Math.floor(formData.occupancyUnits) || 1),
+    )
+    if (
+      !bookingRangeFitsCapacity(
+        formData.moveInDate,
+        formData.moveOutDate,
+        roomCapacity,
+        occupancySlices,
+        submitUnits,
+      )
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        moveOutDate:
+          'Không đủ chỗ trống trong khoảng ngày đã chọn. Vui lòng chỉnh theo lịch khả dụng.',
+      }))
+      setCurrentStep(2)
+      return
+    }
 
-    onSubmit(formData)
+    onSubmit({ ...formData, occupancyUnits: submitUnits })
   }
 
   const calculateTotal = () => {
-    return formData.duration * room.price
+    const u = Math.min(
+      maxUserOccupancy,
+      Math.max(1, Math.floor(formData.occupancyUnits) || 1),
+    )
+    return formData.duration * room.price * u
   }
 
   const calculateDeposit = () => {
@@ -335,7 +428,27 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Không được chọn ngày nhận trong quá khứ. Thời gian thuê tối thiểu{' '}
                   <span className="font-semibold text-blue-600">3 tháng</span> ({BOOKING_MIN_STAY_DAYS} ngày).
+                  {roomCapacity > 1 && (
+                    <>
+                      {' '}
+                      Phòng tối đa <span className="font-semibold">{roomCapacity}</span> chỗ. Mỗi lượt đặt tối đa{' '}
+                      <span className="font-semibold">{MAX_USER_BOOKING_OCCUPANCY_UNITS}</span> chỗ (bản thân / đi cùng); giá
+                      theo số chỗ đặt.
+                    </>
+                  )}
                 </p>
+
+                {expiringLeaseEndYmd && (
+                  <div className="rounded-xl border border-sky-200/90 bg-sky-50/95 px-3 py-2.5 text-sm text-sky-950 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100">
+                    <p className="font-semibold text-sky-900 dark:text-sky-50">Phòng đang giai đoạn sắp trả (~{EXPIRING_SOON_LEAD_DAYS} ngày cuối hợp đồng)</p>
+                    <p className="mt-1 text-xs sm:text-sm opacity-95">
+                      Ngày trả dự kiến của hợp đồng hiện tại:{' '}
+                      <span className="font-medium tabular-nums">{expiringLeaseEndLabel}</span>. Chọn ngày nhận trong khoảng tối đa 1
+                      ngày trước đến 7 ngày sau ngày đó để hệ thống tạo <span className="font-medium">đặt trước</span> (QUEUED).
+                      Người đang ở được ưu tiên gia hạn; nếu họ gia hạn, đặt trước có thể bị hủy.
+                    </p>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -365,6 +478,11 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                     {errors.moveInDate && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.moveInDate}</p>
                     )}
+                    {moveInIsPreBookWindow && (
+                      <p className="mt-1 text-xs text-sky-800 dark:text-sky-200">
+                        Ngày nhận nằm trong cửa sổ đặt trước — đơn có thể được tạo không cần thanh toán ngay; thanh toán khi tới lượt kích hoạt.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -390,7 +508,7 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Thời gian thuê (tháng) *
+                      Đặt cọc (tháng) *
                     </label>
                     <input
                       type="number"
@@ -410,6 +528,37 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.duration}</p>
                     )}
                   </div>
+
+                  {maxUserOccupancy > 1 && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Số chỗ đặt *
+                      </label>
+                      <select
+                        value={formData.occupancyUnits}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            occupancyUnits: Math.min(
+                              maxUserOccupancy,
+                              Math.max(1, parseInt(e.target.value, 10) || 1),
+                            ),
+                          })
+                        }
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white border-gray-300 dark:border-gray-600"
+                      >
+                        {Array.from({ length: maxUserOccupancy }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>
+                            {n} chỗ
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Tối đa {MAX_USER_BOOKING_OCCUPANCY_UNITS} chỗ mỗi lượt. Mỗi chỗ = một suất; tổng = giá/tháng × số chỗ ×
+                        số tháng.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Room Summary */}
@@ -425,9 +574,15 @@ export default function BookingModal({ isOpen, onClose, onSubmit, room, building
                       <span className="text-gray-900 dark:text-white">{room.type}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Giá/tháng:</span>
+                      <span className="text-gray-600 dark:text-gray-400">Giá/tháng (mỗi chỗ):</span>
                       <span className="text-gray-900 dark:text-white">{room.price.toLocaleString()}đ</span>
                     </div>
+                    {maxUserOccupancy > 1 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Số chỗ:</span>
+                        <span className="text-gray-900 dark:text-white">{formData.occupancyUnits}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Thời gian:</span>
                       <span className="text-gray-900 dark:text-white">{formData.duration} tháng</span>

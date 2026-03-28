@@ -10,6 +10,11 @@
  */
 
 import { apiClient } from './apiClient'
+import {
+  parseApiBookingsToOccupancySlices,
+  MAX_USER_BOOKING_OCCUPANCY_UNITS,
+  type OccupancySlice,
+} from '@/utils/roomOccupancy'
 import { BackendApiResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
 
@@ -26,6 +31,8 @@ interface CreateBookingData {
   moveOutDate: string
   duration: number
   paymentMethod: SupportedPaymentMethod
+  /** Số chỗ đặt (KTX); mặc định 1 */
+  occupancyUnits?: number
   specialRequests?: string
   emergencyContact?: string
   emergencyPhone?: string
@@ -57,6 +64,12 @@ function validateBookingData(data: CreateBookingData): void {
   if (data.duration < MIN_RENTAL_MONTHS) {
     throw new ValidationError(`Thời gian thuê tối thiểu ${MIN_RENTAL_MONTHS} tháng`)
   }
+  const ou = Math.floor(Number(data.occupancyUnits ?? 1))
+  if (!Number.isFinite(ou) || ou < 1 || ou > MAX_USER_BOOKING_OCCUPANCY_UNITS) {
+    throw new ValidationError(
+      `Số chỗ đặt phải từ 1 đến ${MAX_USER_BOOKING_OCCUPANCY_UNITS}`,
+    )
+  }
   normalizePaymentMethod(data.paymentMethod)
   // Emergency contact is optional - no validation needed
 }
@@ -68,6 +81,20 @@ function validateToken(token: string): void {
   if (!token || typeof token !== 'string' || token.trim() === '') {
     throw new ValidationError('Authentication token is required')
   }
+}
+
+function extractBookingsArrayFromResponse(response: unknown): unknown[] {
+  if (Array.isArray(response)) return response
+  if (response && typeof response === 'object') {
+    const r = response as Record<string, unknown>
+    const d = r.data
+    if (Array.isArray(d)) return d
+    if (d && typeof d === 'object') {
+      const inner = (d as Record<string, unknown>).data
+      if (Array.isArray(inner)) return inner
+    }
+  }
+  return []
 }
 
 /**
@@ -129,6 +156,10 @@ export class BookingService {
           {
             roomId: bookingData.roomId,
             price: bookingData.roomPrice || 0,
+            occupancyUnits: Math.min(
+              MAX_USER_BOOKING_OCCUPANCY_UNITS,
+              Math.max(1, Math.floor(Number(bookingData.occupancyUnits ?? 1)) || 1),
+            ),
             note: bookingData.specialRequests || undefined,
           },
         ],
@@ -151,6 +182,26 @@ export class BookingService {
       return Array.isArray(bookingsData) ? bookingsData : []
     } catch (error: any) {
       handleApiError(error, 'fetching user bookings')
+    }
+  }
+
+  /**
+   * Khoảng ngày phòng đang bận (không chứa PII) — cho lịch khả dụng trên trang chi tiết phòng.
+   */
+  static async getRoomOccupancySlices(
+    roomId: string,
+    token: string,
+  ): Promise<OccupancySlice[]> {
+    try {
+      if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
+        throw new ValidationError('Room ID is required')
+      }
+      validateToken(token)
+      const raw = await apiClient.getBookingsByRoomId(roomId, token)
+      const list = extractBookingsArrayFromResponse(raw)
+      return parseApiBookingsToOccupancySlices(list, roomId)
+    } catch (error: any) {
+      handleApiError(error, 'fetching room occupancy')
     }
   }
 
