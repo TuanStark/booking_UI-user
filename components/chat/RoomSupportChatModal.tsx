@@ -36,19 +36,34 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
     setChatAuthToken(accessToken);
   }, [accessToken]);
 
+  const stateRefs = useRef({ conversation });
+  useEffect(() => {
+    stateRefs.current = { conversation };
+  }, [conversation]);
+
   // ─── Socket.IO Connection ────────────────────────────────
   useEffect(() => {
     if (!isAuthenticated || !accessToken || !isOpen) return;
 
     const socket = io(`${CHAT_WS_URL}/chat`, {
       auth: { token: accessToken },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionDelay: 1000,
     });
 
+    socket.on("connect", () => {
+      const { conversation } = stateRefs.current;
+      if (conversation) {
+        socket.emit("join_conversation", { conversationId: conversation.id });
+      }
+    });
+
     socket.on("new_message", (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        if (prev.some(m => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
       scrollToBottom();
     });
 
@@ -87,7 +102,8 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
         if (!mounted) return;
         setConversation(conv);
 
-        // Join socket room
+        // We must make sure socket joins the room.
+        // It's safe to emit here; socket.io buffers if not connected, or we handle via "connect" handler
         socketRef.current?.emit("join_conversation", { conversationId: conv.id });
 
         // Load messages

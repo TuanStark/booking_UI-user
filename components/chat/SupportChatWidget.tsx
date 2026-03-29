@@ -35,6 +35,11 @@ export default function SupportChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const stateRefs = useRef({ open, minimized, conversation });
+  useEffect(() => {
+    stateRefs.current = { open, minimized, conversation };
+  }, [open, minimized, conversation]);
+
   // ─── Socket.IO Connection ────────────────────────────────
   useEffect(() => {
     // Only connect if authenticated and open (or if we want background unread counts we can keep it connected)
@@ -42,13 +47,25 @@ export default function SupportChatWidget() {
 
     const socket = io(`${CHAT_WS_URL}/chat`, {
       auth: { token: accessToken },
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionDelay: 1000,
     });
 
+    socket.on("connect", () => {
+      const { conversation } = stateRefs.current;
+      if (conversation) {
+        socket.emit("join_conversation", { conversationId: conversation.id });
+      }
+    });
+
     socket.on("new_message", (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        // Prevent duplicate messages
+        if (prev.some(m => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+      const { open, minimized } = stateRefs.current;
       if (!open || minimized) {
         setUnreadCount((c) => c + 1);
       }
@@ -70,7 +87,7 @@ export default function SupportChatWidget() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [isAuthenticated, accessToken, open, minimized]);
+  }, [isAuthenticated, accessToken]);
 
   // ─── Open chat: create/find conversation & load messages ─
   const handleOpen = useCallback(async () => {
@@ -97,6 +114,11 @@ export default function SupportChatWidget() {
       // Load messages
       const result = await chatApi.getMessages(conv.id);
       setMessages(result.data.reverse());
+      
+      // We must make sure socket joins the room. 
+      // If socket is already connected but didn't know about `conv` when it connected:
+      socketRef.current?.emit("join_conversation", { conversationId: conv.id });
+      
       scrollToBottom();
     } catch (err) {
       console.error("Failed to open chat:", err);
