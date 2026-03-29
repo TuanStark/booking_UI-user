@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+import SupportChatWidget from "@/components/chat/SupportChatWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,8 +32,11 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable} ${poppins.variable}`}>
       <body className="font-sans antialiased">
-        <AuthProvider>{children}</AuthProvider>
-        <ChatbotWidget />
+        <AuthProvider>
+          {children}
+          <SupportChatWidget />
+          <ChatbotWidget />
+        </AuthProvider>
       </body>
     </html>
   );

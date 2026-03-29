@@ -38,6 +38,7 @@ import { BookingService } from "@/services/bookingService";
 import { cn } from "@/utils/utils";
 import { Room, BookingFormData } from "@/types";
 import type { OccupancySlice } from "@/utils/roomOccupancy";
+import RoomSupportChatModal from "@/components/chat/RoomSupportChatModal";
 
 interface BuildingInfo {
   id: string;
@@ -62,6 +63,7 @@ export default function RoomDetailPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
@@ -533,16 +535,6 @@ export default function RoomDetailPage() {
                         showStarRow
                         href="#reviews"
                       />
-                      <div
-                        className={cn(
-                          "px-3 py-1 rounded-full text-sm font-medium",
-                          room.available
-                            ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                            : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
-                        )}
-                      >
-                        {room.available ? "Còn trống" : "Hết phòng"}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -701,20 +693,13 @@ export default function RoomDetailPage() {
                       <div
                         className={cn(
                           "flex items-center space-x-2",
-                          room.available
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-red-600 dark:text-red-400",
+                          "text-green-600 dark:text-green-400"
                         )}
                       >
-                        {room.available ? (
+                        {room &&(
                           <>
                             <CheckCircle className="h-4 w-4" />
                             <span className="font-medium">Còn trống</span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="h-4 w-4" />
-                            <span className="font-medium">Hết phòng</span>
                           </>
                         )}
                       </div>
@@ -742,7 +727,7 @@ export default function RoomDetailPage() {
                     </div>
                   </div>
 
-                  {room.available ? (
+                  {room && (
                     <button
                       onClick={() => setIsBookingModalOpen(true)}
                       className="w-full bg-brand text-white py-3 px-4 rounded-xl font-semibold hover:bg-brand-dark transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -750,10 +735,6 @@ export default function RoomDetailPage() {
                       <Calendar className="h-5 w-5 inline mr-2" />
                       Đặt phòng ngay
                     </button>
-                  ) : (
-                    <div className="text-center py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-600 dark:text-gray-400">
-                      Phòng đã được thuê
-                    </div>
                   )}
 
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -762,7 +743,10 @@ export default function RoomDetailPage() {
                         <Phone className="h-4 w-4" />
                         <span className="text-sm">Gọi</span>
                       </button>
-                      <button className="flex-1 flex items-center justify-center space-x-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <button
+                        onClick={() => setIsChatModalOpen(true)}
+                        className="flex-1 flex items-center justify-center space-x-2 py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                      >
                         <MessageCircle className="h-4 w-4" />
                         <span className="text-sm">Chat</span>
                       </button>
@@ -838,6 +822,14 @@ export default function RoomDetailPage() {
         initialMoveInDate={bookingInitialMoveIn}
         occupancySlices={occupancySlices}
         roomCapacity={room.capacityMax}
+      />
+
+      {/* Room Support Chat Modal */}
+      <RoomSupportChatModal
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+        roomId={roomId}
+        roomNumber={room.roomNumber}
       />
 
       {/* Booking Success Toast */}

@@ -84,16 +84,6 @@ export default function RoomCard({
               <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                 <span>Tầng {room?.floor || "N/A"}</span>
                 <span>{room?.window || "N/A"}</span>
-                <span
-                  className={cn(
-                    "px-2 py-1 rounded-full text-xs font-medium",
-                    room?.available
-                      ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                      : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
-                  )}
-                >
-                  {room?.available ? "Còn trống" : "Hết phòng"}
-                </span>
               </div>
               <Link
                 href={`/rooms/${room?.id || "#"}`}
@@ -130,18 +120,6 @@ export default function RoomCard({
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-4 right-4">
-          <div
-            className={cn(
-              "px-2 py-1 rounded-full text-xs font-medium",
-              room?.available
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white",
-            )}
-          >
-            {room?.available ? "Còn trống" : "Hết phòng"}
-          </div>
-        </div>
         <div className="absolute bottom-4 left-4">
           <div className="bg-white/95 dark:bg-gray-800/95 px-2 py-1 rounded-full shadow-md backdrop-blur-sm">
             <RatingSummaryBadge
