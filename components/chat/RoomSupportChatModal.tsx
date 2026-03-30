@@ -64,6 +64,13 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
         if (prev.some(m => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
+      if (msg.senderRole === 'ADMIN') {
+        try {
+          const audio = new Audio('/assets/notification.mp3');
+          audio.volume = 0.5;
+          audio.play().catch(() => {});
+        } catch(e) {}
+      }
       scrollToBottom();
     });
 
@@ -169,6 +176,16 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
   const formatTime = (d: string) =>
     new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const today = new Date();
+    if (d.toDateString() === today.toDateString()) return 'Hôm nay';
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return 'Hôm qua';
+    return d.toLocaleDateString('vi-VN');
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -240,23 +257,41 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
                     <p className="text-sm">Hãy gửi câu hỏi về phòng {roomNumber} tại đây.</p>
                   </div>
                 ) : (
-                  messages.map((msg) => {
+                  messages.map((msg, idx) => {
                     const isUser = msg.senderRole === "USER";
+                    const showDate =
+                      idx === 0 ||
+                      new Date(msg.createdAt).toDateString() !== new Date(messages[idx - 1].createdAt).toDateString();
+
                     return (
-                      <div key={msg.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[15px] ${isUser
-                              ? "bg-blue-600 text-white rounded-br-sm shadow-sm"
-                              : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-sm shadow-sm border border-gray-100 dark:border-gray-700"
-                            }`}
-                        >
-                          {!isUser && (
-                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">Hỗ trợ viên</p>
-                          )}
-                          <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                          <p className={`text-[11px] mt-1.5 text-right ${isUser ? "text-blue-100" : "text-gray-400 dark:text-gray-500"}`}>
-                            {formatTime(msg.createdAt)}
-                          </p>
+                      <div key={msg.id} className="flex flex-col">
+                        {showDate && (
+                          <div className="relative my-4">
+                            <div className="absolute inset-0 flex items-center">
+                              <div className="w-full border-t border-blue-200/50" />
+                            </div>
+                            <div className="relative flex justify-center text-[10px]">
+                              <span className="bg-gray-50 dark:bg-gray-900 px-3 py-0.5 rounded-full text-blue-600/70 font-medium">
+                                {formatDate(msg.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-2`}>
+                          <div
+                            className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[15px] ${isUser
+                                ? "bg-blue-600 text-white rounded-br-sm shadow-sm"
+                                : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-sm shadow-sm border border-gray-100 dark:border-gray-700"
+                              }`}
+                          >
+                            {!isUser && (
+                              <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">Hỗ trợ viên</p>
+                            )}
+                            <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                            <p className={`text-[11px] mt-1.5 text-right ${isUser ? "text-blue-100" : "text-gray-400 dark:text-gray-500"}`}>
+                              {formatTime(msg.createdAt)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     );

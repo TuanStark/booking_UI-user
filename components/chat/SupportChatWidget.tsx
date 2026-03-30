@@ -68,6 +68,14 @@ export default function SupportChatWidget() {
       const { open, minimized } = stateRefs.current;
       if (!open || minimized) {
         setUnreadCount((c) => c + 1);
+        if (msg.senderRole === 'ADMIN') {
+          // Play a small notification sound
+          try {
+            const audio = new Audio('/assets/notification.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {});
+          } catch(e) {}
+        }
       }
       scrollToBottom();
     });
@@ -159,6 +167,16 @@ export default function SupportChatWidget() {
   const formatTime = (d: string) =>
     new Date(d).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const today = new Date();
+    if (d.toDateString() === today.toDateString()) return 'Hôm nay';
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return 'Hôm qua';
+    return d.toLocaleDateString('vi-VN');
+  };
+
   if (authLoading) return null;
 
   return (
@@ -245,24 +263,42 @@ export default function SupportChatWidget() {
                     <p className="mt-1">Hãy gửi tin nhắn để được hỗ trợ</p>
                   </div>
                 ) : (
-                  messages.map((msg) => {
+                  messages.map((msg, idx) => {
                     const isUser = msg.senderRole === "USER";
+                    const showDate =
+                      idx === 0 ||
+                      new Date(msg.createdAt).toDateString() !== new Date(messages[idx - 1].createdAt).toDateString();
+
                     return (
-                      <div key={msg.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
-                            isUser
-                              ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-br-sm"
-                              : "bg-white text-gray-800 rounded-bl-sm shadow-sm ring-1 ring-black/5"
-                          }`}
-                        >
-                          {!isUser && (
-                            <p className="text-[10px] font-semibold text-emerald-600 mb-0.5">Hỗ trợ</p>
-                          )}
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
-                          <p className={`text-[10px] mt-0.5 ${isUser ? "text-emerald-100" : "text-gray-400"}`}>
-                            {formatTime(msg.createdAt)}
-                          </p>
+                      <div key={msg.id} className="flex flex-col">
+                        {showDate && (
+                          <div className="relative my-4">
+                            <div className="absolute inset-0 flex items-center">
+                              <div className="w-full border-t border-emerald-200/50" />
+                            </div>
+                            <div className="relative flex justify-center text-[10px]">
+                              <span className="bg-[#f0fdf4] px-3 py-0.5 rounded-full text-emerald-600/70 font-medium">
+                                {formatDate(msg.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-2`}>
+                          <div
+                            className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
+                              isUser
+                                ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-br-sm"
+                                : "bg-white text-gray-800 rounded-bl-sm shadow-sm ring-1 ring-black/5"
+                            }`}
+                          >
+                            {!isUser && (
+                              <p className="text-[10px] font-semibold text-emerald-600 mb-0.5">Hỗ trợ</p>
+                            )}
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                            <p className={`text-[10px] mt-0.5 ${isUser ? "text-emerald-100" : "text-gray-400"}`}>
+                              {formatTime(msg.createdAt)}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     );
