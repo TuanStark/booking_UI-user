@@ -66,10 +66,10 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
       });
       if (msg.senderRole === 'ADMIN') {
         try {
-          const audio = new Audio('/assets/notification.mp3');
+          const audio = new Audio('/public/notification.mp3');
           audio.volume = 0.5;
-          audio.play().catch(() => {});
-        } catch(e) {}
+          audio.play().catch(() => { });
+        } catch (e) { }
       }
       scrollToBottom();
     });
@@ -280,8 +280,8 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
                         <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-2`}>
                           <div
                             className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-[15px] ${isUser
-                                ? "bg-blue-600 text-white rounded-br-sm shadow-sm"
-                                : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-sm shadow-sm border border-gray-100 dark:border-gray-700"
+                              ? "bg-blue-600 text-white rounded-br-sm shadow-sm"
+                              : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-sm shadow-sm border border-gray-100 dark:border-gray-700"
                               }`}
                           >
                             {!isUser && (

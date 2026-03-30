@@ -9,6 +9,13 @@ RUN mkdir -p public
 # NEXT_PUBLIC_* is inlined at build time. Browser must reach this host (not Docker service names).
 ARG NEXT_PUBLIC_AGENT_API_URL=https://dorm-agent.tuanstark.id.vn/api/v1/super-agent/query
 ENV NEXT_PUBLIC_AGENT_API_URL=$NEXT_PUBLIC_AGENT_API_URL
+
+ARG NEXT_PUBLIC_CHAT_WS_URL=https://dorm-api.tuanstark.id.vn
+ENV NEXT_PUBLIC_CHAT_WS_URL=$NEXT_PUBLIC_CHAT_WS_URL
+
+ARG NEXT_PUBLIC_API_BASE_URL=https://dorm-api.tuanstark.id.vn
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 RUN npm run build
 
 # Production stage

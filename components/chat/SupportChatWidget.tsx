@@ -71,10 +71,10 @@ export default function SupportChatWidget() {
         if (msg.senderRole === 'ADMIN') {
           // Play a small notification sound
           try {
-            const audio = new Audio('/assets/notification.mp3');
+            const audio = new Audio('/public/notification.mp3');
             audio.volume = 0.5;
-            audio.play().catch(() => {});
-          } catch(e) {}
+            audio.play().catch(() => { });
+          } catch (e) { }
         }
       }
       scrollToBottom();
@@ -122,11 +122,11 @@ export default function SupportChatWidget() {
       // Load messages
       const result = await chatApi.getMessages(conv.id);
       setMessages(result.data.reverse());
-      
+
       // We must make sure socket joins the room. 
       // If socket is already connected but didn't know about `conv` when it connected:
       socketRef.current?.emit("join_conversation", { conversationId: conv.id });
-      
+
       scrollToBottom();
     } catch (err) {
       console.error("Failed to open chat:", err);
@@ -285,11 +285,10 @@ export default function SupportChatWidget() {
                         )}
                         <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-2`}>
                           <div
-                            className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${
-                              isUser
+                            className={`max-w-[80%] px-3.5 py-2 rounded-2xl text-sm ${isUser
                                 ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-br-sm"
                                 : "bg-white text-gray-800 rounded-bl-sm shadow-sm ring-1 ring-black/5"
-                            }`}
+                              }`}
                           >
                             {!isUser && (
                               <p className="text-[10px] font-semibold text-emerald-600 mb-0.5">Hỗ trợ</p>
