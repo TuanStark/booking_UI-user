@@ -59,7 +59,7 @@ export default function ContactPage() {
       setIsSubmitting(false);
       window.setTimeout(() => {
         setSubmitStatus("idle");
-      }, 5000);
+      }, 2000);
     }
   };
 
