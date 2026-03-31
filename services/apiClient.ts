@@ -404,6 +404,22 @@ class ApiClient {
     })
   }
 
+  /**
+   * Submit public contact form via API gateway -> notification-service
+   */
+  async submitContactForm(contactData: {
+    name: string
+    email: string
+    phone?: string
+    subject: string
+    message: string
+  }) {
+    return this.request('/notifications/contact', {
+      method: 'POST',
+      data: contactData,
+    })
+  }
+
   // ==================== Upload Endpoints ====================
 
   /**
@@ -439,32 +455,56 @@ class ApiClient {
 // Create API client instance
 export const apiClient = new ApiClient(API_BASE_URL)
 
-// Export individual methods for convenience (optional, for direct usage)
-export const {
-  login,
-  register,
-  verifyEmailCode,
-  resendVerificationCode,
-  getProfile,
-  getBuildings,
-  getBuildingById,
-  getBuildingDetail,
-  getRoomsByBuildingId,
-  getRoomById,
-  createBooking,
-  getUserBookings,
-  getCheckReviewed,
-  getBookingById,
-  getBookingsByRoomId,
-  updateBookingStatus,
-  createReview,
-  getRoomReviews,
-  getPublicReviews,
-  getRoomRatingStats,
-  getNotifications,
-  markNotificationAsRead,
-  uploadImage,
-  updateProfile,
-} = apiClient
+// Export wrappers instead of destructuring class methods, so `this` remains bound.
+export const login = (...args: Parameters<ApiClient['login']>) =>
+  apiClient.login(...args)
+export const register = (...args: Parameters<ApiClient['register']>) =>
+  apiClient.register(...args)
+export const verifyEmailCode = (...args: Parameters<ApiClient['verifyEmailCode']>) =>
+  apiClient.verifyEmailCode(...args)
+export const resendVerificationCode = (...args: Parameters<ApiClient['resendVerificationCode']>) =>
+  apiClient.resendVerificationCode(...args)
+export const getProfile = (...args: Parameters<ApiClient['getProfile']>) =>
+  apiClient.getProfile(...args)
+export const getBuildings = (...args: Parameters<ApiClient['getBuildings']>) =>
+  apiClient.getBuildings(...args)
+export const getBuildingById = (...args: Parameters<ApiClient['getBuildingById']>) =>
+  apiClient.getBuildingById(...args)
+export const getBuildingDetail = (...args: Parameters<ApiClient['getBuildingDetail']>) =>
+  apiClient.getBuildingDetail(...args)
+export const getRoomsByBuildingId = (...args: Parameters<ApiClient['getRoomsByBuildingId']>) =>
+  apiClient.getRoomsByBuildingId(...args)
+export const getRoomById = (...args: Parameters<ApiClient['getRoomById']>) =>
+  apiClient.getRoomById(...args)
+export const createBooking = (...args: Parameters<ApiClient['createBooking']>) =>
+  apiClient.createBooking(...args)
+export const getUserBookings = (...args: Parameters<ApiClient['getUserBookings']>) =>
+  apiClient.getUserBookings(...args)
+export const getCheckReviewed = (...args: Parameters<ApiClient['getCheckReviewed']>) =>
+  apiClient.getCheckReviewed(...args)
+export const getBookingById = (...args: Parameters<ApiClient['getBookingById']>) =>
+  apiClient.getBookingById(...args)
+export const getBookingsByRoomId = (...args: Parameters<ApiClient['getBookingsByRoomId']>) =>
+  apiClient.getBookingsByRoomId(...args)
+export const updateBookingStatus = (...args: Parameters<ApiClient['updateBookingStatus']>) =>
+  apiClient.updateBookingStatus(...args)
+export const createReview = (...args: Parameters<ApiClient['createReview']>) =>
+  apiClient.createReview(...args)
+export const getRoomReviews = (...args: Parameters<ApiClient['getRoomReviews']>) =>
+  apiClient.getRoomReviews(...args)
+export const getPublicReviews = (...args: Parameters<ApiClient['getPublicReviews']>) =>
+  apiClient.getPublicReviews(...args)
+export const getRoomRatingStats = (...args: Parameters<ApiClient['getRoomRatingStats']>) =>
+  apiClient.getRoomRatingStats(...args)
+export const getNotifications = (...args: Parameters<ApiClient['getNotifications']>) =>
+  apiClient.getNotifications(...args)
+export const markNotificationAsRead = (...args: Parameters<ApiClient['markNotificationAsRead']>) =>
+  apiClient.markNotificationAsRead(...args)
+export const submitContactForm = (...args: Parameters<ApiClient['submitContactForm']>) =>
+  apiClient.submitContactForm(...args)
+export const uploadImage = (...args: Parameters<ApiClient['uploadImage']>) =>
+  apiClient.uploadImage(...args)
+export const updateProfile = (...args: Parameters<ApiClient['updateProfile']>) =>
+  apiClient.updateProfile(...args)
 
 export default apiClient

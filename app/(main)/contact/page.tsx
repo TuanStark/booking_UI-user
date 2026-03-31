@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitContactForm } from "@/services/apiClient";
 import {
   MapPin,
   Phone,
@@ -41,9 +42,8 @@ export default function ContactPage() {
     setIsSubmitting(true);
     setSubmitStatus("idle");
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await submitContactForm(formData);
       setSubmitStatus("success");
       setFormData({
         name: "",
@@ -52,12 +52,15 @@ export default function ContactPage() {
         subject: "",
         message: "",
       });
-
-      // Reset success message after 5 seconds
-      setTimeout(() => {
+    } catch (error) {
+      console.error("Failed to submit contact form:", error);
+      setSubmitStatus("error");
+    } finally {
+      setIsSubmitting(false);
+      window.setTimeout(() => {
         setSubmitStatus("idle");
       }, 5000);
-    }, 1000);
+    }
   };
 
   const contactInfo = [
