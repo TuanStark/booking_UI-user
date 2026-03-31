@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
-import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
-import SupportChatWidget from "@/components/chat/SupportChatWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,8 +32,6 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider>
           {children}
-          <SupportChatWidget />
-          <ChatbotWidget />
         </AuthProvider>
       </body>
     </html>

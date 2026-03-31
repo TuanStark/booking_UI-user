@@ -4,9 +4,15 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
 /** Module-level access token synced from UserContext */
 let _accessToken: string | null = null;
+let _cachedSupportConversation: Conversation | null = null;
+let _pendingSupportConversation: Promise<Conversation> | null = null;
 
 /** Call this when UserContext provides an accessToken */
 export function setChatAuthToken(token: string | null) {
+  if (_accessToken !== token) {
+    _cachedSupportConversation = null;
+    _pendingSupportConversation = null;
+  }
   _accessToken = token;
 }
 
@@ -31,14 +37,31 @@ async function chatRequest<T>(url: string, options: RequestInit = {}): Promise<T
 
 /** Create or find existing support conversation */
 export async function createConversation(contextType?: string, contextId?: string): Promise<Conversation> {
-  return chatRequest('/chat/conversations', {
+  if (_cachedSupportConversation?.id) {
+    return _cachedSupportConversation;
+  }
+
+  if (_pendingSupportConversation) {
+    return _pendingSupportConversation;
+  }
+
+  _pendingSupportConversation = chatRequest<Conversation>('/chat/conversations', {
     method: 'POST',
     body: JSON.stringify({
       title: 'Hỗ trợ khách hàng',
       contextType,
       contextId,
     }),
-  });
+  })
+    .then((conversation) => {
+      _cachedSupportConversation = conversation;
+      return conversation;
+    })
+    .finally(() => {
+      _pendingSupportConversation = null;
+    });
+
+  return _pendingSupportConversation;
 }
 
 /** Get user's conversations */

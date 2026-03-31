@@ -187,7 +187,7 @@ export default function SupportChatWidget() {
           type="button"
           aria-label="Mở hỗ trợ trực tuyến"
           onClick={handleOpen}
-          className="fixed bottom-6 right-24 z-[69] h-14 w-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
+          className="fixed bottom-24 right-6 z-[69] h-14 w-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
           style={{ boxShadow: "0 8px 32px rgba(16,185,129,0.35)" }}
         >
           <MessageCircle className="h-6 w-6" />
@@ -202,7 +202,7 @@ export default function SupportChatWidget() {
       {/* ── Chat window ── */}
       {open && !minimized && (
         <div
-          className="fixed bottom-6 right-24 z-[69] flex h-[70vh] w-[370px] max-w-[calc(100vw-100px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl"
+          className="fixed bottom-24 right-6 z-[69] flex h-[70vh] w-[370px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl"
           style={{
             boxShadow: "0 20px 60px rgba(16,185,129,0.2), 0 4px 16px rgba(0,0,0,0.12)",
             animation: "chatSlideUp 0.25s cubic-bezier(.16,1,.3,1)",
@@ -350,7 +350,7 @@ export default function SupportChatWidget() {
       {open && minimized && (
         <button
           onClick={() => { setMinimized(false); setUnreadCount(0); }}
-          className="fixed bottom-6 right-24 z-[69] flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-lg hover:scale-105 transition-all"
+          className="fixed bottom-24 right-6 z-[69] flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-lg hover:scale-105 transition-all"
         >
           <MessageCircle className="h-4 w-4" />
           Hỗ trợ
