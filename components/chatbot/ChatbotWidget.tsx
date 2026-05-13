@@ -268,7 +268,7 @@ export default function ChatbotWidget() {
       {/* ── Khung chat ── */}
       {open && (
         <div
-          className="fixed bottom-6 right-6 z-[70] flex h-[75vh] w-[390px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl"
+          className="fixed bottom-6 right-6 z-[70] flex h-[75vh] md:w-[390px] w-[370px] max-w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl"
           style={{
             boxShadow:
               "0 20px 60px rgba(75,92,177,0.25), 0 4px 16px rgba(0,0,0,0.12)",
@@ -411,11 +411,10 @@ export default function ChatbotWidget() {
                                       [message.id]: "all",
                                     }))
                                   }
-                                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                    selectedFilter === "all"
-                                      ? "bg-brand text-white shadow-sm"
-                                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                                  }`}
+                                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${selectedFilter === "all"
+                                    ? "bg-brand text-white shadow-sm"
+                                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                                    }`}
                                 >
                                   Tất cả ({typedItems.length})
                                 </button>
@@ -427,11 +426,10 @@ export default function ChatbotWidget() {
                                       [message.id]: "building",
                                     }))
                                   }
-                                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                    selectedFilter === "building"
-                                      ? "bg-brand text-white shadow-sm"
-                                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                                  }`}
+                                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${selectedFilter === "building"
+                                    ? "bg-brand text-white shadow-sm"
+                                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                                    }`}
                                 >
                                   Tòa nhà ({buildingCount})
                                 </button>
@@ -443,11 +441,10 @@ export default function ChatbotWidget() {
                                       [message.id]: "room",
                                     }))
                                   }
-                                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                                    selectedFilter === "room"
-                                      ? "bg-brand text-white shadow-sm"
-                                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                                  }`}
+                                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition ${selectedFilter === "room"
+                                    ? "bg-brand text-white shadow-sm"
+                                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                                    }`}
                                 >
                                   Phòng ({roomCount})
                                 </button>

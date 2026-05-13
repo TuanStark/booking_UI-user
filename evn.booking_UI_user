@@ -1,6 +1,0 @@
-# NextAuth Configuration
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=0515d06c8ca49660046118c8fd39878a2c3b623436393504ae50fab892ae5b55
-
-# Backend API Configuration
-NEXT_PUBLIC_API_BASE_URL=https://dorm.miniappify.space
