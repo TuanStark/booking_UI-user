@@ -14,8 +14,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/utils/utils'
 import {
-  BOOKING_MIN_STAY_DAYS,
-  addCalendarDays,
+  MIN_RENTAL_MONTHS,
+  addCalendarMonths,
+  deriveDurationMonthsFromDates,
   formatDateInputValue,
   getMinMoveOutInputValue,
   getTodayMinInputValue,
@@ -33,7 +34,47 @@ import {
   type OccupancySlice,
 } from '@/utils/roomOccupancy'
 import { Room, BookingFormData } from '@/types'
+import type { UserResponse } from '@/types/api'
 import { useUser } from '@/contexts/UserContext'
+
+function pickStudentIdFromUser(user: UserResponse | null): string {
+  return user?.studentId?.trim() ?? ''
+}
+
+function patchBookingDateRange(
+  prev: BookingFormData,
+  patch: { moveInDate?: string; moveOutDate?: string },
+): BookingFormData {
+  const moveInDate = patch.moveInDate ?? prev.moveInDate
+  let moveOutDate = patch.moveOutDate ?? prev.moveOutDate
+
+  if (patch.moveInDate) {
+    const minOut = getMinMoveOutInputValue(patch.moveInDate)
+    if (minOut && moveOutDate && moveOutDate < minOut) {
+      moveOutDate = minOut
+    }
+  }
+
+  const duration =
+    moveInDate && moveOutDate
+      ? deriveDurationMonthsFromDates(moveInDate, moveOutDate, prev.duration)
+      : prev.duration
+
+  return { ...prev, moveInDate, moveOutDate, duration }
+}
+
+function patchDurationMonths(prev: BookingFormData, months: number): BookingFormData {
+  const duration = Math.min(24, Math.max(MIN_RENTAL_MONTHS, months))
+  const checkIn = parseLocalDateFromInput(prev.moveInDate)
+  if (!checkIn) {
+    return { ...prev, duration }
+  }
+  return {
+    ...prev,
+    duration,
+    moveOutDate: formatDateInputValue(addCalendarMonths(checkIn, duration)),
+  }
+}
 
 function createEmptyBookingForm(): BookingFormData {
   return {
@@ -104,7 +145,7 @@ export default function BookingModal({
     return (
       getMinMoveOutInputValue(formData.moveInDate) ??
       formatDateInputValue(
-        addCalendarDays(startOfTodayLocal(), BOOKING_MIN_STAY_DAYS),
+        addCalendarMonths(startOfTodayLocal(), MIN_RENTAL_MONTHS),
       )
     )
   }, [formData.moveInDate])
@@ -126,7 +167,7 @@ export default function BookingModal({
       fullName: prev.fullName || user.name || '',
       email: prev.email || user.email || '',
       phone: prev.phone || user.phone || '',
-      studentId: prev.studentId || user.id || '',
+      studentId: prev.studentId || pickStudentIdFromUser(user),
     }))
   }, [isOpen, user])
 
@@ -193,8 +234,8 @@ export default function BookingModal({
         newErrors.moveOutDate =
           'Không đủ chỗ trống trong khoảng ngày đã chọn. Vui lòng chỉnh ngày hoặc số chỗ theo lịch phía trên.'
       }
-      if (formData.duration && formData.duration < 3) {
-        newErrors.duration = 'Thời gian thuê tối thiểu 3 tháng'
+      if (formData.duration < MIN_RENTAL_MONTHS) {
+        newErrors.duration = `Thời gian đặt cọc tối thiểu ${MIN_RENTAL_MONTHS} tháng`
       }
     }
 
@@ -405,12 +446,15 @@ export default function BookingModal({
                       type="text"
                       value={formData.studentId}
                       onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                      readOnly={Boolean(pickStudentIdFromUser(user))}
                       className={cn(
                         'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
-                        errors.studentId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        errors.studentId ? 'border-red-500' : 'border-gray-300 dark:border-gray-600',
+                        pickStudentIdFromUser(user) && 'bg-gray-50 dark:bg-gray-600/50 cursor-not-allowed',
                       )}
                       placeholder="SV123456"
                     />
+                    
                     {errors.studentId && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.studentId}</p>
                     )}
@@ -427,7 +471,8 @@ export default function BookingModal({
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Không được chọn ngày nhận trong quá khứ. Thời gian thuê tối thiểu{' '}
-                  <span className="font-semibold text-blue-600">3 tháng</span> ({BOOKING_MIN_STAY_DAYS} ngày).
+                  <span className="font-semibold text-blue-600">{MIN_RENTAL_MONTHS} tháng</span> (tính theo tháng lịch, ví dụ
+                  nhận 15/05 thì trả từ 15/08).
                   {roomCapacity > 1 && (
                     <>
                       {' '}
@@ -444,7 +489,7 @@ export default function BookingModal({
                     <p className="mt-1 text-xs sm:text-sm opacity-95">
                       Ngày trả dự kiến của hợp đồng hiện tại:{' '}
                       <span className="font-medium tabular-nums">{expiringLeaseEndLabel}</span>. Chọn ngày nhận trong khoảng tối đa 1
-                      ngày trước đến 7 ngày sau ngày đó để hệ thống tạo <span className="font-medium">đặt trước</span> (QUEUED).
+                      ngày trước đến 7 ngày sau ngày đó để hệ thống tạo <span className="font-medium">đặt trước</span> .
                       Người đang ở được ưu tiên gia hạn; nếu họ gia hạn, đặt trước có thể bị hủy.
                     </p>
                   </div>
@@ -459,17 +504,11 @@ export default function BookingModal({
                       type="date"
                       min={minCheckIn}
                       value={formData.moveInDate}
-                      onChange={(e) => {
-                        const moveInDate = e.target.value
-                        setFormData((prev) => {
-                          const minOut = getMinMoveOutInputValue(moveInDate)
-                          let moveOutDate = prev.moveOutDate
-                          if (minOut && moveOutDate && moveOutDate < minOut) {
-                            moveOutDate = ''
-                          }
-                          return { ...prev, moveInDate, moveOutDate }
-                        })
-                      }}
+                      onChange={(e) =>
+                        setFormData((prev) =>
+                          patchBookingDateRange(prev, { moveInDate: e.target.value }),
+                        )
+                      }
                       className={cn(
                         'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
                         errors.moveInDate ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
@@ -512,10 +551,17 @@ export default function BookingModal({
                     </label>
                     <input
                       type="number"
-                      min="3"
+                      min={MIN_RENTAL_MONTHS}
                       max="24"
                       value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 3 })}
+                      onChange={(e) =>
+                        setFormData((prev) =>
+                          patchDurationMonths(
+                            prev,
+                            parseInt(e.target.value, 10) || MIN_RENTAL_MONTHS,
+                          ),
+                        )
+                      }
                       className={cn(
                         'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white',
                         errors.duration ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'

@@ -7,8 +7,8 @@ import { eachDayOfInterval, endOfDay, isValid, startOfDay } from 'date-fns'
 import {
   parseLocalDateFromInput,
   formatDateInputValue,
-  addCalendarDays,
-  BOOKING_MIN_STAY_DAYS,
+  addCalendarMonths,
+  MIN_RENTAL_MONTHS,
   startOfTodayLocal,
 } from '@/utils/bookingDates'
 
@@ -251,11 +251,11 @@ export function defaultPairFromCheckIn(moveInYmd: string): {
   duration: number
 } {
   const d = parseLocalDateFromInput(moveInYmd)
-  if (!d) return { moveIn: '', moveOut: '', duration: 3 }
-  const out = addCalendarDays(d, BOOKING_MIN_STAY_DAYS)
+  if (!d) return { moveIn: '', moveOut: '', duration: MIN_RENTAL_MONTHS }
+  const out = addCalendarMonths(d, MIN_RENTAL_MONTHS)
   return {
     moveIn: moveInYmd,
     moveOut: formatDateInputValue(out),
-    duration: 3,
+    duration: MIN_RENTAL_MONTHS,
   }
 }

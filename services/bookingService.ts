@@ -17,6 +17,7 @@ import {
 } from '@/utils/roomOccupancy'
 import { BackendApiResponse } from '@/types/api'
 import { NotFoundError, ValidationError, NetworkError, ServerError } from '@/lib/errors'
+import { parseLocalDateFromInput } from '@/utils/bookingDates'
 
 const SUPPORTED_PAYMENT_METHODS = ['VIETQR', 'VNPAY', 'MOMO', 'PAYOS'] as const
 type SupportedPaymentMethod = (typeof SUPPORTED_PAYMENT_METHODS)[number]
@@ -138,11 +139,13 @@ export class BookingService {
       }
 
       const normalizeDate = (value: string) => {
-        const date = new Date(value)
-        if (Number.isNaN(date.getTime())) {
+        const date = parseLocalDateFromInput(value)
+        if (!date) {
           throw new ValidationError('Invalid date format')
         }
-        return date.toISOString()
+        return new Date(
+          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0),
+        ).toISOString()
       }
 
       const paymentMethod = normalizePaymentMethod(bookingData.paymentMethod)

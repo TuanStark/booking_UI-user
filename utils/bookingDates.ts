@@ -3,6 +3,10 @@
  * Avoids parsing ISO midnight as UTC which shifts "today" in some locales.
  */
 
+/** Đồng bộ booking-service MIN_RENTAL_MONTHS */
+export const MIN_RENTAL_MONTHS = 3
+
+/** Gợi ý UI (~3 tháng lịch); validation chính theo countRentalMonths. */
 export const BOOKING_MIN_STAY_DAYS = 90
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
@@ -39,6 +43,39 @@ export function addCalendarDays(d: Date, days: number): Date {
   return next
 }
 
+/** Cộng tháng lịch (Jan 31 + 1 tháng → cuối tháng 2). */
+export function addCalendarMonths(d: Date, months: number): Date {
+  const day = d.getDate()
+  const result = new Date(d.getFullYear(), d.getMonth() + months, day)
+  if (result.getDate() !== day) {
+    return new Date(result.getFullYear(), result.getMonth() + 1, 0)
+  }
+  return result
+}
+
+/**
+ * Số tháng thuê (floor) — đồng bộ booking-service calculateMonthsDifference.
+ * Ví dụ: 01/02 → 01/05 = 3 tháng; 01/02 → 30/04 có thể < 90 ngày nhưng vẫn 2 tháng.
+ */
+export function countRentalMonths(start: Date, end: Date): number {
+  const years = end.getFullYear() - start.getFullYear()
+  const months = end.getMonth() - start.getMonth()
+  const dayDiff = end.getDate() - start.getDate()
+  let totalMonths = years * 12 + months
+  if (dayDiff < 0) totalMonths--
+  return totalMonths
+}
+
+export function countRentalMonthsFromYmd(
+  moveInYmd: string,
+  moveOutYmd: string,
+): number | null {
+  const checkIn = parseLocalDateFromInput(moveInYmd)
+  const checkOut = parseLocalDateFromInput(moveOutYmd)
+  if (!checkIn || !checkOut) return null
+  return countRentalMonths(checkIn, checkOut)
+}
+
 /** Whole calendar days from start (inclusive) to end (exclusive span): end - start. */
 export function calendarDaysBetween(start: Date, end: Date): number {
   const a = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
@@ -50,11 +87,11 @@ export function getTodayMinInputValue(): string {
   return formatDateInputValue(startOfTodayLocal())
 }
 
-/** Earliest valid checkout for a given check-in (check-in + BOOKING_MIN_STAY_DAYS). */
+/** Ngày trả sớm nhất: check-in + MIN_RENTAL_MONTHS (theo tháng lịch, khớp backend). */
 export function getMinMoveOutInputValue(moveInYmd: string): string | null {
   const checkIn = parseLocalDateFromInput(moveInYmd)
   if (!checkIn) return null
-  return formatDateInputValue(addCalendarDays(checkIn, BOOKING_MIN_STAY_DAYS))
+  return formatDateInputValue(addCalendarMonths(checkIn, MIN_RENTAL_MONTHS))
 }
 
 export type BookingDateFieldErrors = Partial<
@@ -63,7 +100,7 @@ export type BookingDateFieldErrors = Partial<
 
 /**
  * Validates booking check-in / check-out.
- * Rules: required, valid calendar dates, check-in not before today, min stay BOOKING_MIN_STAY_DAYS.
+ * Rules: required, valid calendar dates, check-in not before today, min stay MIN_RENTAL_MONTHS.
  */
 export function validateBookingDates(
   moveInYmd: string,
@@ -98,12 +135,24 @@ export function validateBookingDates(
   }
 
   const stayLengthDays = calendarDaysBetween(checkIn, checkOut)
+  const rentalMonths = countRentalMonths(checkIn, checkOut)
 
   if (stayLengthDays <= 0) {
     errors.moveOutDate = 'Ngày trả phòng phải sau ngày nhận phòng'
-  } else if (stayLengthDays < BOOKING_MIN_STAY_DAYS) {
-    errors.moveOutDate = `Thời gian lưu trú tối thiểu ${BOOKING_MIN_STAY_DAYS} ngày (ngày trả phòng phải cách ngày nhận ít nhất ${BOOKING_MIN_STAY_DAYS} ngày)`
+  } else if (rentalMonths < MIN_RENTAL_MONTHS) {
+    errors.moveOutDate = `Thời gian thuê tối thiểu ${MIN_RENTAL_MONTHS} tháng (ví dụ nhận 01/05 thì trả từ 01/08 trở đi)`
   }
 
   return errors
+}
+
+/** Đồng bộ số tháng đặt cọc từ khoảng ngày đã chọn. */
+export function deriveDurationMonthsFromDates(
+  moveInYmd: string,
+  moveOutYmd: string,
+  fallback = MIN_RENTAL_MONTHS,
+): number {
+  const months = countRentalMonthsFromYmd(moveInYmd, moveOutYmd)
+  if (months == null || months < MIN_RENTAL_MONTHS) return fallback
+  return months
 }

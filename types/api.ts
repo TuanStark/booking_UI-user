@@ -53,6 +53,7 @@ export interface UserResponse {
   email: string
   name: string
   role: RoleResponse
+  studentId?: string | null
   phone?: string | null
   address?: string | null
   createdAt?: string | null
