@@ -21,6 +21,7 @@ import BuildingImageCarousel from "@/components/buildings/BuildingImageCarousel"
 import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
 import { BuildingService } from "@/services/buildingService";
 import type { Building, Room, ContactInfo } from "@/types";
+import { translateAmenity } from "@/utils/amenityUtils";
 
 interface BuildingDetailPageProps {
   params: Promise<{
@@ -437,7 +438,7 @@ export default async function BuildingDetailPage({
                           </div>
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
-                              {amenity.name}
+                              {translateAmenity(amenity.name)}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                               Có trong {amenity.count} phòng

@@ -19,6 +19,7 @@ import { LoadingState, EmptyState } from '@/components/ui/UtilityComponents'
 import { cn } from '@/utils/utils'
 import { MockDataService } from '@/services/mockDataService'
 import { Room, FilterState, SearchParams } from '@/types'
+import { translateAmenity } from '@/utils/amenityUtils'
 
 export default function BuildingRoomsPage() {
   const params = useParams()
@@ -218,7 +219,7 @@ export default function BuildingRoomsPage() {
                         key={amenity}
                         className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
                       >
-                        {amenity}
+                        {translateAmenity(amenity)}
                       </span>
                     ))}
                   </div>

@@ -32,6 +32,7 @@ import BookingModal from "@/components/BookingModal";
 import { RoomAvailabilityCalendar } from "@/components/rooms/RoomAvailabilityCalendar";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
+import { translateAmenity } from "@/utils/amenityUtils";
 import { useRoomRatingStats } from "@/hooks/useRoomRatingStats";
 import { RoomService } from "@/services/roomService";
 import { BookingService } from "@/services/bookingService";
@@ -647,7 +648,7 @@ export default function RoomDetailPage() {
                         >
                           <CheckCircle className="h-4 w-4 text-green-500" />
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {amenity}
+                            {translateAmenity(amenity)}
                           </span>
                         </div>
                       ))}

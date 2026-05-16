@@ -6,6 +6,7 @@ import { MapPin, Users, DollarSign, Eye } from "lucide-react";
 import { Building } from "@/types";
 import { cn } from "@/lib/utils";
 import { RatingSummaryBadge } from "@/components/reviews/RatingSummaryBadge";
+import { translateAmenity } from "@/utils/amenityUtils";
 
 interface BuildingCardProps {
   building: Building;
@@ -105,7 +106,7 @@ export default function BuildingCard({
                   key={index}
                   className="px-2.5 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full"
                 >
-                  {amenity}
+                  {translateAmenity(amenity)}
                 </span>
               ))}
               {building.amenities.length > 3 && (

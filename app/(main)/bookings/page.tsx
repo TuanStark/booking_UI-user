@@ -37,6 +37,7 @@ import { BookingService } from "@/services/bookingService";
 import { RoomService } from "@/services/roomService";
 import { Room } from "@/types";
 import { cn } from "@/utils/utils";
+import { translateAmenity } from "@/utils/amenityUtils";
 
 type BookingStatus =
   | "PENDING"
@@ -592,7 +593,7 @@ function BookingCard({
                           className="flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-white dark:bg-[#243146] text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-blue-500/30 hover:shadow-md hover:shadow-blue-500/5"
                         >
                           <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
-                          {amenity}
+                          {translateAmenity(amenity)}
                         </div>
                       ))}
                     </div>
