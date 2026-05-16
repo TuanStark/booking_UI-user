@@ -176,7 +176,7 @@ export default function BuildingRoomsList({ rooms }: BuildingRoomsListProps) {
                 className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30"
               />
             </div>
-            <select
+            {/* <select
               value={searchParams.sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
               className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30"
@@ -186,7 +186,7 @@ export default function BuildingRoomsList({ rooms }: BuildingRoomsListProps) {
                   Sắp xếp: {option.label}
                 </option>
               ))}
-            </select>
+            </select> */}
             <div className="flex items-center space-x-2 rounded-2xl border border-gray-200 dark:border-gray-700 p-1">
               <button
                 onClick={() => setViewMode('grid')}
@@ -253,7 +253,7 @@ export default function BuildingRoomsList({ rooms }: BuildingRoomsListProps) {
           </button>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
             <span className="font-medium">Giá tối đa:</span>
             <span className="rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-gray-800 dark:text-gray-100">
@@ -269,7 +269,7 @@ export default function BuildingRoomsList({ rooms }: BuildingRoomsListProps) {
             onChange={(e) => handlePriceChange(parseInt(e.target.value, 10))}
             className="w-full accent-blue-600 sm:w-64"
           />
-        </div>
+        </div> */}
       </div>
 
       {filteredRooms.length > 0 ? (

@@ -202,9 +202,9 @@ export default async function BuildingDetailPage({
   const availableRoomsCount = building.availableRooms ?? 0;
   const occupancyRate = building.totalRooms
     ? Math.round(
-        ((building.totalRooms - availableRoomsCount) / building.totalRooms) *
-          100,
-      )
+      ((building.totalRooms - availableRoomsCount) / building.totalRooms) *
+      100,
+    )
     : 0;
 
   const heroStats = [
@@ -432,7 +432,7 @@ export default async function BuildingDetailPage({
               </div>
 
               <div className="space-y-6">
-                <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl ring-1 ring-gray-100/70 dark:ring-gray-800/70 p-6 sm:p-8">
+                {/* <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl ring-1 ring-gray-100/70 dark:ring-gray-800/70 p-6 sm:p-8">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     Liên hệ quản lý
                   </h3>
@@ -479,7 +479,7 @@ export default async function BuildingDetailPage({
                       Đặt lịch tham quan
                     </button>
                   </div>
-                </div>
+                </div> */}
 
                 <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl ring-1 ring-gray-100/70 dark:ring-gray-800/70 p-6 sm:p-8 space-y-4">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -531,7 +531,7 @@ export default async function BuildingDetailPage({
           </div>
         </section>
 
-        <section id="rooms" className="pb-24 scroll-mt-24">
+        <section id="rooms" className="pb-24 scroll-mt-24" style={{ marginTop: '0' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
