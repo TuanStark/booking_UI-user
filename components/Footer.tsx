@@ -54,7 +54,6 @@ export default function Footer() {
               <h3 className="font-semibold text-gray-900 mb-5">Về Chúng Tôi</h3>
               <ul className="space-y-3 text-gray-600">
                 <li><Link href="/about" className="hover:text-blue-600 transition-colors">Giới thiệu</Link></li>
-                <li><Link href="/careers" className="hover:text-blue-600 transition-colors">Tuyển dụng</Link></li>
                 <li><Link href="/news" className="hover:text-blue-600 transition-colors">Tin tức</Link></li>
                 <li><Link href="/contact" className="hover:text-blue-600 transition-colors">Liên hệ</Link></li>
               </ul>
@@ -65,7 +64,6 @@ export default function Footer() {
               <h3 className="font-semibold text-gray-900 mb-5">Dịch Vụ</h3>
               <ul className="space-y-3 text-gray-600">
                 <li><Link href="/buildings" className="hover:text-blue-600 transition-colors">Tìm phòng</Link></li>
-                <li><Link href="/partner" className="hover:text-blue-600 transition-colors">Đăng tin</Link></li>
                 <li><Link href="/pricing" className="hover:text-blue-600 transition-colors">Bảng giá</Link></li>
                 <li><Link href="/support" className="hover:text-blue-600 transition-colors">Hỗ trợ</Link></li>
               </ul>
@@ -95,7 +93,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-gray-100 text-center text-sm text-gray-500">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>© 2026 KTX Online. All rights reserved.</p>
+            <p>© 2026 KTX Online.</p>
             <div className="flex gap-6 text-xs sm:text-sm">
               <Link href="/privacy" className="hover:text-gray-700">Chính sách bảo mật</Link>
               <Link href="/terms" className="hover:text-gray-700">Điều khoản dịch vụ</Link>
