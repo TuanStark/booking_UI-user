@@ -468,14 +468,14 @@ export default function RoomDetailPage() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="absolute top-4 right-4 flex space-x-2">
+                  {/* <div className="absolute top-4 right-4 flex space-x-2">
                     <button className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-lg transition-all duration-200">
                       <Heart className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                     </button>
                     <button className="bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 rounded-full p-2 shadow-lg transition-all duration-200">
                       <Share2 className="h-5 w-5 text-gray-700 dark:text-gray-300" />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Thumbnail Gallery */}
@@ -697,7 +697,7 @@ export default function RoomDetailPage() {
                           "text-green-600 dark:text-green-400"
                         )}
                       >
-                        {room &&(
+                        {room && (
                           <>
                             <CheckCircle className="h-4 w-4" />
                             <span className="font-medium">Còn trống</span>

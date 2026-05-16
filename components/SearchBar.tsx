@@ -10,7 +10,7 @@ interface SearchBarProps {
   className?: string;
 }
 
-const cities = ["Hà Nội", "TP Hồ Chí Minh", "Đà Nẵng"];
+const cities = ["Đà Nẵng"];
 
 function SearchBarContent({ onSearch, className }: SearchBarProps) {
   const router = useRouter();
@@ -86,7 +86,7 @@ function SearchBarContent({ onSearch, className }: SearchBarProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm ký túc xá..."
-            className="w-full pl-10 pr-4 py-4 border rounded-2xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 transition-colors"
+            className="w-full pl-10 pr-4 py-4 border rounded-2xl focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 transition-colors text-black"
           />
         </div>
 
@@ -137,7 +137,7 @@ export default function SearchBar(props: SearchBarProps) {
       fallback={
         <div
           className={cn(
-            "w-full max-w-4xl mx-auto space-y-4 animate-pulse",
+            "w-full max-w-4xl mx-auto space-y-4 animate-pulse text-black",
             props.className,
           )}
         >
