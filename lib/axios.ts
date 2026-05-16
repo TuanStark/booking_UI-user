@@ -14,6 +14,7 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { NetworkError, ServerError, ValidationError, EmailNotVerifiedError } from '@/lib/errors'
+import { extractEmailNotVerifiedPayload } from '@/lib/extract-email-not-verified'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
@@ -75,6 +76,14 @@ axiosInstance.interceptors.response.use(
       const errorData = body;
       const data = errorData?.data ?? errorData;
 
+      const unv =
+        extractEmailNotVerifiedPayload(body) ||
+        extractEmailNotVerifiedPayload(errorData) ||
+        extractEmailNotVerifiedPayload(data);
+      if ((status === 403 || status === 401) && unv) {
+        return Promise.reject(new EmailNotVerifiedError(unv.userId, unv.email));
+      }
+
       if (status === 403 && data?.code === 'EMAIL_NOT_VERIFIED' && data?.userId && data?.email) {
         return Promise.reject(new EmailNotVerifiedError(data.userId, data.email));
       }
@@ -111,9 +120,17 @@ axiosInstance.interceptors.response.use(
       const errorData = (error.response.data as any) || {}
       const data = errorData?.data ?? errorData
 
+      const unv =
+        extractEmailNotVerifiedPayload(error.response.data) ||
+        extractEmailNotVerifiedPayload(errorData) ||
+        extractEmailNotVerifiedPayload(data)
+      if ((status === 403 || status === 401) && unv) {
+        return Promise.reject(new EmailNotVerifiedError(unv.userId, unv.email))
+      }
+
       // 403 with EMAIL_NOT_VERIFIED: preserve userId+email for redirect to verify page
       if (status === 403 && data?.code === 'EMAIL_NOT_VERIFIED' && data?.userId && data?.email) {
-        throw new EmailNotVerifiedError(data.userId, data.email)
+        return Promise.reject(new EmailNotVerifiedError(data.userId, data.email))
       }
 
       if (status >= 400 && status < 500) {
@@ -157,7 +174,12 @@ export async function apiRequest<T>(
     })
     return response.data
   } catch (error: any) {
-    if (error instanceof NetworkError || error instanceof ServerError || error instanceof ValidationError) {
+    if (
+      error instanceof NetworkError ||
+      error instanceof ServerError ||
+      error instanceof ValidationError ||
+      error instanceof EmailNotVerifiedError
+    ) {
       throw error
     }
     throw new NetworkError(error.message || 'An unexpected error occurred')

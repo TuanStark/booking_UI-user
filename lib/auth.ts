@@ -2,6 +2,7 @@ import { NextAuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { apiClient } from '@/services/apiClient'
 import { EmailNotVerifiedError } from '@/lib/errors'
+import { extractEmailNotVerifiedPayload } from '@/lib/extract-email-not-verified'
 import { RoleResponse } from '@/types/api'
 
 interface AuthUser extends User {
@@ -85,7 +86,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const response = await apiClient.login({
-            email: credentials.email,
+            email: credentials.email.trim().toLowerCase(),
             password: credentials.password,
           }) as any
 
@@ -125,16 +126,38 @@ export const authOptions: NextAuthOptions = {
           return null
         } catch (error: any) {
           console.error('[NextAuth] Authorize Error: ', error);
-          
-          const errData = error?.response?.data?.data || error?.response?.data || error;
+
+          if (error instanceof EmailNotVerifiedError) {
+            throw new Error(
+              JSON.stringify({
+                code: 'EMAIL_NOT_VERIFIED',
+                userId: error.userId,
+                email: error.email,
+              }),
+            )
+          }
+
+          const errData = error?.response?.data?.data || error?.response?.data || error
+          const nested = extractEmailNotVerifiedPayload(error?.response?.data)
+          if (nested) {
+            throw new Error(
+              JSON.stringify({
+                code: 'EMAIL_NOT_VERIFIED',
+                userId: nested.userId,
+                email: nested.email,
+              }),
+            )
+          }
+
           if (
-            error instanceof EmailNotVerifiedError || 
             error?.code === 'EMAIL_NOT_VERIFIED' ||
             errData?.code === 'EMAIL_NOT_VERIFIED'
           ) {
-            const userId = error?.userId || errData?.userId;
-            const email = error?.email || errData?.email;
-            throw new Error(JSON.stringify({ code: 'EMAIL_NOT_VERIFIED', userId, email }))
+            const userId = error?.userId || errData?.userId
+            const email = error?.email || errData?.email
+            throw new Error(
+              JSON.stringify({ code: 'EMAIL_NOT_VERIFIED', userId, email }),
+            )
           }
           return null
         }

@@ -36,8 +36,9 @@ export default function SignInPage() {
     setError("");
 
     try {
+      const emailNorm = formData.email.trim().toLowerCase();
       const result = await signIn("credentials", {
-        email: formData.email,
+        email: emailNorm,
         password: formData.password,
         rememberMe: rememberMe.toString(),
         redirect: false,
@@ -47,7 +48,7 @@ export default function SignInPage() {
           const parsed = JSON.parse(result.error ?? "{}");
           if (parsed?.code === "EMAIL_NOT_VERIFIED" && parsed?.userId && parsed?.email) {
             router.push(
-              `/auth/verify-email?email=${encodeURIComponent(parsed.email)}&userId=${encodeURIComponent(parsed.userId)}`
+              `/auth/verify-email?email=${encodeURIComponent(parsed.email)}&userId=${encodeURIComponent(parsed.userId)}&autoSent=1`
             );
             return;
           }
@@ -55,11 +56,11 @@ export default function SignInPage() {
           /* not JSON, fall through */
         }
         // Change the fallback error text slightly
-        setError("Tài khoản chưa được xác thực hoặc thông tin đăng nhập không đúng.");
+        setError("Email hoặc mật khẩu không đúng. Nếu bạn mới đăng ký, hệ thống sẽ chuyển bạn tới trang xác thực email.");
       } else {
         // Prepare storage persistence
         if (rememberMe) {
-          window.localStorage.setItem("rememberedEmail", formData.email);
+          window.localStorage.setItem("rememberedEmail", formData.email.trim().toLowerCase());
         } else {
           window.localStorage.removeItem("rememberedEmail");
         }

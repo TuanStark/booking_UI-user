@@ -50,9 +50,10 @@ export default function SignUpPage() {
     }
 
     try {
+      const emailNorm = formData.email.trim().toLowerCase();
       const response = await apiClient.register({
         name: formData.name,
-        email: formData.email,
+        email: emailNorm,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         studentId: formData.studentId || undefined,
@@ -71,7 +72,7 @@ export default function SignUpPage() {
       if (isSuccess) {
         const user = payload?.data ?? payload;
         const userId = user?.id ?? (payload as any)?.id;
-        const email = user?.email ?? (payload as any)?.email ?? formData.email;
+        const email = user?.email ?? (payload as any)?.email ?? emailNorm;
 
         setSuccess("Đăng ký thành công! Vui lòng kiểm tra email và nhập mã xác thực.");
         setTimeout(() => {

@@ -14,6 +14,7 @@ export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const emailFromUrl = searchParams.get("email") ?? "";
   const userIdFromUrl = searchParams.get("userId") ?? "";
+  const autoSentFromLogin = searchParams.get("autoSent") === "1";
 
   const [codeId, setCodeId] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -115,6 +116,14 @@ export default function VerifyEmailPage() {
       setError("Thiếu thông tin. Vui lòng đăng ký hoặc đăng nhập lại.");
     }
   }, [hasRequiredParams]);
+
+  useEffect(() => {
+    if (!hasRequiredParams || !autoSentFromLogin) return;
+    setSuccess(
+      "Chúng tôi đã gửi lại mã xác thực tới email của bạn. Kiểm tra hộp thư (và thư mục spam), rồi nhập mã bên dưới.",
+    );
+    startResendCooldown();
+  }, [autoSentFromLogin, hasRequiredParams, startResendCooldown]);
 
   if (!hasRequiredParams) {
     return (
