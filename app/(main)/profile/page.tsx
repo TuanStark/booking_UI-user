@@ -131,7 +131,7 @@ export default function ProfilePage() {
     },
     {
       title: 'Hồ sơ cá nhân',
-      subtitle: 'Cập nhật ảnh & thông tin',
+      subtitle: 'Cập nhật thông tin',
       href: '/profile',
       icon: User2,
     }

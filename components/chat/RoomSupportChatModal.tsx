@@ -98,7 +98,8 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
     let mounted = true;
 
     const initChat = async () => {
-      if (conversation) {
+      // Use stateRefs to avoid stale closure without triggering re-runs
+      if (stateRefs.current.conversation) {
         scrollToBottom();
         return;
       }
@@ -110,7 +111,6 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
         setConversation(conv);
 
         // We must make sure socket joins the room.
-        // It's safe to emit here; socket.io buffers if not connected, or we handle via "connect" handler
         socketRef.current?.emit("join_conversation", { conversationId: conv.id });
 
         // Load messages
@@ -131,7 +131,7 @@ export default function RoomSupportChatModal({ isOpen, onClose, roomId, roomNumb
     return () => {
       mounted = false;
     };
-  }, [isOpen, isAuthenticated, roomId, conversation]);
+  }, [isOpen, isAuthenticated, roomId]); // Removed conversation from dependencies
 
   // ─── Reset state on close ──────────────────────────────
   useEffect(() => {
