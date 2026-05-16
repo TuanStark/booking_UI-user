@@ -160,18 +160,25 @@ export async function generateMetadata({
   params,
 }: BuildingDetailPageProps): Promise<Metadata> {
   const { id } = await params;
-  const { building } = await BuildingService.getBuildingDetailWithRooms(id);
+  const { building, rooms: roomsForMeta } =
+    await BuildingService.getBuildingDetailWithRooms(id);
   if (!building) {
     return {
       title: "Không tìm thấy tòa nhà",
     };
   }
 
+  const totalRoomsMeta =
+    building.totalRooms ?? building.roomsCount ?? roomsForMeta.length;
+  const availableMeta =
+    building.availableRooms ??
+    roomsForMeta.filter((r) => r.available).length;
+
   return {
     title: `${building.name} - Chi tiết tòa nhà ký túc xá | KTX Online`,
     description:
       building.description ||
-      `Thông tin chi tiết về ${building.name} - ${building.address}. ${building.totalRooms} phòng, ${building.availableRooms ?? 0} phòng còn trống.`,
+      `Thông tin chi tiết về ${building.name} - ${building.address}. ${totalRoomsMeta} phòng, ${availableMeta} phòng còn trống.`,
     keywords: `ký túc xá, ${building.name}, đặt phòng, sinh viên, ${building.address}`,
     openGraph: {
       title: `${building.name} - KTX Online`,
@@ -199,17 +206,34 @@ export default async function BuildingDetailPage({
   const contactInfo = getPrimaryContact(building, rooms);
   const heroBackground = galleryImages[0] || FALLBACK_IMAGES[0];
   const mapCoords = getBuildingCoordinates(building);
-  const availableRoomsCount = building.availableRooms ?? 0;
-  const occupancyRate = building.totalRooms
-    ? Math.round(
-      ((building.totalRooms - availableRoomsCount) / building.totalRooms) *
-      100,
-    )
-    : 0;
+
+  /**
+   * building-service (Prisma) chỉ có `roomsCount`, không có `totalRooms` / `availableRooms`.
+   * FE type gộp cả hai — nếu chỉ đọc totalRooms thì heroStats render rỗng (undefined).
+   */
+  const totalRoomsDisplay =
+    building.totalRooms ?? building.roomsCount ?? rooms.length;
+  const availableRoomsDisplay =
+    building.availableRooms ?? roomStats.availableCount;
+
+  const occupancyRate =
+    totalRoomsDisplay > 0
+      ? Math.min(
+        100,
+        Math.max(
+          0,
+          Math.round(
+            ((totalRoomsDisplay - availableRoomsDisplay) /
+              totalRoomsDisplay) *
+            100,
+          ),
+        ),
+      )
+      : 0;
 
   const heroStats = [
-    { label: "Tổng phòng", value: building.totalRooms },
-    { label: "Còn trống", value: availableRoomsCount },
+    { label: "Tổng phòng", value: totalRoomsDisplay },
+    { label: "Còn trống", value: availableRoomsDisplay },
     { label: "Giá trung bình", value: formatCurrency(roomStats.averagePrice) },
     {
       label: "Tỷ lệ lấp đầy",
