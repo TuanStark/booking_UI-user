@@ -115,6 +115,32 @@ class ApiClient {
     })
   }
 
+  /** Quên mật khẩu — gateway → auth-service */
+  async forgotPassword(payload: { email: string }) {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      data: payload,
+    })
+  }
+
+  async validatePasswordResetToken(payload: { token: string }) {
+    return this.request('/auth/reset-password/validate', {
+      method: 'POST',
+      data: payload,
+    })
+  }
+
+  async resetPasswordWithToken(payload: {
+    token: string
+    password: string
+    confirmPassword: string
+  }) {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      data: payload,
+    })
+  }
+
   /**
    * Register new user (auth-service: name, email, studentId?, phone?, password, confirmPassword)
    */

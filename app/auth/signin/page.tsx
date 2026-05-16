@@ -19,6 +19,7 @@ export default function SignInPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const justVerified = searchParams.get("verified") === "1";
+  const passwordResetOk = searchParams.get("reset") === "1";
 
   // Chuẩn Architecture: Pre-fill email từ localStorage nếu user đã từng chọn Ghi nhớ
   useEffect(() => {
@@ -95,6 +96,14 @@ export default function SignInPage() {
               Chào mừng bạn quay trở lại!
             </p>
           </div>
+
+          {passwordResetOk && (
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-green-600 dark:text-green-400 text-sm">
+                Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.
+              </p>
+            </div>
+          )}
 
           {justVerified && (
             <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
