@@ -173,7 +173,7 @@ class ApiClient {
   /**
    * Update user profile
    */
-  async updateProfile(userId: string, userData: { name?: string; phone?: string; address?: string }, token: string) {
+  async updateProfile(userId: string, userData: { name?: string; phone?: string; studentId?: string }, token: string) {
     return this.request(`/auth/user/${userId}`, {
       method: 'PATCH',
       headers: {

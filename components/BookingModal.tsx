@@ -86,7 +86,7 @@ function createEmptyBookingForm(): BookingFormData {
     moveOutDate: '',
     duration: 3,
     occupancyUnits: 1,
-    paymentMethod: 'VIETQR',
+    paymentMethod: 'MOMO',
     specialRequests: '',
     emergencyContact: '',
     emergencyPhone: '',
@@ -656,30 +656,32 @@ export default function BookingModal({
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
+                      disabled
                       onClick={() => setFormData({ ...formData, paymentMethod: 'VIETQR' })}
                       className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
+                        'p-4 border rounded-lg text-left transition-colors duration-200 opacity-50 cursor-not-allowed',
                         formData.paymentMethod === 'VIETQR'
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                          : 'border-gray-300 dark:border-gray-600'
                       )}
                     >
                       <Banknote className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">VietQR</div>
+                      <div className="font-medium text-gray-900 dark:text-white">VietQR <span className="text-xs text-red-500 font-normal ml-2">(Tạm bảo trì)</span></div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Quét mã QR ngân hàng</div>
                     </button>
 
                     <button
+                      disabled
                       onClick={() => setFormData({ ...formData, paymentMethod: 'VNPAY' })}
                       className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
+                        'p-4 border rounded-lg text-left transition-colors duration-200 opacity-50 cursor-not-allowed',
                         formData.paymentMethod === 'VNPAY'
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                          : 'border-gray-300 dark:border-gray-600'
                       )}
                     >
                       <CreditCard className="h-6 w-6 text-blue-600 dark:text-blue-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">VNPay</div>
+                      <div className="font-medium text-gray-900 dark:text-white">VNPay <span className="text-xs text-red-500 font-normal ml-2">(Tạm bảo trì)</span></div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán qua VNPay</div>
                     </button>
 
@@ -698,16 +700,17 @@ export default function BookingModal({
                     </button>
 
                     <button
+                      disabled
                       onClick={() => setFormData({ ...formData, paymentMethod: 'PAYOS' as any })}
                       className={cn(
-                        'p-4 border rounded-lg text-left transition-colors duration-200',
+                        'p-4 border rounded-lg text-left transition-colors duration-200 opacity-50 cursor-not-allowed',
                         (formData.paymentMethod as string) === 'PAYOS'
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                          : 'border-gray-300 dark:border-gray-600'
                       )}
                     >
                       <CreditCard className="h-6 w-6 text-green-600 dark:text-green-400 mb-2" />
-                      <div className="font-medium text-gray-900 dark:text-white">PayOS</div>
+                      <div className="font-medium text-gray-900 dark:text-white">PayOS <span className="text-xs text-red-500 font-normal ml-2">(Tạm bảo trì)</span></div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Cổng thanh toán PayOS</div>
                     </button>
                   </div>

@@ -21,6 +21,7 @@ import {
   X,
   Save,
   Loader2,
+  IdCard,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { useRequireAuth } from '@/hooks/useAuth'
@@ -39,7 +40,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    address: '',
+    studentId: '',
   })
 
   // Sync form data when user is loaded
@@ -48,7 +49,7 @@ export default function ProfilePage() {
       setFormData({
         name: user.name || '',
         phone: user.phone || '',
-        address: user.address || '',
+        studentId: user.studentId || '',
       })
     }
   }, [user])
@@ -63,7 +64,7 @@ export default function ProfilePage() {
       setFormData({
         name: user?.name || '',
         phone: user?.phone || '',
-        address: user?.address || '',
+        studentId: user?.studentId || '',
       })
     }
     setIsEditing(!isEditing)
@@ -311,12 +312,12 @@ export default function ProfilePage() {
                   onChange={handleInputChange}
                 />
                 <ProfileFieldCard
-                  label="Địa chỉ hiện tại"
-                  value={user.address || 'Chưa cập nhật'}
-                  icon={MapPin}
+                  label="Mã số sinh viên"
+                  value={user.studentId || 'Chưa cập nhật'}
+                  icon={IdCard}
                   isEditing={isEditing}
-                  name="address"
-                  inputValue={formData.address}
+                  name="studentId"
+                  inputValue={formData.studentId}
                   onChange={handleInputChange}
                 />
               </div>
