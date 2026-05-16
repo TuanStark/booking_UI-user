@@ -43,14 +43,14 @@ export default function BuildingCard({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         <div className="absolute top-4 right-4">
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-md max-w-[min(100%,11rem)]">
+          {/* <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2.5 py-1.5 rounded-full shadow-md max-w-[min(100%,11rem)]">
             <RatingSummaryBadge
               averageRating={building.rating}
               totalReviews={building.totalReviews ?? 0}
               mode="compact"
               href={`/buildings/${building.id}#rooms`}
             />
-          </div>
+          </div> */}
         </div>
         {building.roomsCount > 0 && (
           <div className="absolute bottom-4 left-4">
@@ -84,16 +84,13 @@ export default function BuildingCard({
 
           {/* Stats */}
           <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center text-green-600 dark:text-green-400">
-              <DollarSign className="h-4 w-4 mr-1" />
-              <span className="font-semibold">
-                {building?.averagePrice?.toLocaleString("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                })}
-                /tháng
-              </span>
-            </div>
+            <RatingSummaryBadge
+              averageRating={building.rating}
+              totalReviews={building.totalReviews ?? 0}
+              mode="full"
+              className="text-sm pt-1"
+              href={`/buildings/${building.id}#rooms`}
+            />
             <div className="flex items-center text-blue-600 dark:text-blue-400">
               <Users className="h-4 w-4 mr-1" />
               <span>{building.roomsCount} phòng</span>
@@ -119,13 +116,7 @@ export default function BuildingCard({
             </div>
           )}
 
-          <RatingSummaryBadge
-            averageRating={building.rating}
-            totalReviews={building.totalReviews ?? 0}
-            mode="full"
-            className="text-sm pt-1"
-            href={`/buildings/${building.id}#rooms`}
-          />
+
         </div>
 
         {/* Action Button */}
